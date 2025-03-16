@@ -77,6 +77,25 @@ class _LoginState extends State<Login> {
     }
   }
 
+  Future <void> _resetPassword() async {
+    if(_emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email')),
+      );  
+      return;
+    }
+    try {
+      await _auth.sendPasswordResetEmail(email: _emailController.text.trim());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password reset email sent. Check your inbox.')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to send password reset email: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
@@ -230,9 +249,7 @@ class _LoginState extends State<Login> {
                       ),
                       SizedBox(height: 12.h),
                       GestureDetector(
-                        onTap: () {
-                          // Add your "Forgot Password" logic here if needed
-                        },
+                        onTap: _resetPassword,
                         child: Text(
                           'Forget Password ?',
                           style: TextStyle(

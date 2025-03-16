@@ -284,7 +284,7 @@ class Onboarding3 extends StatelessWidget {
                 margin: EdgeInsets.symmetric(horizontal: 5),
                 child: Text(
                   textAlign: TextAlign.center,
-                  'Offline Access',
+                  'Bridging Conversations',
                   style: TextStyle(
                       fontSize: screenWidth < 400
                           ? 18
@@ -307,7 +307,7 @@ class Onboarding3 extends StatelessWidget {
                         ? screenWidth * 0.06
                         : screenWidth * 0.08),
                 child: Text(
-                  'No internet? No problem! Use offline tools for speech-to-text and sign language translation anytime.',
+                  'Use powerful tools for effortless and seamless face-to-face communication.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       fontSize: screenWidth < 400 ? 14 : 16,

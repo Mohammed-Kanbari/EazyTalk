@@ -34,8 +34,8 @@ class _NavigationState extends State<Navigation> {
       'unselected': 'assets/icons/sign_unselected.png',
     },
     {
-      'selected': 'assets/icons/offline_selected.png',
-      'unselected': 'assets/icons/offline_unselected.png',
+      'selected': 'assets/icons/tools_selected.png',
+      'unselected': 'assets/icons/tools_unselected.png',
     },
     {
       'selected': 'assets/icons/profile_selected.png',
@@ -57,7 +57,6 @@ class _NavigationState extends State<Navigation> {
         child: _pages[_selectedIndex], //if state preservation isn’t necessary or if you want a fresh instance of the page each time - when memory efficiency is a priority         
       ),
       bottomNavigationBar: Container(
-        height: 85.h,
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -93,7 +92,7 @@ class _NavigationState extends State<Navigation> {
           items: [
             _buildNavItem(0, "Connect"),
             _buildNavItem(1, "Learn Signs"),
-            _buildNavItem(2, "Offline Tools"),
+            _buildNavItem(2, "Smart Tools"),
             _buildNavItem(3, "Profile"),
           ],
         ),
@@ -103,12 +102,15 @@ class _NavigationState extends State<Navigation> {
 
   BottomNavigationBarItem _buildNavItem(int index, String label) {
     return BottomNavigationBarItem(
-      icon: Image.asset(
-        _selectedIndex == index
-            ? _iconPaths[index]['selected']!
-            : _iconPaths[index]['unselected']!,
-        width: 32.w,
-        height: 32.h,
+      icon: Padding(
+        padding: const EdgeInsets.only(top: 5.0),
+        child: Image.asset(
+          _selectedIndex == index
+              ? _iconPaths[index]['selected']!
+              : _iconPaths[index]['unselected']!,
+          width: 32.w,
+          height: 32.h,
+        ),
       ),
       label: label,
     );
