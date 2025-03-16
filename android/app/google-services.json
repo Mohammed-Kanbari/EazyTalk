@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "307711161537",
+    "project_id": "eazytalk-5ed0d",
+    "storage_bucket": "eazytalk-5ed0d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307711161537:android:dcc196003e6c0a344d5040",
+        "android_client_info": {
+          "package_name": "com.example.eazytalksplash"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDE-ODMUhh6cGy52WETFlqOftbOTtYjC6A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
