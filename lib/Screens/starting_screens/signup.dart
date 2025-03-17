@@ -168,7 +168,7 @@ class _SignupState extends State<Signup> {
       body: SafeArea(
         child: GestureDetector(
           onTap: () {
-            FocusManager.instance.primaryFocus?.unfocus();
+            FocusScope.of(context).unfocus();
           },
           child: LayoutBuilder(builder: (context, constraints) {
             return SingleChildScrollView(

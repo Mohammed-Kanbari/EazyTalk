@@ -1,4 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:eazytalk/Screens/secondary_screens/speech-to-text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -162,13 +163,23 @@ class _OfflineToolsState extends State<OfflineTools> {
                     'Sign Language Translator',
                     'record a video to translate sign language instantly.',
                     'assets/images/sign.png',
-                    'Start translation'),
+                    'Start translation',
+                    onPressed: () {
+                      // Add your navigation logic here
+                      // Example:
+                      // Navigator.push(context, MaterialPageRoute(builder: (context) => SignLanguagePage()));
+                    },
+                ),
                 SizedBox(height: 40.h),
                 _buildFeatureCard(
                     'Speech to Text',
                     'Convert spoken words into text effortlessly.',
                     'assets/images/speech.png',
-                    'Start translation'),
+                    'Start translation',
+                    onPressed: () {
+                       Navigator.push(context, MaterialPageRoute(builder: (context) => Speech()));
+                    },
+                ),
                 SizedBox(height: 60.h),
                 Text(
                   'How to use smart tools :',
@@ -191,7 +202,9 @@ class _OfflineToolsState extends State<OfflineTools> {
   }
 
   Widget _buildFeatureCard(
-      String title, String description, String iconPath, String buttonText) {
+      String title, String description, String iconPath, String buttonText, {
+      VoidCallback? onPressed,  // Added callback parameter
+  }) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -255,7 +268,7 @@ class _OfflineToolsState extends State<OfflineTools> {
               color: const Color(0xFF00D0FF),
             ),
             child: MaterialButton(
-              onPressed: () {}, // Fixed callback
+              onPressed: onPressed,  // Use the provided callback
               splashColor: const Color(0x52FFFFFF),
               minWidth: 0,
               child: Text(

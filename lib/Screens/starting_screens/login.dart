@@ -107,7 +107,7 @@ class _LoginState extends State<Login> {
       body: SafeArea(
         child: GestureDetector(
           onTap: () {
-            FocusManager.instance.primaryFocus?.unfocus();
+            FocusScope.of(context).unfocus();
           },
           child: LayoutBuilder(builder: (context, constraints) {
             return SingleChildScrollView(
