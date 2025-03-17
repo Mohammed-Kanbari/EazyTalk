@@ -2,6 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter/services.dart'; // For clipboard functionality
+import 'dart:math' as math;
+
+// Custom painter for sound wave visualization
+class SoundWavePainter extends CustomPainter {
+  final double soundLevel;
+  final Color color;
+  
+  SoundWavePainter({
+    required this.soundLevel, 
+    required this.color,
+  });
+  
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) / 2;
+    
+    // Draw multiple perfect circles with varying sizes based on sound level
+    for (int i = 0; i < 3; i++) {
+      // Vary the opacity based on the wave number
+      final opacity = math.max(0.05, 0.3 - (i * 0.05));
+      
+      // Calculate wave radius based on sound level
+      final waveRadius = radius * (0.7 + (i * 0.15)) * (0.8 + (soundLevel * 0.3));
+      
+      final paint = Paint()
+        ..color = color.withOpacity(opacity)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0;
+      
+      // Draw perfect circle
+      canvas.drawCircle(center, waveRadius, paint);
+    }
+  }
+  
+  @override
+  bool shouldRepaint(SoundWavePainter oldDelegate) => 
+      oldDelegate.soundLevel != soundLevel;
+}
 
 class Speech extends StatefulWidget {
   const Speech({super.key});
@@ -15,7 +54,9 @@ class _SpeechState extends State<Speech> {
   bool _isListening = false;
   String _transcribedText = '';
   late TextEditingController _textController;
-
+  // Sound level for wave animation
+  double _soundLevel = 0.0;
+  double _maxSoundLevel = 0.0;
 
   @override
   void initState() {
@@ -81,7 +122,14 @@ class _SpeechState extends State<Speech> {
       pauseFor: const Duration(minutes: 5), // Allow longer pauses
       partialResults: true,
       onSoundLevelChange: (level) {
-        // Optional: You can use this to provide visual feedback
+        // Update sound level for the wave animation
+        if (mounted) {
+          setState(() {
+            _soundLevel = level;
+            // Keep track of the maximum sound level for scaling purposes
+            if (level > _maxSoundLevel) _maxSoundLevel = level;
+          });
+        }
       },
       cancelOnError: false,
       listenMode: stt.ListenMode.confirmation, // Use confirmation mode for better continuity
@@ -282,37 +330,74 @@ class _SpeechState extends State<Speech> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(width: 80.w),
-              GestureDetector(
-                onTap: _toggleListening,
-                child: Container(
-                  width: 120.w,
-                  height: 120.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFF00D0FF),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF00D0FF).withOpacity(0.3),
-                        blurRadius: 20,
-                        spreadRadius: 5,
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Sound wave animations - only visible when listening
+                  if (_isListening) ...[
+                    // Static background ripples
+                    for (int i = 1; i <= 2; i++)
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(milliseconds: (1000 + (i * 300)).toInt()),
+                        curve: Curves.easeInOut,
+                        builder: (context, value, child) {
+                          return Opacity(
+                            opacity: (1 - value).clamp(0.0, 0.5),
+                            child: Transform.scale(
+                              scale: 1 + (value * 0.5),
+                              child: Container(
+                                width: 120.w,
+                                height: 120.h,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: const Color(0xFF00D0FF).withOpacity(0.3),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        key: ValueKey('static_ripple_$i'),
                       ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Icon(
-                      _isListening ? Icons.mic : Icons.mic_none,
-                      color: Colors.white,
-                      size: 50,
+                    
+                    // Dynamic sound level-based ripples
+                    _buildSoundWaves(),
+                  ],
+                  
+                  // Main mic button
+                  GestureDetector(
+                    onTap: _toggleListening,
+                    child: Container(
+                      width: 120.w,
+                      height: 120.h,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF00D0FF),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF00D0FF).withOpacity(0.3),
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Icon(
+                          _isListening ? Icons.mic : Icons.mic_none,
+                          color: Colors.white,
+                          size: 50,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
               SizedBox(width: 25.w),
               IconButton(
                 icon: Icon(
                   Icons.stop,
                   size: 28.w,
-                  color: _isListening ? Colors.grey[600] : Colors.grey[300],
+                  color: _isListening ? Colors.red : Colors.grey[300],
                 ),
                 onPressed: _isListening ? _stopListening : null,
               ),
@@ -328,6 +413,28 @@ class _SpeechState extends State<Speech> {
           ),
         ],
       ),
+    );
+  }
+  
+  // Build sound wave visualization based on current sound level
+  Widget _buildSoundWaves() {
+    // Normalize sound level for visualization
+    // If max level is too small, use a default value
+    double normalizedLevel = _maxSoundLevel > 0.1 
+        ? (_soundLevel / _maxSoundLevel).clamp(0.3, 1.0)
+        : 0.5;
+    
+    // Use a StatefulBuilder instead of AnimatedBuilder with a separate controller
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return CustomPaint(
+          size: Size(200.w, 200.h),
+          painter: SoundWavePainter(
+            soundLevel: normalizedLevel,
+            color: const Color(0xFF00D0FF),
+          ),
+        );
+      },
     );
   }
 }
