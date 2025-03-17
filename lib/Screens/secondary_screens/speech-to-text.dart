@@ -16,6 +16,7 @@ class _SpeechState extends State<Speech> {
   String _transcribedText = '';
   late TextEditingController _textController;
 
+
   @override
   void initState() {
     super.initState();
@@ -36,19 +37,12 @@ class _SpeechState extends State<Speech> {
       if (!_isListening) {
         bool available = await _speech.initialize();
         if (available) {
-          setState(() => _isListening = true);
-          _speech.listen(
-            onResult: (result) {
-              if (mounted) {
-                setState(() {
-                  _transcribedText = result.recognizedWords;
-                  _textController.text = _transcribedText;
-                });
-              }
-            },
-            listenFor: const Duration(seconds: 30),
-            pauseFor: const Duration(seconds: 30),
-          );
+          setState(() {
+            _isListening = true;
+            // Reset accumulated text only when starting a completely new session
+            _accumulatedText = _textController.text;
+          });
+          _startListening();
         } else {
           _showSnackBar('Speech recognition not available');
         }
@@ -58,6 +52,55 @@ class _SpeechState extends State<Speech> {
     } catch (e) {
       _showSnackBar('Error: ${e.toString()}');
     }
+  }
+
+  // Store the accumulated text when starting a new listening session
+  String _accumulatedText = '';
+  
+  // Separate method to start listening with continuous recognition
+  void _startListening() {
+    // Before starting a new listening session, save the current text
+    if (_speech.isNotListening && _isListening) {
+      _accumulatedText = _textController.text;
+    }
+    
+    _speech.listen(
+      onResult: (result) {
+        if (mounted) {
+          setState(() {
+            // Append the new recognized words to the accumulated text
+            if (result.recognizedWords.isNotEmpty) {
+              // Only update if we have new words to avoid flickering
+              _transcribedText = _accumulatedText + ' ' + result.recognizedWords;
+              _textController.text = _transcribedText;
+            }
+          });
+        }
+      },
+      listenFor: const Duration(minutes: 30), // Extend listening time significantly
+      pauseFor: const Duration(minutes: 5), // Allow longer pauses
+      partialResults: true,
+      onSoundLevelChange: (level) {
+        // Optional: You can use this to provide visual feedback
+      },
+      cancelOnError: false,
+      listenMode: stt.ListenMode.confirmation, // Use confirmation mode for better continuity
+    );
+    
+    // Set up a listener for when speech service is stopped
+    _speech.statusListener = (status) {
+      if (status == 'done' && _isListening) {
+        // Save the current text before restarting
+        _accumulatedText = _textController.text;
+        
+        // If speech service stopped but we're still in listening mode, restart it
+        Future.delayed(const Duration(milliseconds: 200), () {
+          if (_isListening && mounted) {
+            _startListening();
+          }
+        });
+      }
+    };
   }
 
   void _stopListening() {
@@ -227,7 +270,7 @@ class _SpeechState extends State<Speech> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Text(
-            'Tap the mic and start talking — we’ll do the typing!',
+            "Tap the mic and start talking — we'll do the typing!",
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'DM Sans',
