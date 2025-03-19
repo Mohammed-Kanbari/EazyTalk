@@ -497,7 +497,7 @@ class _ChangePassState extends State<ChangePass> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12.r),
                             ),
-                            elevation: 2,
+                            elevation: 0,
                           ),
                           child: _isLoading 
                               ? const SizedBox(

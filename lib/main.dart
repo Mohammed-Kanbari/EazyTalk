@@ -31,7 +31,7 @@ class EazyTalkApp extends StatelessWidget {
         builder: (context, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: Navigation(),
+          home: SplashScreen(),
         );
         });
    } );

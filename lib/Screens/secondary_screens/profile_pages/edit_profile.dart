@@ -447,7 +447,7 @@ class _EditProfileState extends State<EditProfile> {
                                   Padding(
                                     padding: EdgeInsets.only(bottom: 20.h),
                                     child: SizedBox(
-                                      height: 50.h,
+                                      height: 44.h,
                                       width: double.infinity,
                                       child: ElevatedButton(
                                         onPressed: _isLoading ? null : _saveProfile,
@@ -470,7 +470,7 @@ class _EditProfileState extends State<EditProfile> {
                                                 'Save Changes',
                                                 style: TextStyle(
                                                   fontFamily: 'Sora',
-                                                  fontSize: 16.sp,
+                                                  fontSize: 14.sp,
                                                   fontWeight: FontWeight.w600,
                                                   color: Colors.white,
                                                 ),

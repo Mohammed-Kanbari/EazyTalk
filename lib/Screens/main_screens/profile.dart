@@ -1,6 +1,7 @@
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/change_pass.dart';
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/deaf_excursions.dart';
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/edit_profile.dart';
+import 'package:eazytalk/Screens/secondary_screens/profile_pages/help_us.dart';
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/more_on_deaf.dart';
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/terms_and_services.dart';
 import 'package:eazytalk/Screens/starting_screens/login.dart'; // Import login page
@@ -386,8 +387,7 @@ class _ProfileState extends State<Profile> {
   }
 
   void _handleHelpUs() {
-    print('Navigating to Help Us screen');
-    // Example: Navigator.push(context, MaterialPageRoute(builder: (context) => HelpUsScreen()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpUsPage()));
   }
 
   void _handleTermsAndServices() {
