@@ -1,5 +1,7 @@
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/change_pass.dart';
+import 'package:eazytalk/Screens/secondary_screens/profile_pages/deaf_excursions.dart';
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/edit_profile.dart';
+import 'package:eazytalk/Screens/secondary_screens/profile_pages/more_on_deaf.dart';
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/terms_and_services.dart';
 import 'package:eazytalk/Screens/starting_screens/login.dart'; // Import login page
 import 'package:flutter/material.dart';
@@ -376,13 +378,11 @@ class _ProfileState extends State<Profile> {
   }
 
   void _handleMoreOnDeafPeople() {
-    print('Navigating to More On Deaf People screen');
-    // Example: Navigator.push(context, MaterialPageRoute(builder: (context) => MoreOnDeafPeopleScreen()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const MoreOnDeaf()));
   }
 
   void _handleDeafFriendlyExcursions() {
-    print('Navigating to Deaf-Friendly Excursions screen');
-    // Example: Navigator.push(context, MaterialPageRoute(builder: (context) => ExcursionsScreen()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => DeafFriendlyExcursions()));
   }
 
   void _handleHelpUs() {

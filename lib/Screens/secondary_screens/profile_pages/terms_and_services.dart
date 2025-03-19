@@ -57,65 +57,53 @@ class TermsAndServicesPage extends StatelessWidget {
                       SizedBox(height: 20.h),
                       
                       // Introduction
-                      _buildSectionTitle('1. Introduction'),
+                      _buildSectionTitle('1. Acceptance of Terms'),
                       _buildParagraph(
-                        'Welcome to our application. These Terms of Service ("Terms") govern your use of our mobile application (the "App") and any related services provided by us. By accessing or using our App, you agree to be bound by these Terms.'
+                        'By using the Eazy Talk application, you agree to comply with and be bound by these terms and conditions. If you do not agree with any part of these terms, you are advised to discontinue using the application.'
                       ),
                       
                       // User Accounts
-                      _buildSectionTitle('2. User Accounts'),
+                      _buildSectionTitle('2. Service Overview'),
                       _buildParagraph(
-                        'When you create an account with us, you must provide accurate and complete information. You are solely responsible for the activity that occurs on your account, and you must keep your account password secure. You must notify us immediately of any breach of security or unauthorized use of your account.'
+                        'Eazy Talk is a platform designed to assist users in translating Arabic sign language to text and vice versa. It also offers features to contribute data and provide feedback to enhance the platform. All functionalities are intended for personal, non-commercial use only.'
                       ),
                       
                       // Privacy Policy
-                      _buildSectionTitle('3. Privacy Policy'),
-                      _buildParagraph(
-                        'Our Privacy Policy describes how we handle the information you provide to us when you use our App. You understand that through your use of the App, you consent to the collection and use of this information as set forth in our Privacy Policy.'
-                      ),
+                      _buildSectionTitle('3. User Responsibilities'),
+                      _buildListItem('Use the application solely for its intended purpose.'),
+                      _buildListItem('Avoid uploading inappropriate, offensive, or harmful content.'),
+                      _buildListItem('Provide accurate information when contributing data or providing feedback.'),
                       
                       // User Content
-                      _buildSectionTitle('4. User Content'),
+                      _buildSectionTitle('4. Data Contribution'),
                       _buildParagraph(
-                        'Our App may allow you to upload, submit, store, send or receive content, including profile pictures and other information. You retain ownership of any intellectual property rights that you hold in that content.'
+                        'Users contributing data (e.g., videos, photos, or textual labels) grant AI Signs a non-exclusive, royalty-free license to use the content for improving the application’s performance and expanding its database. AI Signs will not use this data for any purpose outside its scope.'
                       ),
-                      _buildParagraph(
-                        'When you upload, submit, store, send or receive content to or through our App, you give us a worldwide license to use, host, store, reproduce, modify, create derivative works, communicate, publish, publicly perform, publicly display and distribute such content.'
-                      ),
+                     
                       
                       // Prohibited Activities
-                      _buildSectionTitle('5. Prohibited Activities'),
+                      _buildSectionTitle('5. Privacy Policy'),
                       _buildParagraph(
-                        'You may not engage in any of the following prohibited activities:'
-                      ),
-                      _buildListItem('Using the App for any illegal purpose or in violation of any local, state, national, or international law'),
-                      _buildListItem('Harassing, threatening, or intimidating other users'),
-                      _buildListItem('Impersonating or attempting to impersonate another user or person'),
-                      _buildListItem('Posting or transmitting viruses, Trojan horses, or other disruptive code'),
-                      _buildListItem('Interfering with or circumventing the security features of the App'),
+                        'Eazy Talk respects your privacy and handles your data responsibly. Collected data will only be used to enhance application functionality and will not be shared with third parties without your consent. For more details, refer to our Privacy Policy.'
+ ),
                       
                       // Limitation of Liability
                       _buildSectionTitle('6. Limitation of Liability'),
                       _buildParagraph(
-                        'To the maximum extent permitted by law, in no event shall the company, its affiliates, agents, directors, employees, suppliers or licensors be liable for any indirect, punitive, incidental, special, consequential or exemplary damages, including without limitation damages for loss of profits, goodwill, use, data or other intangible losses, that result from the use of, or inability to use, this App.'
+                        'Eazy Talk is provided on an “as-is” basis. While we strive to ensure accurate translations and smooth functionality, we do not guarantee the application’s performance at all times. AI Signs will not be liable for any damages or losses resulting from the use or inability to use the application.'
                       ),
                       
                       // Termination
-                      _buildSectionTitle('7. Termination'),
+                      _buildSectionTitle('7. Updates and Changes'),
                       _buildParagraph(
-                        'We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms. Upon termination, your right to use the App will immediately cease.'
+                        'Eazy Talk reserves the right to modify these terms and the application’s features at any time. Users will be notified of significant changes through the application or other communication channels.'
                       ),
                       
-                      // Changes to Terms
-                      _buildSectionTitle('8. Changes to Terms'),
-                      _buildParagraph(
-                        'We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will try to provide at least 30 days\' notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.'
-                      ),
                       
                       // Contact Information
-                      _buildSectionTitle('9. Contact Information'),
+                      _buildSectionTitle('8. Contact Information'),
                       _buildParagraph(
-                        'If you have any questions about these Terms, please contact us at support@yourappname.com.'
+                        'If you have any questions, concerns, or feedback regarding these terms or the application, please reach out to us at: \nEmail: Ammaralhawamdeh@gmail.com \nPhone: 0567132854'
                       ),
                       
                       SizedBox(height: 20.h),

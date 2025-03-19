@@ -289,82 +289,81 @@ class _OfflineToolsState extends State<OfflineTools> {
     );
   }
 
-  Widget _buildInstructionCard(String number, String text) {
-    return Row(
-      children: [
-        Container(
-          width: 95.w,
-          height: 154.h,
-          decoration: BoxDecoration(
-            color: Color(0xFF00D0FF),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(10),
-              bottomLeft: Radius.circular(10),
-            ),
+ Widget _buildInstructionCard(String number, String text) {
+  return Row(
+    children: [
+      Container(
+        width: 95.w,
+        height: 154.h,
+        decoration: BoxDecoration(
+          color: Color(0xFF00D0FF),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(10),
+            bottomLeft: Radius.circular(10),
           ),
-          child: Center(
-            child: Text(
-              '${currentIndex + 1}',
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 40.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+        ),
+        child: Center(
+          child: Text(
+            '${currentIndex + 1}',
+            style: TextStyle(
+              fontFamily: 'DM Sans',
+              fontSize: 40.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
           ),
         ),
-        Expanded(
-          child: Container(
-            height: 154.h,
-            decoration: BoxDecoration(
-              color: Color(0xFFF1F3F5),
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(10),
-                bottomRight: Radius.circular(10),
-              ),
+      ),
+      Expanded(
+        child: Container(
+          height: 154.h,
+          decoration: BoxDecoration(
+            color: Color(0xFFF1F3F5),
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(10),
+              bottomRight: Radius.circular(10),
             ),
-            child: Row(
-              children: [
-                if (currentIndex > 0)
-                  IconButton(
-                    icon: Image.asset(
-                      'assets/icons/arrow-left.png',
-                      width: 18.w,
-                      height: 18.h,
-                    ),
-                    onPressed: previousInstruction,
+          ),
+          child: Row(
+            children: [
+              if (currentIndex > 0)
+                IconButton(
+                  icon: Image.asset(
+                    'assets/icons/arrow-left.png',
+                    width: 18.w,
+                    height: 18.h,
                   ),
-                Expanded(
-                  child: Padding(
-                    padding:  EdgeInsets.symmetric(horizontal: 25.0.w),
-                    child: Text(
-                      instructions[currentIndex],
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'DM Sans',
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
-                        color: const Color.fromARGB(255, 0, 0, 0),
-                      ),
+                  onPressed: previousInstruction,
+                ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 25.0.w),
+                  child: Text(
+                    instructions[currentIndex],
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'DM Sans',
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color.fromARGB(255, 0, 0, 0),
                     ),
                   ),
                 ),
+              ),
+              if (currentIndex < instructions.length - 1) // Conditionally render the right arrow
                 IconButton(
                   icon: Image.asset(
                     'assets/icons/arrow-right 1.png',
                     width: 18.w,
                     height: 18.h,
                   ),
-                  onPressed: currentIndex < instructions.length - 1 
-                      ? nextInstruction 
-                      : null,
+                  onPressed: nextInstruction,
                 ),
-              ],
-            ),
+            ],
           ),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 }
