@@ -1,3 +1,4 @@
+import 'package:eazytalk/Screens/secondary_screens/chatBot.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -95,17 +96,41 @@ class _ChattingState extends State<Chatting> {
           ),
         ),
         //AI Chatbot button
-        floatingActionButton: FloatingActionButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          backgroundColor: const Color(0xFF00D0FF),
-          child: Image.asset(
-            'assets/icons/chatbot 1.png',
-            width: 32.w,
-            height: 32.h,
-          ),
-          onPressed: () {},
-        ));
+        floatingActionButton: Container(
+  decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(20),
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF00D0FF),
+        Color(0xFF0088FF),
+      ],
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: Color(0xFF00D0FF).withOpacity(0.4),
+        spreadRadius: 2,
+        blurRadius: 15,
+        offset: Offset(0, 4),
+      ),
+    ],
+  ),
+  child: FloatingActionButton(
+    elevation: 0, // Remove default elevation since we have custom shadow
+    backgroundColor: Colors.transparent, // Transparent to show gradient
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(18),
+    ),
+    child: Image.asset(
+      'assets/icons/chatbot 1.png',
+      width: 35.w,
+      height: 35.h,
+    ),
+    onPressed: () {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Chatbot()));
+    },
+  ),
+),);
   }
 }
