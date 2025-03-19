@@ -484,7 +484,7 @@ class _ChangePassState extends State<ChangePass> {
                       
                       // Reset Button with loading state
                       SizedBox(
-                        height: 44.h,
+                        height: 50.h,
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: _isLoading || !_isPasswordValid || !_doPasswordsMatch || _currentPasswordController.text.isEmpty

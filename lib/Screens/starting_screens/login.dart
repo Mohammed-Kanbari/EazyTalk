@@ -262,7 +262,7 @@ class _LoginState extends State<Login> {
                       ),
                       SizedBox(height: 100.h),
                       Container(
-                        height: 44.h,
+                        height: 50.h,
                         width: double.infinity,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
@@ -280,7 +280,7 @@ class _LoginState extends State<Login> {
                                   textAlign: TextAlign.center,
                                   maxLines: 1,
                                   style: TextStyle(
-                                    fontSize: screenWidth < 400 ? 10 : 14,
+                                    fontSize: 14.sp,
                                     fontFamily: 'Sora',
                                     fontWeight: FontWeight.w600,
                                     color: Colors.white,

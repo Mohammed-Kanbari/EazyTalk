@@ -1,12 +1,14 @@
 import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:video_player/video_player.dart'; // Add this to pubspec.yaml
+import 'package:video_player/video_player.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart' as path;
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
+import 'package:mime/mime.dart';
 
 class HelpUsPage extends StatefulWidget {
   const HelpUsPage({Key? key}) : super(key: key);
@@ -22,17 +24,17 @@ class _HelpUsPageState extends State<HelpUsPage> {
   bool _isVideo = false;
   VideoPlayerController? _videoController;
   bool _isVideoInitialized = false;
-  
+
   // Form data
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _signNameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   String? _selectedCategory;
-  
+
   // Loading state
   bool _isUploading = false;
   double _uploadProgress = 0.0;
-  
+
   // Available categories for signs
   final List<String> _categories = [
     'Alphabet',
@@ -46,6 +48,9 @@ class _HelpUsPageState extends State<HelpUsPage> {
     'Weather',
     'Other'
   ];
+
+  // Get Supabase client instance
+  final _supabase = Supabase.instance.client;
 
   @override
   void dispose() {
@@ -64,7 +69,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
         maxHeight: 1080,
         imageQuality: 100,
       );
-      
+
       if (pickedFile != null) {
         setState(() {
           _mediaFile = File(pickedFile.path);
@@ -87,14 +92,14 @@ class _HelpUsPageState extends State<HelpUsPage> {
         source: source,
         maxDuration: const Duration(seconds: 10), // Limit video length
       );
-      
+
       if (pickedFile != null) {
         final videoFile = File(pickedFile.path);
-        
+
         // Initialize video controller
         final videoController = VideoPlayerController.file(videoFile);
         await videoController.initialize();
-        
+
         setState(() {
           _mediaFile = videoFile;
           _isVideo = true;
@@ -129,7 +134,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
                 ),
               ),
               SizedBox(height: 20.h),
-              
+
               // Camera options
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -152,9 +157,9 @@ class _HelpUsPageState extends State<HelpUsPage> {
                   ),
                 ],
               ),
-              
+
               SizedBox(height: 20.h),
-              
+
               // Gallery options
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -222,90 +227,89 @@ class _HelpUsPageState extends State<HelpUsPage> {
     );
   }
 
-  // Upload media and form data to Firebase
+  // Upload media to Supabase Storage and save metadata to Firestore
   Future<void> _uploadData() async {
     if (_mediaFile == null) {
       _showSnackBar('Please select a photo or video first');
       return;
     }
-    
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     setState(() {
       _isUploading = true;
       _uploadProgress = 0.0;
     });
-    
+
     try {
       final user = FirebaseAuth.instance.currentUser;
-      
+
       if (user == null) {
         throw Exception('User not authenticated');
       }
 
-      String? base64Media;
-      
-      // Set up a simulated progress
+
+
+      // Create a unique file name with UUID
+      final uuid = Uuid();
+      final fileExt = path.extension(_mediaFile!.path);
+      final fileName = '${uuid.v4()}$fileExt';
+      final fileType = _isVideo ? 'videos' : 'images';
+
+      // Determine mime type
+      final mimeType = lookupMimeType(_mediaFile!.path) ??
+          (_isVideo ? 'video/mp4' : 'image/jpeg');
+
+      // Start progress simulation
       _simulateProgress();
-      
-      // For images, we can directly encode to base64
-      if (!_isVideo) {
-        final bytes = await _mediaFile!.readAsBytes();
-        base64Media = base64Encode(bytes);
-        
-        // Update progress to 75%
-        setState(() {
-          _uploadProgress = 0.75;
-        });
-      } else {
-        // For videos, we'll note that it's a video file but we can't
-        // store the full video in Firestore due to size limits
-        // We'll just store a thumbnail or a small segment
-        
-        // This is a limitation - full video support would need Firebase Storage
-        // For now, let's extract a few frames from the video
-        // or just store metadata but not the actual video content
-        
-        // Basic handling for now - for a real app you'd need Firebase Storage
-        // or another storage solution for videos
-        final bytes = await _mediaFile!.readAsBytes();
-        
-        // Warning: This approach will only work for very small videos
-        // Firestore has document size limits (1MB)
-        if (bytes.length > 800000) { // ~800KB to leave some room for other fields
-          throw Exception('Video is too large. Please choose a shorter video or use a photo instead.');
-        }
-        
-        base64Media = base64Encode(bytes);
-        
-        // Update progress to 75%
-        setState(() {
-          _uploadProgress = 0.75;
-        });
-      }
-      
-      // Save metadata and encoded media to Firestore
+
+      // Upload to Supabase Storage
+      final bytes = await _mediaFile!.readAsBytes();
+
+      // Path in Supabase Storage
+      final storagePath = 'user_signs/$fileType/$fileName';
+
+      // Upload file to Supabase Storage
+      final response = await _supabase.storage
+          .from('eazytalk') // Your bucket name in Supabase
+          .uploadBinary(
+            storagePath,
+            bytes,
+            fileOptions: FileOptions(
+              contentType: mimeType,
+            ),
+          );
+
+      // Get public URL for the uploaded file
+      final fileUrl =
+          _supabase.storage.from('eazytalk').getPublicUrl(storagePath);
+
+      // Update progress
+      setState(() {
+        _uploadProgress = 0.8;
+      });
+
+      // Save metadata to Firestore
       await FirebaseFirestore.instance.collection('user_signs').add({
         'userId': user.uid,
         'userEmail': user.email,
         'signName': _signNameController.text.trim(),
         'description': _descriptionController.text.trim(),
         'category': _selectedCategory,
-        'mediaData': base64Media,
-        'fileName': path.basename(_mediaFile!.path),
+        'fileUrl': fileUrl,
+        'filePath': storagePath,
         'fileType': _isVideo ? 'video' : 'image',
-        'fileSize': await _mediaFile!.length(),
         'status': 'pending', // For moderation
         'createdAt': FieldValue.serverTimestamp(),
       });
-      
+
       // Update progress to 100%
       setState(() {
         _uploadProgress = 1.0;
       });
-      
+
       // Reset form
       setState(() {
         _mediaFile = null;
@@ -318,9 +322,8 @@ class _HelpUsPageState extends State<HelpUsPage> {
         _selectedCategory = null;
         _isUploading = false;
       });
-      
+
       _showThankYouDialog();
-      
     } catch (e) {
       setState(() {
         _isUploading = false;
@@ -328,7 +331,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
       _showSnackBar('Error uploading sign: $e');
     }
   }
-  
+
   // Simulates progress updates for a smoother user experience
   void _simulateProgress() {
     const totalSteps = 20;
@@ -435,107 +438,52 @@ class _HelpUsPageState extends State<HelpUsPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Stack(
-          children: [
-            // Main content
-            Column(
-              children: [
-                // App Bar
-                Padding(
-                  padding: EdgeInsets.only(top: 27.h, left: 28.w, right: 28.w),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(width: 28.w, height: 28.h),
-                          Text(
-                            'Help Us Improve',
-                            style: TextStyle(
-                              fontFamily: 'Sora',
-                              fontSize: 20.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
+        child: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: Stack(
+            children: [
+              // Main content
+              Column(
+                children: [
+                  // App Bar
+                  Padding(
+                    padding: EdgeInsets.only(top: 27.h, left: 28.w, right: 28.w),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(width: 28.w, height: 28.h),
+                        Text(
+                          'Help Us Improve',
+                          style: TextStyle(
+                            fontFamily: 'Sora',
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w600,
                           ),
-                          GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: Icon(Icons.close, size: 28.sp),
-                          ), // Empty space for alignment
-                    ],
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Icon(Icons.close, size: 28.sp),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 30.h,),
-                
-                // Main content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 28.w),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Introduction section
-                          Container(
-                            padding: EdgeInsets.all(16.r),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF1F3F5),
-                              borderRadius: BorderRadius.circular(16.r),
-                              border: Border.all(
-                                color: const Color(0xFFE8E8E8),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.lightbulb_outline,
-                                      color: const Color(0xFF00D0FF),
-                                      size: 24.sp,
-                                    ),
-                                    SizedBox(width: 8.w),
-                                    Text(
-                                      'Contribute to EazyTalk',
-                                      style: TextStyle(
-                                        fontFamily: 'Sora',
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 12.h),
-                                Text(
-                                  'Help us expand our sign language database by submitting signs you know. Your contributions make EazyTalk better for everyone!',
-                                  style: TextStyle(
-                                    fontFamily: 'DM Sans',
-                                    fontSize: 14.sp,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          
-                          SizedBox(height: 24.h),
-                          
-                          // Media upload section
-                          Text(
-                            'Upload Sign',
-                            style: TextStyle(
-                              fontFamily: 'Sora',
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(height: 16.h),
-                          
-                          // Media preview or placeholder
-                          GestureDetector(
-                            onTap: _showMediaPickerOptions,
-                            child: Container(
-                              width: double.infinity,
-                              height: 200.h,
+          
+                  SizedBox(height: 30.h),
+          
+                  // Main content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(horizontal: 28.w),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Introduction section
+                            Container(
+                              padding: EdgeInsets.all(16.r),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFF1F3F5),
                                 borderRadius: BorderRadius.circular(16.r),
@@ -543,214 +491,249 @@ class _HelpUsPageState extends State<HelpUsPage> {
                                   color: const Color(0xFFE8E8E8),
                                 ),
                               ),
-                              child: _mediaFile == null
-                                  ? Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.add_a_photo,
-                                          color: const Color(0xFF00D0FF),
-                                          size: 40.sp,
-                                        ),
-                                        SizedBox(height: 12.h),
-                                        Text(
-                                          'Tap to add a photo or video',
-                                          style: TextStyle(
-                                            fontFamily: 'DM Sans',
-                                            fontSize: 14.sp,
-                                            color: Colors.black54,
-                                          ),
-                                        ),
-                                        SizedBox(height: 8.h),
-                                        Text(
-                                          'Show the sign clearly in good lighting',
-                                          style: TextStyle(
-                                            fontFamily: 'DM Sans',
-                                            fontSize: 12.sp,
-                                            color: Colors.black38,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : ClipRRect(
-                                      borderRadius: BorderRadius.circular(16.r),
-                                      child: _isVideo
-                                          ? _isVideoInitialized
-                                              ? Stack(
-                                                  alignment: Alignment.center,
-                                                  children: [
-                                                    AspectRatio(
-                                                      aspectRatio: _videoController!.value.aspectRatio,
-                                                      child: VideoPlayer(_videoController!),
-                                                    ),
-                                                    IconButton(
-                                                      icon: Icon(
-                                                        _videoController!.value.isPlaying
-                                                            ? Icons.pause
-                                                            : Icons.play_arrow,
-                                                        color: Colors.white,
-                                                        size: 40.sp,
-                                                      ),
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          _videoController!.value.isPlaying
-                                                              ? _videoController!.pause()
-                                                              : _videoController!.play();
-                                                        });
-                                                      },
-                                                    ),
-                                                  ],
-                                                )
-                                              : Center(
-                                                  child: CircularProgressIndicator(
-                                                    color: const Color(0xFF00D0FF),
-                                                  ),
-                                                )
-                                          : Image.file(
-                                              _mediaFile!,
-                                              fit: BoxFit.cover,
-                                              width: double.infinity,
-                                              height: double.infinity,
-                                            ),
-                                    ),
-                            ),
-                          ),
-                          
-                          if (_mediaFile != null)
-                            Padding(
-                              padding: EdgeInsets.only(top: 8.h),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  TextButton.icon(
-                                    onPressed: _showMediaPickerOptions,
-                                    icon: Icon(
-                                      Icons.refresh,
-                                      size: 16.sp,
-                                      color: const Color(0xFF00D0FF),
-                                    ),
-                                    label: Text(
-                                      'Change',
-                                      style: TextStyle(
-                                        fontFamily: 'DM Sans',
-                                        fontSize: 12.sp,
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.lightbulb_outline,
                                         color: const Color(0xFF00D0FF),
+                                        size: 24.sp,
                                       ),
-                                    ),
-                                    style: TextButton.styleFrom(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 8.w,
-                                        vertical: 4.h,
+                                      SizedBox(width: 8.w),
+                                      Text(
+                                        'Contribute to EazyTalk',
+                                        style: TextStyle(
+                                          fontFamily: 'Sora',
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                  TextButton.icon(
-                                    onPressed: () {
-                                      setState(() {
-                                        _mediaFile = null;
-                                        _isVideo = false;
-                                        if (_videoController != null) {
-                                          _videoController!.dispose();
-                                          _videoController = null;
-                                          _isVideoInitialized = false;
-                                        }
-                                      });
-                                    },
-                                    icon: Icon(
-                                      Icons.delete_outline,
-                                      size: 16.sp,
-                                      color: Colors.red,
-                                    ),
-                                    label: Text(
-                                      'Remove',
-                                      style: TextStyle(
-                                        fontFamily: 'DM Sans',
-                                        fontSize: 12.sp,
-                                        color: Colors.red,
-                                      ),
-                                    ),
-                                    style: TextButton.styleFrom(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 8.w,
-                                        vertical: 4.h,
-                                      ),
+                                  SizedBox(height: 12.h),
+                                  Text(
+                                    'Help us expand our sign language database by submitting signs you know. Your contributions make EazyTalk better for everyone!',
+                                    style: TextStyle(
+                                      fontFamily: 'DM Sans',
+                                      fontSize: 14.sp,
+                                      color: Colors.black87,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          
-                          SizedBox(height: 24.h),
-                          
-                          // Sign details section
-                          Text(
-                            'Sign Details',
-                            style: TextStyle(
-                              fontFamily: 'Sora',
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w600,
+          
+                            SizedBox(height: 24.h),
+          
+                            // Media upload section
+                            Text(
+                              'Upload Sign',
+                              style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 16.h),
-                          
-                          // Sign name field
-                          Text(
-                            'Sign Name:',
-                            style: TextStyle(
-                              fontFamily: 'DM Sans',
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
+                            SizedBox(height: 16.h),
+          
+                            // Media preview or placeholder
+                            GestureDetector(
+                              onTap: _showMediaPickerOptions,
+                              child: Container(
+                                width: double.infinity,
+                                height: 200.h,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF1F3F5),
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  border: Border.all(
+                                    color: const Color(0xFFE8E8E8),
+                                  ),
+                                ),
+                                child: _mediaFile == null
+                                    ? Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.add_a_photo,
+                                            color: const Color(0xFF00D0FF),
+                                            size: 40.sp,
+                                          ),
+                                          SizedBox(height: 12.h),
+                                          Text(
+                                            'Tap to add a photo or video',
+                                            style: TextStyle(
+                                              fontFamily: 'DM Sans',
+                                              fontSize: 14.sp,
+                                              color: Colors.black54,
+                                            ),
+                                          ),
+                                          SizedBox(height: 8.h),
+                                          Text(
+                                            'Show the sign clearly in good lighting',
+                                            style: TextStyle(
+                                              fontFamily: 'DM Sans',
+                                              fontSize: 12.sp,
+                                              color: Colors.black38,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : ClipRRect(
+                                        borderRadius: BorderRadius.circular(16.r),
+                                        child: _isVideo
+                                            ? _isVideoInitialized
+                                                ? Stack(
+                                                    alignment: Alignment.center,
+                                                    children: [
+                                                      AspectRatio(
+                                                        aspectRatio:
+                                                            _videoController!
+                                                                .value
+                                                                .aspectRatio,
+                                                        child: VideoPlayer(
+                                                            _videoController!),
+                                                      ),
+                                                      IconButton(
+                                                        icon: Icon(
+                                                          _videoController!
+                                                                  .value.isPlaying
+                                                              ? Icons.pause
+                                                              : Icons.play_arrow,
+                                                          color: Colors.white,
+                                                          size: 40.sp,
+                                                        ),
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            _videoController!
+                                                                    .value
+                                                                    .isPlaying
+                                                                ? _videoController!
+                                                                    .pause()
+                                                                : _videoController!
+                                                                    .play();
+                                                          });
+                                                        },
+                                                      ),
+                                                    ],
+                                                  )
+                                                : Center(
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      color:
+                                                          const Color(0xFF00D0FF),
+                                                    ),
+                                                  )
+                                            : Image.file(
+                                                _mediaFile!,
+                                                fit: BoxFit.cover,
+                                                width: double.infinity,
+                                                height: double.infinity,
+                                              ),
+                                      ),
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 8.h),
-                          TextFormField(
-                            controller: _signNameController,
-                            decoration: InputDecoration(
-                              hintText: 'Enter the meaning of this sign',
-                              hintStyle: TextStyle(
+          
+                            if (_mediaFile != null)
+                              Padding(
+                                padding: EdgeInsets.only(top: 8.h),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    TextButton.icon(
+                                      onPressed: _showMediaPickerOptions,
+                                      icon: Icon(
+                                        Icons.refresh,
+                                        size: 16.sp,
+                                        color: const Color(0xFF00D0FF),
+                                      ),
+                                      label: Text(
+                                        'Change',
+                                        style: TextStyle(
+                                          fontFamily: 'DM Sans',
+                                          fontSize: 12.sp,
+                                          color: const Color(0xFF00D0FF),
+                                        ),
+                                      ),
+                                      style: TextButton.styleFrom(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 8.w,
+                                          vertical: 4.h,
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton.icon(
+                                      onPressed: () {
+                                        setState(() {
+                                          _mediaFile = null;
+                                          _isVideo = false;
+                                          if (_videoController != null) {
+                                            _videoController!.dispose();
+                                            _videoController = null;
+                                            _isVideoInitialized = false;
+                                          }
+                                        });
+                                      },
+                                      icon: Icon(
+                                        Icons.delete_outline,
+                                        size: 16.sp,
+                                        color: Colors.red,
+                                      ),
+                                      label: Text(
+                                        'Remove',
+                                        style: TextStyle(
+                                          fontFamily: 'DM Sans',
+                                          fontSize: 12.sp,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                      style: TextButton.styleFrom(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 8.w,
+                                          vertical: 4.h,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+          
+                            SizedBox(height: 24.h),
+          
+                            // Sign details section
+                            Text(
+                              'Sign Details',
+                              style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(height: 16.h),
+          
+                            // Sign name field
+                            Text(
+                              'Sign Name:',
+                              style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 14.sp,
-                                color: Colors.black38,
-                              ),
-                              filled: true,
-                              fillColor: const Color(0xFFF1F3F5),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 14.h,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12.r),
-                                borderSide: BorderSide.none,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter the sign name';
-                              }
-                              return null;
-                            },
-                          ),
-                          
-                          SizedBox(height: 16.h),
-                          
-                          // Category dropdown
-                          Text(
-                            'Category:',
-                            style: TextStyle(
-                              fontFamily: 'DM Sans',
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(height: 8.h),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF1F3F5),
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            child: DropdownButtonFormField<String>(
-                              value: _selectedCategory,
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _signNameController,
                               decoration: InputDecoration(
+                                hintText: 'Enter the meaning of this sign',
+                                hintStyle: TextStyle(
+                                  fontFamily: 'DM Sans',
+                                  fontSize: 14.sp,
+                                  color: Colors.black38,
+                                ),
+                                filled: true,
+                                fillColor: const Color(0xFFF1F3F5),
                                 contentPadding: EdgeInsets.symmetric(
                                   horizontal: 16.w,
                                   vertical: 14.h,
@@ -759,176 +742,217 @@ class _HelpUsPageState extends State<HelpUsPage> {
                                   borderRadius: BorderRadius.circular(12.r),
                                   borderSide: BorderSide.none,
                                 ),
-                                hintText: 'Select a category',
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter the sign name';
+                                }
+                                return null;
+                              },
+                            ),
+          
+                            SizedBox(height: 16.h),
+          
+                            // Category dropdown
+                            Text(
+                              'Category:',
+                              style: TextStyle(
+                                fontFamily: 'DM Sans',
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF1F3F5),
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              child: DropdownButtonFormField<String>(
+                                value: _selectedCategory,
+                                decoration: InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16.w,
+                                    vertical: 14.h,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  hintText: 'Select a category',
+                                  hintStyle: TextStyle(
+                                    fontFamily: 'DM Sans',
+                                    fontSize: 14.sp,
+                                    color: Colors.black38,
+                                  ),
+                                ),
+                                items: _categories.map((category) {
+                                  return DropdownMenuItem<String>(
+                                    value: category,
+                                    child: Text(
+                                      category,
+                                      style: TextStyle(
+                                        fontFamily: 'DM Sans',
+                                        fontSize: 14.sp,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedCategory = value;
+                                  });
+                                },
+                                validator: (value) {
+                                  if (value == null) {
+                                    return 'Please select a category';
+                                  }
+                                  return null;
+                                },
+                                icon: Icon(
+                                  Icons.arrow_drop_down,
+                                  color: Colors.black54,
+                                ),
+                                dropdownColor: Colors.white,
+                              ),
+                            ),
+          
+                            SizedBox(height: 16.h),
+          
+                            // Description field
+                            Text(
+                              'Description (Optional):',
+                              style: TextStyle(
+                                fontFamily: 'DM Sans',
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _descriptionController,
+                              maxLines: 3,
+                              decoration: InputDecoration(
+                                hintText:
+                                    'Add any additional information about this sign',
                                 hintStyle: TextStyle(
                                   fontFamily: 'DM Sans',
                                   fontSize: 14.sp,
                                   color: Colors.black38,
                                 ),
-                              ),
-                              items: _categories.map((category) {
-                                return DropdownMenuItem<String>(
-                                  value: category,
-                                  child: Text(
-                                    category,
-                                    style: TextStyle(
-                                      fontFamily: 'DM Sans',
-                                      fontSize: 14.sp,
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedCategory = value;
-                                });
-                              },
-                              validator: (value) {
-                                if (value == null) {
-                                  return 'Please select a category';
-                                }
-                                return null;
-                              },
-                              icon: Icon(
-                                Icons.arrow_drop_down,
-                                color: Colors.black54,
-                              ),
-                              dropdownColor: Colors.white,
-                            ),
-                          ),
-                          
-                          SizedBox(height: 16.h),
-                          
-                          // Description field
-                          Text(
-                            'Description (Optional):',
-                            style: TextStyle(
-                              fontFamily: 'DM Sans',
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(height: 8.h),
-                          TextFormField(
-                            controller: _descriptionController,
-                            maxLines: 3,
-                            decoration: InputDecoration(
-                              hintText: 'Add any additional information about this sign',
-                              hintStyle: TextStyle(
-                                fontFamily: 'DM Sans',
-                                fontSize: 14.sp,
-                                color: Colors.black38,
-                              ),
-                              filled: true,
-                              fillColor: const Color(0xFFF1F3F5),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 14.h,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12.r),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                          ),
-                          
-                          SizedBox(height: 32.h),
-                          
-                          // Submit button
-                          SizedBox(
-                            width: double.infinity,
-                            height: 44.h,
-                            child: ElevatedButton(
-                              onPressed: _isUploading ? null : _uploadData,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00D0FF),
-                                disabledBackgroundColor: const Color(0xFF00D0FF).withOpacity(0.6),
-                                shape: RoundedRectangleBorder(
+                                filled: true,
+                                fillColor: const Color(0xFFF1F3F5),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16.w,
+                                  vertical: 14.h,
+                                ),
+                                border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12.r),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: Text(
-                                'Submit Sign',
-                                style: TextStyle(
-                                  fontFamily: 'Sora',
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                  borderSide: BorderSide.none,
                                 ),
                               ),
                             ),
-                          ),
-                          
-                          SizedBox(height: 20.h),
-                          
-                          // Additional information
-                          Center(
-                            child: Container(
-                              padding: EdgeInsets.all(16.r),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF1F3F5),
-                                borderRadius: BorderRadius.circular(16.r),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.info_outline,
-                                    color: Colors.black54,
-                                    size: 20.sp,
+          
+                            SizedBox(height: 32.h),
+          
+                            // Submit button
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50.h,
+                              child: ElevatedButton(
+                                onPressed: _isUploading ? null : _uploadData,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF00D0FF),
+                                  disabledBackgroundColor:
+                                      const Color(0xFF00D0FF).withOpacity(0.6),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.r),
                                   ),
-                                  SizedBox(width: 8.w),
-                                  Expanded(
-                                    child: Text(
-                                      'Your submission will be reviewed by our team before being added to the app.',
-                                      style: TextStyle(
-                                        fontFamily: 'DM Sans',
-                                        fontSize: 12.sp,
-                                        color: Colors.black54,
+                                  elevation: 0,
+                                ),
+                                child: Text(
+                                  'Submit Sign',
+                                  style: TextStyle(
+                                    fontFamily: 'Sora',
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+          
+                            SizedBox(height: 20.h),
+          
+                            // Additional information
+                            Center(
+                              child: Container(
+                                padding: EdgeInsets.all(16.r),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF1F3F5),
+                                  borderRadius: BorderRadius.circular(16.r),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline,
+                                      color: Colors.black54,
+                                      size: 20.sp,
+                                    ),
+                                    SizedBox(width: 8.w),
+                                    Expanded(
+                                      child: Text(
+                                        'Your submission will be reviewed by our team before being added to the app.',
+                                        style: TextStyle(
+                                          fontFamily: 'DM Sans',
+                                          fontSize: 12.sp,
+                                          color: Colors.black54,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                            SizedBox(height: 20.h),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            
-            // Loading overlay
-            if (_isUploading)
-              Container(
-                color: Colors.black.withOpacity(0.5),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(
-                        value: _uploadProgress,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          const Color(0xFF00D0FF),
+                ],
+              ),
+          
+              // Loading overlay
+              if (_isUploading)
+                Container(
+                  color: Colors.black.withOpacity(0.5),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(
+                          value: _uploadProgress,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            const Color(0xFF00D0FF),
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 16.h),
-                      Text(
-                        'Uploading... ${(_uploadProgress * 100).toStringAsFixed(0)}%',
-                        style: TextStyle(
-                          fontFamily: 'DM Sans',
-                          fontSize: 16.sp,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
+                        SizedBox(height: 16.h),
+                        Text(
+                          'Uploading... ${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                          style: TextStyle(
+                            fontFamily: 'DM Sans',
+                            fontSize: 16.sp,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

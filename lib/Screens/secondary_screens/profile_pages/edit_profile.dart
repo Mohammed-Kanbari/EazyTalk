@@ -447,7 +447,7 @@ class _EditProfileState extends State<EditProfile> {
                                   Padding(
                                     padding: EdgeInsets.only(bottom: 20.h),
                                     child: SizedBox(
-                                      height: 44.h,
+                                      height: 50.h,
                                       width: double.infinity,
                                       child: ElevatedButton(
                                         onPressed: _isLoading ? null : _saveProfile,
