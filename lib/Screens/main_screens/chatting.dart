@@ -90,6 +90,7 @@ class _ChattingState extends State<Chatting> {
                       )
                     ],
                   ),
+                  SizedBox(height: 30.h,)
                 ],
               ),
             ),

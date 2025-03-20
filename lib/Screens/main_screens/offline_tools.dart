@@ -102,99 +102,106 @@ class _OfflineToolsState extends State<OfflineTools> {
       body: SafeArea(
         child: Padding(
           padding:  EdgeInsets.symmetric(horizontal: 28.w),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding:  EdgeInsets.only(top: 27.h),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Smart Tools',
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontSize: 28.sp,
-                          fontWeight: FontWeight.w700,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding:  EdgeInsets.only(top: 27.h),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Smart Tools',
+                      style: TextStyle(
+                        fontFamily: 'Sora',
+                        fontSize: 28.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (isOffline)
+                      GestureDetector(
+                        onTap: showConnectivityMessage,
+                        child: Image.asset(
+                          'assets/icons/exclamation 1.png',
+                          width: 28.w,
+                          height: 28.h,
                         ),
                       ),
-                      if (isOffline)
-                        GestureDetector(
-                          onTap: showConnectivityMessage,
-                          child: Image.asset(
-                            'assets/icons/exclamation 1.png',
-                            width: 28.w,
-                            height: 28.h,
+                  ],
+                ),
+              ),
+              SizedBox(height: 30.h),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontSize: 16.sp,
+                        color: const Color.fromARGB(255, 0, 0, 0),
+                      ),
+                      children: [
+                        const TextSpan(text: 'Enhance communication with '),
+                        TextSpan(
+                          text: 'smart',
+                          style: TextStyle(
+                            color: const Color(0xFF00D0FF),
                           ),
                         ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 30.h),
-                RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontFamily: 'DM Sans',
-                      fontSize: 16.sp,
-                      color: const Color.fromARGB(255, 0, 0, 0),
+                        const TextSpan(text: ', '),
+                        TextSpan(
+                          text: 'real-time',
+                          style: TextStyle(
+                            color: const Color(0xFF00D0FF),
+                          ),
+                        ),
+                        const TextSpan(text: ' translation tools.'),
+                      ],
                     ),
-                    children: [
-                      const TextSpan(text: 'Enhance communication with '),
-                      TextSpan(
-                        text: 'smart',
-                        style: TextStyle(
-                          color: const Color(0xFF00D0FF),
-                        ),
-                      ),
-                      const TextSpan(text: ', '),
-                      TextSpan(
-                        text: 'real-time',
-                        style: TextStyle(
-                          color: const Color(0xFF00D0FF),
-                        ),
-                      ),
-                      const TextSpan(text: ' translation tools.'),
+                  ),
+                  SizedBox(height: 30.h),
+                  _buildFeatureCard(
+                      'Sign Language Translator',
+                      'record a video to translate sign language instantly.',
+                      'assets/images/sign.png',
+                      'Start translation',
+                      onPressed: () {
+                        // Add your navigation logic here
+                        // Example:
+                        // Navigator.push(context, MaterialPageRoute(builder: (context) => SignLanguagePage()));
+                      },
+                  ),
+                  SizedBox(height: 40.h),
+                  _buildFeatureCard(
+                      'Speech to Text',
+                      'Convert spoken words into text effortlessly.',
+                      'assets/images/speech.png',
+                      'Start translation',
+                      onPressed: () {
+                         Navigator.push(context, MaterialPageRoute(builder: (context) => Speech()));
+                      },
+                  ),
+                  SizedBox(height: 60.h),
+                  Text(
+                    'How to use smart tools :',
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+                  _buildInstructionCard('1', 'Download required language packs'),
+                            
+                  SizedBox(height: 20.h,)
                     ],
                   ),
                 ),
-                SizedBox(height: 30.h),
-                _buildFeatureCard(
-                    'Sign Language Translator',
-                    'record a video to translate sign language instantly.',
-                    'assets/images/sign.png',
-                    'Start translation',
-                    onPressed: () {
-                      // Add your navigation logic here
-                      // Example:
-                      // Navigator.push(context, MaterialPageRoute(builder: (context) => SignLanguagePage()));
-                    },
-                ),
-                SizedBox(height: 40.h),
-                _buildFeatureCard(
-                    'Speech to Text',
-                    'Convert spoken words into text effortlessly.',
-                    'assets/images/speech.png',
-                    'Start translation',
-                    onPressed: () {
-                       Navigator.push(context, MaterialPageRoute(builder: (context) => Speech()));
-                    },
-                ),
-                SizedBox(height: 60.h),
-                Text(
-                  'How to use smart tools :',
-                  style: TextStyle(
-                    fontFamily: 'Sora',
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: 21.h),
-                _buildInstructionCard('1', 'Download required language packs'),
-
-                SizedBox(height: 50.h,)
-              ],
-            ),
+              )
+            ],
           ),
         ),
       ),

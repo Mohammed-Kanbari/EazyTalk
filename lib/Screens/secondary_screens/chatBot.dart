@@ -139,32 +139,6 @@ class _ChatbotState extends State<Chatbot> {
     );
   }
 
-  Future<void> _testAPI() async {
-    try {
-      final content = [Content.text("Hello!")];
-      final response = await _model.generateContent(content);
-      setState(() {
-        _messages.add(
-          Message(
-            text: "API connection successful! You can now chat with the AI.",
-            isUser: false,
-            timestamp: DateTime.now(),
-          ),
-        );
-      });
-    } catch (e) {
-      setState(() {
-        _messages.add(
-          Message(
-            text: "API test failed: ${e.toString()}",
-            isUser: false,
-            timestamp: DateTime.now(),
-          ),
-        );
-      });
-    }
-  }
-
   Future<void> _sendMessageToGemini(String message) async {
     if (!_modelInitialized) {
       setState(() {

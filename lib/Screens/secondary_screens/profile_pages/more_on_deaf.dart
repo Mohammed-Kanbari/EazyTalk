@@ -60,7 +60,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
                           color: Colors.black,
                         ),
                       ),
-                      SizedBox(height: 25.h),
+                      SizedBox(height: 30.h),
 
                       // Stats Grid
                       Row(
