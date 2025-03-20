@@ -20,7 +20,7 @@ class SectionDetailPage extends StatefulWidget {
 
 class _SectionDetailPageState extends State<SectionDetailPage> {
   // Sample data for words in this section
-  late List<Map<String, String>> words;
+  late List<Map<String, dynamic>> words;
   
   @override
   void initState() {
@@ -30,55 +30,235 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
     // This would typically come from a database or API
     if (widget.category == 'الأفعال') {
       words = [
-        {'word': 'يأكل', 'description': 'التعبير عن الأكل بالإشارة', 'image': 'assets/images/signs/eat.png'},
-        {'word': 'يشرب', 'description': 'الإشارة لشرب السوائل', 'image': 'assets/images/signs/drink.png'},
-        {'word': 'ينام', 'description': 'التعبير عن النوم والراحة', 'image': 'assets/images/signs/sleep.png'},
-        {'word': 'يقرأ', 'description': 'يشير إلى المطالعة ودراستها', 'image': 'assets/images/signs/read.png'},
-        {'word': 'يكتب', 'description': 'يعبر عن الكتابة باستخدام القلم', 'image': 'assets/images/signs/write.png'},
-        {'word': 'يسوق', 'description': 'قيادة السيارة أو الشاحنة', 'image': 'assets/images/signs/drive.png'},
-        {'word': 'يمشي', 'description': 'التعبير عن المشي على الأقدام', 'image': 'assets/images/signs/walk.png'},
-        {'word': 'يتحدث', 'description': 'الإشارة للتواصل والمحادثة', 'image': 'assets/images/signs/talk.png'},
-        {'word': 'يدرس', 'description': 'التعلم والدراسة في المدرسة', 'image': 'assets/images/signs/study.png'},
+        {
+          'word': 'يأكل', 
+          'description': 'التعبير عن الأكل بالإشارة', 
+          'image': 'assets/images/signs/eat.png',
+          'videoPath': 'assets/videos/eat_sign.mp4'
+        },
+        {
+          'word': 'يشرب', 
+          'description': 'الإشارة لشرب السوائل', 
+          'image': 'assets/images/signs/drink.png',
+          'videoPath': 'assets/videos/drink_sign.mp4'
+        },
+        {
+          'word': 'ينام', 
+          'description': 'التعبير عن النوم والراحة', 
+          'image': 'assets/images/signs/sleep.png',
+          'videoPath': 'assets/videos/sleep_sign.mp4'
+        },
+        {
+          'word': 'يقرأ', 
+          'description': 'يشير إلى المطالعة ودراستها', 
+          'image': 'assets/images/signs/read.png',
+          'videoPath': 'assets/videos/read_sign.mp4'
+        },
+        {
+          'word': 'يكتب', 
+          'description': 'يعبر عن الكتابة باستخدام القلم', 
+          'image': 'assets/images/signs/write.png',
+          'videoPath': 'assets/videos/write_sign.mp4'
+        },
+        {
+          'word': 'يسوق', 
+          'description': 'قيادة السيارة أو الشاحنة', 
+          'image': 'assets/images/signs/drive.png',
+          'videoPath': 'assets/videos/drive_sign.mp4'
+        },
+        {
+          'word': 'يمشي', 
+          'description': 'التعبير عن المشي على الأقدام', 
+          'image': 'assets/images/signs/walk.png',
+          'videoPath': 'assets/videos/walk_sign.mp4'
+        },
+        {
+          'word': 'يتحدث', 
+          'description': 'الإشارة للتواصل والمحادثة', 
+          'image': 'assets/images/signs/talk.png',
+          'videoPath': 'assets/videos/talk_sign.mp4'
+        },
+        {
+          'word': 'يدرس', 
+          'description': 'التعلم والدراسة في المدرسة', 
+          'image': 'assets/images/signs/study.png',
+          'videoPath': 'assets/videos/study_sign.mp4'
+        },
       ];
     } else if (widget.category == 'العائلة') {
       words = [
-        {'word': 'أب', 'description': 'الوالد ورب الأسرة', 'image': 'assets/images/signs/father.png'},
-        {'word': 'أم', 'description': 'الوالدة وربة المنزل', 'image': 'assets/images/signs/mother.png'},
-        {'word': 'أخ', 'description': 'الأخ الذكر في العائلة', 'image': 'assets/images/signs/brother.png'},
-        {'word': 'أخت', 'description': 'الأخت الأنثى في العائلة', 'image': 'assets/images/signs/sister.png'},
-        {'word': 'جد', 'description': 'والد الأب أو الأم', 'image': 'assets/images/signs/grandfather.png'},
-        {'word': 'جدة', 'description': 'والدة الأب أو الأم', 'image': 'assets/images/signs/grandmother.png'},
-        {'word': 'عم', 'description': 'أخو الأب', 'image': 'assets/images/signs/uncle.png'},
-        {'word': 'خال', 'description': 'أخو الأم', 'image': 'assets/images/signs/maternal_uncle.png'},
+        {
+          'word': 'أب', 
+          'description': 'الوالد ورب الأسرة', 
+          'image': 'assets/images/signs/father.png',
+          'videoPath': 'assets/videos/father_sign.mp4'
+        },
+        {
+          'word': 'أم', 
+          'description': 'الوالدة وربة المنزل', 
+          'image': 'assets/images/signs/mother.png',
+          'videoPath': 'assets/videos/mother_sign.mp4'
+        },
+        {
+          'word': 'أخ', 
+          'description': 'الأخ الذكر في العائلة', 
+          'image': 'assets/images/signs/brother.png',
+          'videoPath': 'assets/videos/brother_sign.mp4'
+        },
+        {
+          'word': 'أخت', 
+          'description': 'الأخت الأنثى في العائلة', 
+          'image': 'assets/images/signs/sister.png',
+          'videoPath': 'assets/videos/sister_sign.mp4'
+        },
+        {
+          'word': 'جد', 
+          'description': 'والد الأب أو الأم', 
+          'image': 'assets/images/signs/grandfather.png',
+          'videoPath': 'assets/videos/grandfather_sign.mp4'
+        },
+        {
+          'word': 'جدة', 
+          'description': 'والدة الأب أو الأم', 
+          'image': 'assets/images/signs/grandmother.png',
+          'videoPath': 'assets/videos/grandmother_sign.mp4'
+        },
+        {
+          'word': 'عم', 
+          'description': 'أخو الأب', 
+          'image': 'assets/images/signs/uncle.png',
+          'videoPath': 'assets/videos/uncle_sign.mp4'
+        },
+        {
+          'word': 'خال', 
+          'description': 'أخو الأم', 
+          'image': 'assets/images/signs/maternal_uncle.png',
+          'videoPath': 'assets/videos/maternal_uncle_sign.mp4'
+        },
       ];
     } else if (widget.category == 'الأسماء') {
       words = [
-        {'word': 'منزل', 'description': 'المكان الذي نعيش فيه', 'image': 'assets/images/signs/house.png'},
-        {'word': 'مدرسة', 'description': 'مكان التعليم والدراسة', 'image': 'assets/images/signs/school.png'},
-        {'word': 'سيارة', 'description': 'وسيلة نقل بأربع عجلات', 'image': 'assets/images/signs/car.png'},
-        {'word': 'كتاب', 'description': 'مجموعة من الأوراق المطبوعة', 'image': 'assets/images/signs/book.png'},
-        {'word': 'هاتف', 'description': 'جهاز للاتصال والتواصل', 'image': 'assets/images/signs/phone.png'},
-        {'word': 'حاسوب', 'description': 'جهاز إلكتروني للعمل والترفيه', 'image': 'assets/images/signs/computer.png'},
+        {
+          'word': 'منزل', 
+          'description': 'المكان الذي نعيش فيه', 
+          'image': 'assets/images/signs/house.png',
+          'videoPath': 'assets/videos/house_sign.mp4'
+        },
+        {
+          'word': 'مدرسة', 
+          'description': 'مكان التعليم والدراسة', 
+          'image': 'assets/images/signs/school.png',
+          'videoPath': 'assets/videos/school_sign.mp4'
+        },
+        {
+          'word': 'سيارة', 
+          'description': 'وسيلة نقل بأربع عجلات', 
+          'image': 'assets/images/signs/car.png',
+          'videoPath': 'assets/videos/car_sign.mp4'
+        },
+        {
+          'word': 'كتاب', 
+          'description': 'مجموعة من الأوراق المطبوعة', 
+          'image': 'assets/images/signs/book.png',
+          'videoPath': 'assets/videos/book_sign.mp4'
+        },
+        {
+          'word': 'هاتف', 
+          'description': 'جهاز للاتصال والتواصل', 
+          'image': 'assets/images/signs/phone.png',
+          'videoPath': 'assets/videos/phone_sign.mp4'
+        },
+        {
+          'word': 'حاسوب', 
+          'description': 'جهاز إلكتروني للعمل والترفيه', 
+          'image': 'assets/images/signs/computer.png',
+          'videoPath': 'assets/videos/computer_sign.mp4'
+        },
       ];
     } else if (widget.category == 'الأرقام') {
       words = [
-        {'word': 'واحد', 'description': 'الرقم ١', 'image': 'assets/images/signs/one.png'},
-        {'word': 'اثنان', 'description': 'الرقم ٢', 'image': 'assets/images/signs/two.png'},
-        {'word': 'ثلاثة', 'description': 'الرقم ٣', 'image': 'assets/images/signs/three.png'},
-        {'word': 'أربعة', 'description': 'الرقم ٤', 'image': 'assets/images/signs/four.png'},
-        {'word': 'خمسة', 'description': 'الرقم ٥', 'image': 'assets/images/signs/five.png'},
-        {'word': 'ستة', 'description': 'الرقم ٦', 'image': 'assets/images/signs/six.png'},
-        {'word': 'سبعة', 'description': 'الرقم ٧', 'image': 'assets/images/signs/seven.png'},
-        {'word': 'ثمانية', 'description': 'الرقم ٨', 'image': 'assets/images/signs/eight.png'},
-        {'word': 'تسعة', 'description': 'الرقم ٩', 'image': 'assets/images/signs/nine.png'},
-        {'word': 'عشرة', 'description': 'الرقم ١٠', 'image': 'assets/images/signs/ten.png'},
+        {
+          'word': 'واحد', 
+          'description': 'الرقم ١', 
+          'image': 'assets/images/signs/one.png',
+          'videoPath': 'assets/videos/one_sign.mp4'
+        },
+        {
+          'word': 'اثنان', 
+          'description': 'الرقم ٢', 
+          'image': 'assets/images/signs/two.png',
+          'videoPath': 'assets/videos/two_sign.mp4'
+        },
+        {
+          'word': 'ثلاثة', 
+          'description': 'الرقم ٣', 
+          'image': 'assets/images/signs/three.png',
+          'videoPath': 'assets/videos/three_sign.mp4'
+        },
+        {
+          'word': 'أربعة', 
+          'description': 'الرقم ٤', 
+          'image': 'assets/images/signs/four.png',
+          'videoPath': 'assets/videos/four_sign.mp4'
+        },
+        {
+          'word': 'خمسة', 
+          'description': 'الرقم ٥', 
+          'image': 'assets/images/signs/five.png',
+          'videoPath': 'assets/videos/five_sign.mp4'
+        },
+        {
+          'word': 'ستة', 
+          'description': 'الرقم ٦', 
+          'image': 'assets/images/signs/six.png',
+          'videoPath': 'assets/videos/six_sign.mp4'
+        },
+        {
+          'word': 'سبعة', 
+          'description': 'الرقم ٧', 
+          'image': 'assets/images/signs/seven.png',
+          'videoPath': 'assets/videos/seven_sign.mp4'
+        },
+        {
+          'word': 'ثمانية', 
+          'description': 'الرقم ٨', 
+          'image': 'assets/images/signs/eight.png',
+          'videoPath': 'assets/videos/eight_sign.mp4'
+        },
+        {
+          'word': 'تسعة', 
+          'description': 'الرقم ٩', 
+          'image': 'assets/images/signs/nine.png',
+          'videoPath': 'assets/videos/nine_sign.mp4'
+        },
+        {
+          'word': 'عشرة', 
+          'description': 'الرقم ١٠', 
+          'image': 'assets/images/signs/ten.png',
+          'videoPath': 'assets/videos/ten_sign.mp4'
+        },
       ];
     } else {
       // Default list if category doesn't match
       words = [
-        {'word': 'كلمة 1', 'description': 'وصف الكلمة الأولى', 'image': 'assets/images/signs/default.png'},
-        {'word': 'كلمة 2', 'description': 'وصف الكلمة الثانية', 'image': 'assets/images/signs/default.png'},
-        {'word': 'كلمة 3', 'description': 'وصف الكلمة الثالثة', 'image': 'assets/images/signs/default.png'},
+        {
+          'word': 'كلمة 1', 
+          'description': 'وصف الكلمة الأولى', 
+          'image': 'assets/images/signs/default.png',
+          'videoPath': null
+        },
+        {
+          'word': 'كلمة 2', 
+          'description': 'وصف الكلمة الثانية', 
+          'image': 'assets/images/signs/default.png',
+          'videoPath': null
+        },
+        {
+          'word': 'كلمة 3', 
+          'description': 'وصف الكلمة الثالثة', 
+          'image': 'assets/images/signs/default.png',
+          'videoPath': null
+        },
       ];
     }
   }
@@ -179,7 +359,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
   }
 
   // Word card widget
-  Widget _buildWordCard(Map<String, String> word) {
+  Widget _buildWordCard(Map<String, dynamic> word) {
     return GestureDetector(
       onTap: () {
         // Show word details
@@ -366,18 +546,18 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
   }
 
   // Navigate to word detail page
-  void _navigateToWordDetail(Map<String, String> word) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => WordDetailPage(
-        word: word['word']!,
-        description: word['description']!,
-        image: word['image'] ?? 'assets/images/signs/default.png',
-        categoryColor: widget.categoryColor,
+  void _navigateToWordDetail(Map<String, dynamic> word) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WordDetailPage(
+          word: word['word'],
+          description: word['description'],
+          image: word['image'] ?? 'assets/images/signs/default.png',
+          categoryColor: widget.categoryColor,
+          videoPath: word['videoPath'], // Pass the video path to WordDetailPage
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
-}
-

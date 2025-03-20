@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:video_player/video_player.dart';
 
 class WordDetailPage extends StatefulWidget {
   final String word;
   final String description;
   final String image;
   final Color categoryColor;
+  final String? videoPath; // Add videoPath parameter
 
   const WordDetailPage({
     Key? key,
@@ -13,6 +15,7 @@ class WordDetailPage extends StatefulWidget {
     required this.description,
     required this.image,
     required this.categoryColor,
+    this.videoPath, // Optional video path
   }) : super(key: key);
 
   @override
@@ -22,8 +25,178 @@ class WordDetailPage extends StatefulWidget {
 class _WordDetailPageState extends State<WordDetailPage> {
   bool isFavorite = false;
   int _selectedTabIndex = 0;
+  VideoPlayerController? _videoController;
+  bool _isVideoInitialized = false;
 
   final List<String> _tabTitles = ['وصف', 'تعليمات', 'نصائح للإتقان'];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideo();
+  }
+
+  void _initializeVideo() {
+    if (widget.videoPath != null && widget.videoPath!.isNotEmpty) {
+      _videoController = VideoPlayerController.asset(widget.videoPath!)
+        ..initialize().then((_) {
+          setState(() {
+            _isVideoInitialized = true;
+          });
+        }).catchError((error) {
+          print("Error initializing video: $error");
+        });
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    super.dispose();
+  }
+
+  // Get dynamic instructions based on the word
+  List<String> _getInstructions() {
+    // Default instructions if no specific ones are found
+    List<String> defaultInstructions = [
+      'ابدأ برفع يدك اليمنى مفتوحة بجانب الوجه',
+      'حرك يدك في حركة دائرية خفيفة',
+      'ثم اجعل يدك تنزل للأمام مع إشارة الإحترام',
+      'حافظ على الابتسامة أثناء الإشارة',
+    ];
+    
+    // Word-specific instructions
+    switch (widget.word) {
+      case 'يأكل':
+        return [
+          'ضع أطراف أصابعك معاً',
+          'حرك يدك نحو فمك',
+          'افتح يدك قليلاً ثم أغلقها كأنك تأكل',
+          'كرر هذه الحركة مرتين'
+        ];
+      case 'يشرب':
+        return [
+          'شكل يدك كأنك تمسك كوباً',
+          'حرك يدك نحو فمك',
+          'اعمل حركة الشرب',
+          'يمكن إمالة رأسك للخلف قليلاً'
+        ];
+      case 'ينام':
+        return [
+          'ضع كفك مفتوحاً بجانب خدك',
+          'أغلق عينيك ببطء',
+          'أمل رأسك قليلاً للجانب',
+          'حافظ على الإشارة لثانية أو اثنتين'
+        ];
+      case 'يقرأ':
+        return [
+          'افتح كفيك كأنك تمسك كتاباً',
+          'حرك عينيك من اليمين إلى اليسار',
+          'اجعل تعبير وجهك يعكس التركيز',
+          'حافظ على ثبات اليدين أثناء الإشارة'
+        ];
+      case 'يكتب':
+        return [
+          'اجعل يدك اليسرى مفتوحة كأنها ورقة',
+          'استخدم اليد اليمنى كأنك تمسك قلماً',
+          'حرك يدك اليمنى على اليسرى بحركة الكتابة',
+          'حافظ على تركيز النظر على حركة اليد'
+        ];
+      case 'السلام عليكم':
+      case 'مرحباً':
+        return [
+          'ارفع يدك اليمنى بجانب وجهك',
+          'حرك يدك للأمام بانحناء خفيف',
+          'ابتسم أثناء تقديم الإشارة',
+          'يمكن تكرار الحركة مرتين للتأكيد'
+        ];
+      case 'شكراً':
+        return [
+          'ضع أصابعك على شفتيك',
+          'حرك يدك للأمام وللأسفل',
+          'انهِ الحركة بفتح الكف',
+          'ابتسم أثناء تقديم الإشارة'
+        ];
+      case 'أب':
+        return [
+          'ضع إبهامك على جبينك',
+          'افرد أصابعك الأخرى للأعلى',
+          'حرك يدك للأمام قليلاً',
+          'احتفظ بتعبير وجه يدل على الاحترام'
+        ];
+      case 'أم':
+        return [
+          'ضع إبهامك على ذقنك',
+          'افرد أصابعك الأخرى',
+          'حرك يدك للأمام قليلاً',
+          'اعرض ابتسامة دافئة أثناء الإشارة'
+        ];
+      case 'واحد':
+        return [
+          'ارفع سبابتك للأعلى',
+          'اجعل باقي أصابعك مطوية',
+          'حافظ على ثبات اليد لحظة',
+          'يمكن تحريك اليد قليلاً للتأكيد'
+        ];
+      case 'اثنان':
+        return [
+          'ارفع السبابة والوسطى للأعلى',
+          'اجعل باقي أصابعك مطوية',
+          'باعد قليلاً بين الإصبعين',
+          'حافظ على وضوح الإشارة'
+        ];
+      default:
+        return defaultInstructions;
+    }
+  }
+
+  // Get dynamic tips based on the word
+  List<String> _getTips() {
+    // Default tips if no specific ones are found
+    List<String> defaultTips = [
+      'حافظ على اتصال العين أثناء تقديم الإشارة',
+      'يمكن استخدام تعبيرات الوجه المناسبة مع الإشارة لتأكيد المعنى',
+      'التدرب على الإشارة أمام المرآة يساعد على إتقانها',
+      'تدرب بسرعات مختلفة',
+    ];
+    
+    // Word-specific tips
+    switch (widget.word) {
+      case 'يأكل':
+      case 'يشرب':
+        return [
+          'تعتبر إشارات الطعام والشراب من الإشارات الأساسية للمبتدئين',
+          'حاول أن تجعل حركتك طبيعية كأنك تقوم بالفعل حقيقةً',
+          'استخدم تعابير الوجه المناسبة مثل الرضا أو التلذذ',
+          'يمكن تغيير سرعة الحركة للتعبير عن شدة الجوع أو العطش'
+        ];
+      case 'يقرأ':
+      case 'يكتب':
+        return [
+          'اجعل حركاتك واضحة ومحددة',
+          'يمكن تغيير وضعية الإشارة حسب نوعية الكتابة أو القراءة',
+          'تعبيرات الوجه مهمة للتعبير عن مدى الاهتمام بالقراءة',
+          'تُستخدم هذه الإشارة كثيراً في سياق التعليم'
+        ];
+      case 'السلام عليكم':
+      case 'مرحباً':
+        return [
+          'ابدأ كل محادثة بهذه الإشارة كتقليد مهم',
+          'الابتسامة جزء لا يتجزأ من هذه الإشارة',
+          'انتبه إلى مستوى اليد، يجب أن تكون بمستوى الصدر أو أعلى قليلاً',
+          'هذه من أكثر الإشارات استخداماً في التواصل اليومي'
+        ];
+      case 'شكراً':
+        return [
+          'اجعل الإشارة تنبع من القلب لتعطي دفئاً أكثر',
+          'تأكد من وضوح حركة الشكر بفتح الكف في نهاية الحركة',
+          'يمكن تكرار الإشارة للتعبير عن الامتنان الشديد',
+          'تعتبر هذه الإشارة من أكثر الإشارات تقديراً في مجتمع الصم'
+        ];
+      default:
+        return defaultTips;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,44 +283,64 @@ class _WordDetailPageState extends State<WordDetailPage> {
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
-                              Image.asset(
-                                widget.image,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.videocam,
-                                        size: 50.sp,
-                                        color: Colors.grey[400],
-                                      ),
-                                      SizedBox(height: 8.h),
-                                      Text(
-                                        'Video demonstration',
-                                        style: TextStyle(
-                                          fontFamily: 'DM Sans',
-                                          fontSize: 14.sp,
-                                          color: Colors.grey[500],
+                              // Show video player if initialized, otherwise show image
+                              _isVideoInitialized && _videoController != null
+                                  ? AspectRatio(
+                                      aspectRatio: _videoController!.value.aspectRatio,
+                                      child: VideoPlayer(_videoController!),
+                                    )
+                                  : Image.asset(
+                                      widget.image,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          Center(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.videocam,
+                                              size: 50.sp,
+                                              color: Colors.grey[400],
+                                            ),
+                                            SizedBox(height: 8.h),
+                                            Text(
+                                              'Video demonstration',
+                                              style: TextStyle(
+                                                fontFamily: 'DM Sans',
+                                                fontSize: 14.sp,
+                                                color: Colors.grey[500],
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                                    ),
+                              // Play button overlay
                               Center(
-                                child: Container(
-                                  width: 60.h,
-                                  height: 60.h,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.8),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.play_arrow,
-                                    color: Color(0xFF00D0FF),
-                                    size: 40.sp,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    if (_videoController != null && _isVideoInitialized) {
+                                      setState(() {
+                                        _videoController!.value.isPlaying
+                                            ? _videoController!.pause()
+                                            : _videoController!.play();
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    width: 60.h,
+                                    height: 60.h,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.8),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      _videoController != null && _isVideoInitialized && _videoController!.value.isPlaying
+                                          ? Icons.pause
+                                          : Icons.play_arrow,
+                                      color: Color(0xFF00D0FF),
+                                      size: 40.sp,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -187,20 +380,19 @@ class _WordDetailPageState extends State<WordDetailPage> {
                               widget.word,
                               style: TextStyle(
                                 fontFamily: 'Sora',
-                                fontSize: 28.sp, // Larger text size
-                                fontWeight: FontWeight.w700, // Bolder text
+                                fontSize: 28.sp,
+                                fontWeight: FontWeight.w700,
                                 color: Colors.black,
                               ),
                             ),
-                            SizedBox(height: 20.h), // More spacing
+                            SizedBox(height: 20.h),
 
                             // Tags row
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 _buildTag('مبتدئ', Color(0xFFFCE8DD)),
-                                SizedBox(
-                                    width: 16.w), // More spacing between tags
+                                SizedBox(width: 16.w),
                                 _buildTag('عبارة شائعة', Color(0xFFE6DAFF)),
                               ],
                             ),
@@ -271,8 +463,8 @@ class _WordDetailPageState extends State<WordDetailPage> {
         text,
         style: TextStyle(
           fontFamily: 'DM Sans',
-          fontSize: 14.sp, // Slightly larger
-          fontWeight: FontWeight.w600, // Bolder
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w600,
           color: Colors.black87,
         ),
       ),
@@ -360,49 +552,29 @@ class _WordDetailPageState extends State<WordDetailPage> {
     );
   }
 
-  // Instructions tab content
+  // Instructions tab content with dynamic instructions
   Widget _buildInstructionsTab() {
+    List<String> instructions = _getInstructions();
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildInstructionStep(
-          number: '1',
-          description: 'ابدأ برفع يدك اليمنى مفتوحة بجانب الوجه',
+      children: List.generate(
+        instructions.length,
+        (index) => _buildInstructionStep(
+          number: '${index + 1}',
+          description: instructions[index],
         ),
-        _buildInstructionStep(
-          number: '2',
-          description: 'حرك يدك في حركة دائرية خفيفة',
-        ),
-        _buildInstructionStep(
-          number: '3',
-          description: 'ثم اجعل يدك تنزل للأمام مع إشارة الإحترام',
-        ),
-        _buildInstructionStep(
-          number: '4',
-          description: 'حافظ على الابتسامة أثناء الإشارة',
-        ),
-      ],
+      ),
     );
   }
 
-  // Tips tab content
+  // Tips tab content with dynamic tips
   Widget _buildTipsTab() {
+    List<String> tips = _getTips();
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildTipItem(
-          'حافظ على اتصال العين أثناء تقديم الإشارة',
-        ),
-        _buildTipItem(
-          'يمكن استخدام تعبيرات الوجه المناسبة مع الإشارة لتأكيد المعنى',
-        ),
-        _buildTipItem(
-          'التدرب على الإشارة أمام المرآة يساعد على إتقانها',
-        ),
-        _buildTipItem(
-          'هذه الإشارة من الإشارات الأساسية التي يجب إتقانها',
-        ),
-      ],
+      children: tips.map((tip) => _buildTipItem(tip)).toList(),
     );
   }
 
