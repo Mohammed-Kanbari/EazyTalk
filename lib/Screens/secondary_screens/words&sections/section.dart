@@ -1,14 +1,17 @@
 import 'package:eazytalk/Screens/secondary_screens/words&sections/words.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SectionDetailPage extends StatefulWidget {
+  final int sectionId;
   final String title;
   final String category;
   final Color categoryColor;
   
   const SectionDetailPage({
     Key? key, 
+    required this.sectionId,
     required this.title, 
     required this.category,
     required this.categoryColor,
@@ -19,259 +22,105 @@ class SectionDetailPage extends StatefulWidget {
 }
 
 class _SectionDetailPageState extends State<SectionDetailPage> {
-  // Sample data for words in this section
-  late List<Map<String, dynamic>> words;
+  final _supabase = Supabase.instance.client;
+  
+  bool _isLoading = true;
+  List<Map<String, dynamic>> words = [];
+  String _errorMessage = '';
+  String _searchQuery = '';
+  
+  // Sorting and filtering options
+  bool _showFavoritesOnly = false;
+  String _sortOption = 'alphabetical'; // 'alphabetical', 'difficulty'
   
   @override
   void initState() {
     super.initState();
+    _loadWords();
+  }
+  
+  // Load words from Supabase
+  Future<void> _loadWords() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
     
-    // Initialize words based on the category
-    // This would typically come from a database or API
-    if (widget.category == 'الأفعال') {
-      words = [
-        {
-          'word': 'يأكل', 
-          'description': 'التعبير عن الأكل بالإشارة', 
-          'image': 'assets/images/signs/eat.png',
-          'videoPath': 'assets/videos/eat_sign.mp4'
-        },
-        {
-          'word': 'يشرب', 
-          'description': 'الإشارة لشرب السوائل', 
-          'image': 'assets/images/signs/drink.png',
-          'videoPath': 'assets/videos/drink_sign.mp4'
-        },
-        {
-          'word': 'ينام', 
-          'description': 'التعبير عن النوم والراحة', 
-          'image': 'assets/images/signs/sleep.png',
-          'videoPath': 'assets/videos/sleep_sign.mp4'
-        },
-        {
-          'word': 'يقرأ', 
-          'description': 'يشير إلى المطالعة ودراستها', 
-          'image': 'assets/images/signs/read.png',
-          'videoPath': 'assets/videos/read_sign.mp4'
-        },
-        {
-          'word': 'يكتب', 
-          'description': 'يعبر عن الكتابة باستخدام القلم', 
-          'image': 'assets/images/signs/write.png',
-          'videoPath': 'assets/videos/write_sign.mp4'
-        },
-        {
-          'word': 'يسوق', 
-          'description': 'قيادة السيارة أو الشاحنة', 
-          'image': 'assets/images/signs/drive.png',
-          'videoPath': 'assets/videos/drive_sign.mp4'
-        },
-        {
-          'word': 'يمشي', 
-          'description': 'التعبير عن المشي على الأقدام', 
-          'image': 'assets/images/signs/walk.png',
-          'videoPath': 'assets/videos/walk_sign.mp4'
-        },
-        {
-          'word': 'يتحدث', 
-          'description': 'الإشارة للتواصل والمحادثة', 
-          'image': 'assets/images/signs/talk.png',
-          'videoPath': 'assets/videos/talk_sign.mp4'
-        },
-        {
-          'word': 'يدرس', 
-          'description': 'التعلم والدراسة في المدرسة', 
-          'image': 'assets/images/signs/study.png',
-          'videoPath': 'assets/videos/study_sign.mp4'
-        },
-      ];
-    } else if (widget.category == 'العائلة') {
-      words = [
-        {
-          'word': 'أب', 
-          'description': 'الوالد ورب الأسرة', 
-          'image': 'assets/images/signs/father.png',
-          'videoPath': 'assets/videos/father_sign.mp4'
-        },
-        {
-          'word': 'أم', 
-          'description': 'الوالدة وربة المنزل', 
-          'image': 'assets/images/signs/mother.png',
-          'videoPath': 'assets/videos/mother_sign.mp4'
-        },
-        {
-          'word': 'أخ', 
-          'description': 'الأخ الذكر في العائلة', 
-          'image': 'assets/images/signs/brother.png',
-          'videoPath': 'assets/videos/brother_sign.mp4'
-        },
-        {
-          'word': 'أخت', 
-          'description': 'الأخت الأنثى في العائلة', 
-          'image': 'assets/images/signs/sister.png',
-          'videoPath': 'assets/videos/sister_sign.mp4'
-        },
-        {
-          'word': 'جد', 
-          'description': 'والد الأب أو الأم', 
-          'image': 'assets/images/signs/grandfather.png',
-          'videoPath': 'assets/videos/grandfather_sign.mp4'
-        },
-        {
-          'word': 'جدة', 
-          'description': 'والدة الأب أو الأم', 
-          'image': 'assets/images/signs/grandmother.png',
-          'videoPath': 'assets/videos/grandmother_sign.mp4'
-        },
-        {
-          'word': 'عم', 
-          'description': 'أخو الأب', 
-          'image': 'assets/images/signs/uncle.png',
-          'videoPath': 'assets/videos/uncle_sign.mp4'
-        },
-        {
-          'word': 'خال', 
-          'description': 'أخو الأم', 
-          'image': 'assets/images/signs/maternal_uncle.png',
-          'videoPath': 'assets/videos/maternal_uncle_sign.mp4'
-        },
-      ];
-    } else if (widget.category == 'الأسماء') {
-      words = [
-        {
-          'word': 'منزل', 
-          'description': 'المكان الذي نعيش فيه', 
-          'image': 'assets/images/signs/house.png',
-          'videoPath': 'assets/videos/house_sign.mp4'
-        },
-        {
-          'word': 'مدرسة', 
-          'description': 'مكان التعليم والدراسة', 
-          'image': 'assets/images/signs/school.png',
-          'videoPath': 'assets/videos/school_sign.mp4'
-        },
-        {
-          'word': 'سيارة', 
-          'description': 'وسيلة نقل بأربع عجلات', 
-          'image': 'assets/images/signs/car.png',
-          'videoPath': 'assets/videos/car_sign.mp4'
-        },
-        {
-          'word': 'كتاب', 
-          'description': 'مجموعة من الأوراق المطبوعة', 
-          'image': 'assets/images/signs/book.png',
-          'videoPath': 'assets/videos/book_sign.mp4'
-        },
-        {
-          'word': 'هاتف', 
-          'description': 'جهاز للاتصال والتواصل', 
-          'image': 'assets/images/signs/phone.png',
-          'videoPath': 'assets/videos/phone_sign.mp4'
-        },
-        {
-          'word': 'حاسوب', 
-          'description': 'جهاز إلكتروني للعمل والترفيه', 
-          'image': 'assets/images/signs/computer.png',
-          'videoPath': 'assets/videos/computer_sign.mp4'
-        },
-      ];
-    } else if (widget.category == 'الأرقام') {
-      words = [
-        {
-          'word': 'واحد', 
-          'description': 'الرقم ١', 
-          'image': 'assets/images/signs/one.png',
-          'videoPath': 'assets/videos/one_sign.mp4'
-        },
-        {
-          'word': 'اثنان', 
-          'description': 'الرقم ٢', 
-          'image': 'assets/images/signs/two.png',
-          'videoPath': 'assets/videos/two_sign.mp4'
-        },
-        {
-          'word': 'ثلاثة', 
-          'description': 'الرقم ٣', 
-          'image': 'assets/images/signs/three.png',
-          'videoPath': 'assets/videos/three_sign.mp4'
-        },
-        {
-          'word': 'أربعة', 
-          'description': 'الرقم ٤', 
-          'image': 'assets/images/signs/four.png',
-          'videoPath': 'assets/videos/four_sign.mp4'
-        },
-        {
-          'word': 'خمسة', 
-          'description': 'الرقم ٥', 
-          'image': 'assets/images/signs/five.png',
-          'videoPath': 'assets/videos/five_sign.mp4'
-        },
-        {
-          'word': 'ستة', 
-          'description': 'الرقم ٦', 
-          'image': 'assets/images/signs/six.png',
-          'videoPath': 'assets/videos/six_sign.mp4'
-        },
-        {
-          'word': 'سبعة', 
-          'description': 'الرقم ٧', 
-          'image': 'assets/images/signs/seven.png',
-          'videoPath': 'assets/videos/seven_sign.mp4'
-        },
-        {
-          'word': 'ثمانية', 
-          'description': 'الرقم ٨', 
-          'image': 'assets/images/signs/eight.png',
-          'videoPath': 'assets/videos/eight_sign.mp4'
-        },
-        {
-          'word': 'تسعة', 
-          'description': 'الرقم ٩', 
-          'image': 'assets/images/signs/nine.png',
-          'videoPath': 'assets/videos/nine_sign.mp4'
-        },
-        {
-          'word': 'عشرة', 
-          'description': 'الرقم ١٠', 
-          'image': 'assets/images/signs/ten.png',
-          'videoPath': 'assets/videos/ten_sign.mp4'
-        },
-      ];
-    } else {
-      // Default list if category doesn't match
-      words = [
-        {
-          'word': 'كلمة 1', 
-          'description': 'وصف الكلمة الأولى', 
-          'image': 'assets/images/signs/default.png',
-          'videoPath': null
-        },
-        {
-          'word': 'كلمة 2', 
-          'description': 'وصف الكلمة الثانية', 
-          'image': 'assets/images/signs/default.png',
-          'videoPath': null
-        },
-        {
-          'word': 'كلمة 3', 
-          'description': 'وصف الكلمة الثالثة', 
-          'image': 'assets/images/signs/default.png',
-          'videoPath': null
-        },
-      ];
+    try {
+      // Fetch words for the current section
+      final wordsResponse = await _supabase
+          .from('Words')
+          .select()
+          .eq('section_id', widget.sectionId)
+          .order('word');
+      
+      setState(() {
+        words = wordsResponse;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading words: $e');
+      setState(() {
+        _errorMessage = 'Failed to load words. Please check your connection.';
+        _isLoading = false;
+      });
     }
+  }
+  
+  // Filter and sort words based on user preferences
+  List<Map<String, dynamic>> _getFilteredWords() {
+    List<Map<String, dynamic>> filteredList = List.from(words);
+    
+    // Apply search filter if query exists
+    if (_searchQuery.isNotEmpty) {
+      filteredList = filteredList.where((word) {
+        return word['word'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
+               (word['description'] != null && 
+                word['description'].toString().toLowerCase().contains(_searchQuery.toLowerCase()));
+      }).toList();
+    }
+    
+    // Apply favorites filter if enabled
+    if (_showFavoritesOnly) {
+      // In a real app, you'd have a 'favorites' field in your database
+      // For now, this is just a placeholder implementation
+      filteredList = filteredList.where((word) => word['is_favorite'] == true).toList();
+    }
+    
+    // Apply sorting
+    if (_sortOption == 'alphabetical') {
+      filteredList.sort((a, b) => a['word'].toString().compareTo(b['word'].toString()));
+    } else if (_sortOption == 'difficulty') {
+      // Sort by difficulty level (assuming levels like 'beginner', 'intermediate', 'advanced')
+      filteredList.sort((a, b) {
+        // Define the order of difficulty levels
+        final difficultyOrder = {
+          'beginner': 0,
+          'intermediate': 1,
+          'advanced': 2,
+        };
+        
+        final diffA = a['difficulty_level'] ?? 'beginner';
+        final diffB = b['difficulty_level'] ?? 'beginner';
+        
+        return (difficultyOrder[diffA] ?? 0).compareTo(difficultyOrder[diffB] ?? 0);
+      });
+    }
+    
+    return filteredList;
   }
 
   @override
   Widget build(BuildContext context) {
+    final filteredWords = _getFilteredWords();
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Custom app bar to match your style
+            // Custom app bar
             Padding(
               padding: EdgeInsets.only(top: 27.h, left: 28.w, right: 28.w),
               child: Row(
@@ -313,45 +162,160 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
               ),
             ),
             
-            // Expanded section with scroll view that includes the header
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.symmetric(horizontal: 28.w),
-                physics: BouncingScrollPhysics(),
-                children: [
-                  // Category title with colored word (now scrolls with the content)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 30.h),
-                    child: RichText(
-                      text: TextSpan(
+            // Loading indicator or error message
+            if (_isLoading)
+              Expanded(
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF00D0FF),
+                  ),
+                ),
+              )
+            else if (_errorMessage.isNotEmpty)
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 60.sp,
+                      ),
+                      SizedBox(height: 20.h),
+                      Text(
+                        _errorMessage,
                         style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                          fontFamily: 'DM Sans',
+                          fontSize: 16.sp,
+                          color: Colors.red,
                         ),
-                        children: [
-                          TextSpan(text: 'Common '),
-                          TextSpan(
-                            text: widget.title,
-                            style: TextStyle(
-                              color: widget.categoryColor,
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 30.h),
+                      ElevatedButton(
+                        onPressed: _loadWords,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF00D0FF),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 20.w,
+                            vertical: 10.h,
+                          ),
+                        ),
+                        child: Text(
+                          'Try Again',
+                          style: TextStyle(
+                            fontFamily: 'Sora',
+                            fontSize: 16.sp,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              // Expanded section with content
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _loadWords,
+                  color: Color(0xFF00D0FF),
+                  child: ListView(
+                    padding: EdgeInsets.symmetric(horizontal: 28.w),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      // Search bar
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20.h),
+                        child: TextField(
+                          onChanged: (value) {
+                            setState(() {
+                              _searchQuery = value;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Search words...',
+                            prefixIcon: Icon(Icons.search, color: Colors.grey),
+                            filled: true,
+                            fillColor: Color(0xFFF1F3F5),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 10.h,
+                              horizontal: 15.w,
                             ),
                           ),
-                          TextSpan(text: ' In Sign Language'),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
+                      
+                      // Category title with colored word
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 30.h),
+                        child: RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 20.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                            children: [
+                              TextSpan(text: 'Common '),
+                              TextSpan(
+                                text: widget.title,
+                                style: TextStyle(
+                                  color: widget.categoryColor,
+                                ),
+                              ),
+                              TextSpan(text: ' In Sign Language'),
+                            ],
+                          ),
+                        ),
+                      ),
 
-                  // Words list
-                  ...words.map((word) => _buildWordCard(word)).toList(),
-                  
-                  // Bottom spacing
-                  SizedBox(height: 20.h),
-                ],
+                      // Words list or empty state
+                      filteredWords.isNotEmpty
+                          ? Column(
+                              children: filteredWords
+                                  .map((word) => _buildWordCard(word))
+                                  .toList(),
+                            )
+                          : Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 50.h),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.search_off,
+                                      size: 60.sp,
+                                      color: Colors.grey,
+                                    ),
+                                    SizedBox(height: 20.h),
+                                    Text(
+                                      _searchQuery.isNotEmpty
+                                          ? 'No words matching "$_searchQuery"'
+                                          : 'No words available in this section',
+                                      style: TextStyle(
+                                        fontFamily: 'DM Sans',
+                                        fontSize: 16.sp,
+                                        color: Colors.grey,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                      
+                      // Bottom spacing
+                      SizedBox(height: 20.h),
+                    ],
+                  ),
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -387,7 +351,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.r),
               child: Image.asset(
-                word['image'] ?? 'assets/images/signs/default.png',
+                word['image_path'] ?? 'assets/images/signs/default.png',
                 width: 60.w,
                 height: 60.h,
                 fit: BoxFit.cover,
@@ -416,7 +380,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    word['word']!,
+                    word['word'] ?? 'Unknown',
                     style: TextStyle(
                       fontFamily: 'Sora',
                       fontSize: 18.sp,
@@ -426,7 +390,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    word['description']!,
+                    word['description'] ?? '',
                     style: TextStyle(
                       fontFamily: 'DM Sans',
                       fontSize: 12.sp,
@@ -487,37 +451,53 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
               ),
             ),
             SizedBox(height: 20.h),
+            // Sort alphabetically
             _buildOptionItem(
               icon: Icons.sort_by_alpha,
               title: 'Sort alphabetically',
+              isSelected: _sortOption == 'alphabetical',
               onTap: () {
                 Navigator.pop(context);
-                // Implement sorting
                 setState(() {
-                  words.sort((a, b) => a['word']!.compareTo(b['word']!));
+                  _sortOption = 'alphabetical';
                 });
               },
             ),
+            // Sort by difficulty
+            _buildOptionItem(
+              icon: Icons.trending_up,
+              title: 'Sort by difficulty',
+              isSelected: _sortOption == 'difficulty',
+              onTap: () {
+                Navigator.pop(context);
+                setState(() {
+                  _sortOption = 'difficulty';
+                });
+              },
+            ),
+            // Show favorites only
             _buildOptionItem(
               icon: Icons.star_border,
               title: 'Show favorites only',
+              isSelected: _showFavoritesOnly,
               onTap: () {
                 Navigator.pop(context);
-                // Implement showing favorites
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Showing favorites feature will be implemented soon')),
-                );
+                setState(() {
+                  _showFavoritesOnly = !_showFavoritesOnly;
+                });
               },
             ),
+            // Clear filters
             _buildOptionItem(
-              icon: Icons.search,
-              title: 'Search',
+              icon: Icons.clear_all,
+              title: 'Clear all filters',
               onTap: () {
                 Navigator.pop(context);
-                // Implement search
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Search feature will be implemented soon')),
-                );
+                setState(() {
+                  _showFavoritesOnly = false;
+                  _sortOption = 'alphabetical';
+                  _searchQuery = '';
+                });
               },
             ),
           ],
@@ -531,14 +511,20 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    bool isSelected = false,
   }) {
     return ListTile(
-      leading: Icon(icon, color: Color(0xFF00D0FF)),
+      leading: Icon(
+        icon,
+        color: isSelected ? Color(0xFF00D0FF) : Colors.grey[600],
+      ),
       title: Text(
         title,
         style: TextStyle(
           fontFamily: 'DM Sans',
           fontSize: 16.sp,
+          color: isSelected ? Color(0xFF00D0FF) : Colors.black87,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
         ),
       ),
       onTap: onTap,
@@ -551,11 +537,12 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
       context,
       MaterialPageRoute(
         builder: (context) => WordDetailPage(
-          word: word['word'],
-          description: word['description'],
-          image: word['image'] ?? 'assets/images/signs/default.png',
+          wordId: word['id'],
+          word: word['word'] ?? 'Unknown',
+          description: word['description'] ?? '',
+          image: word['image_path'] ?? 'assets/images/signs/default.png',
           categoryColor: widget.categoryColor,
-          videoPath: word['videoPath'], // Pass the video path to WordDetailPage
+          videoPath: word['video_path'],
         ),
       ),
     );
