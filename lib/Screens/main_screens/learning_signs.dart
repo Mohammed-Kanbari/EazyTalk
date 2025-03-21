@@ -1,8 +1,16 @@
-import 'package:eazytalk/Screens/secondary_screens/words&sections/section.dart';
-import 'package:eazytalk/Screens/secondary_screens/words&sections/words.dart';
+import 'package:eazytalk/Screens/secondary_screens/words_sections/word_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:eazytalk/models/section_model.dart';
+import 'package:eazytalk/models/word_model.dart';
+import 'package:eazytalk/services/sign_language/sign_language_service.dart';
+import 'package:eazytalk/widgets/common/error_display.dart';
+import 'package:eazytalk/widgets/common/screen_header.dart';
+import 'package:eazytalk/widgets/signs/word_card.dart';
+import 'package:eazytalk/widgets/signs/section_card.dart';
+import 'package:eazytalk/screens/secondary_screens/words_sections/section_detail.dart';
+import 'package:eazytalk/core/theme/app_colors.dart';
+import 'package:eazytalk/core/theme/text_styles.dart';
 
 class LearnSignsPage extends StatefulWidget {
   const LearnSignsPage({super.key});
@@ -12,11 +20,11 @@ class LearnSignsPage extends StatefulWidget {
 }
 
 class _LearnSignsPageState extends State<LearnSignsPage> {
-  final _supabase = Supabase.instance.client;
+  final SignLanguageService _signService = SignLanguageService();
   
   bool _isLoading = true;
-  List<Map<String, dynamic>> mostUsedWords = [];
-  List<Map<String, dynamic>> sections = [];
+  List<WordModel> _mostUsedWords = [];
+  List<SectionModel> _sections = [];
   String _errorMessage = '';
 
   @override
@@ -25,7 +33,7 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
     _loadData();
   }
 
-  // Load data from Supabase
+  // Load data from service
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
@@ -33,51 +41,21 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
     });
 
     try {
-      // Fetch sections
-      final sectionsResponse = await _supabase
-          .from('Sections')
-          .select()
-          .order('id');
-
-      // Fetch most used words
-      final wordsResponse = await _supabase
-          .from('Words')
-          .select()
-          .eq('is_most_used', true)
-          .order('id');
-
-      // Process sections to convert color string to Color
-      final processedSections = sectionsResponse.map<Map<String, dynamic>>((section) {
-        return {
-          'id': section['id'],
-          'title': section['title'],
-          'subtitle': section['subtitle'],
-          'color': _hexToColor(section['color'] ?? '#E6DAFF'),
-          'icon': section['icon_path'] ?? 'assets/icons/default.png',
-        };
-      }).toList();
+      // Fetch data using the service
+      final sections = await _signService.fetchSections();
+      final mostUsedWords = await _signService.fetchMostUsedWords();
 
       setState(() {
-        sections = processedSections;
-        mostUsedWords = wordsResponse;
+        _sections = sections;
+        _mostUsedWords = mostUsedWords;
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading data: $e');
       setState(() {
-        _errorMessage = 'Failed to load data. Please check your connection.';
+        _errorMessage = e.toString();
         _isLoading = false;
       });
     }
-  }
-
-  // Helper method to convert hex color string to Color
-  Color _hexToColor(String hexColor) {
-    hexColor = hexColor.replaceAll('#', '');
-    if (hexColor.length == 6) {
-      hexColor = 'FF$hexColor';
-    }
-    return Color(int.parse(hexColor, radix: 16));
   }
 
   @override
@@ -88,342 +66,180 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
-            Padding(
-              padding: EdgeInsets.only(top: 27.0.h, right: 28.w, left: 28.w),
-              child: Text(
-                'Learn Sign Language',
-                style: TextStyle(
-                  fontFamily: 'Sora',
-                  fontSize: 28.sp,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+            // Screen header
+            const ScreenHeader(title: 'Learn Sign Language'),
             SizedBox(height: 30.h),
-
-            // Loading indicator or error message
-            if (_isLoading)
-              Expanded(
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFF00D0FF),
-                  ),
-                ),
-              )
-            else if (_errorMessage.isNotEmpty)
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                        size: 60.sp,
-                      ),
-                      SizedBox(height: 20.h),
-                      Text(
-                        _errorMessage,
-                        style: TextStyle(
-                          fontFamily: 'DM Sans',
-                          fontSize: 16.sp,
-                          color: Colors.red,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 30.h),
-                      ElevatedButton(
-                        onPressed: _loadData,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF00D0FF),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 20.w,
-                            vertical: 10.h,
-                          ),
-                        ),
-                        child: Text(
-                          'Try Again',
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 16.sp,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: _loadData,
-                  color: Color(0xFF00D0FF),
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 28.w),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Introduction text
-                          RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontFamily: 'DM Sans',
-                                fontSize: 16.sp,
-                                color: const Color.fromARGB(255, 0, 0, 0),
-                              ),
-                              children: [
-                                const TextSpan(text: 'Master '),
-                                TextSpan(
-                                  text: 'essential signs',
-                                  style: TextStyle(
-                                    color: const Color(0xFF00D0FF),
-                                  ),
-                                ),
-                                const TextSpan(text: ' for everyday communication.'),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 30.h),
-
-                          // Most Used Words section
-                          mostUsedWords.isNotEmpty
-                              ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Most Used Words :',
-                                      style: TextStyle(
-                                        fontFamily: 'Sora',
-                                        fontSize: 18.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    SizedBox(height: 20.h),
-                                    SizedBox(
-                                      height: 80.h,
-                                      child: ListView.separated(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: mostUsedWords.length,
-                                        separatorBuilder: (context, index) =>
-                                            SizedBox(width: 12.w),
-                                        itemBuilder: (context, index) {
-                                          return _buildWordCard(mostUsedWords[index]);
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : SizedBox(),
-                          SizedBox(height: 60.h),
-
-                          // Sections title
-                          Text(
-                            'Sections :',
-                            style: TextStyle(
-                              fontFamily: 'Sora',
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
-                          ),
-                          SizedBox(height: 20.h),
-
-                          // Sections grid
-                          sections.isNotEmpty
-                              ? GridView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    crossAxisSpacing: 15.w,
-                                    mainAxisSpacing: 15.h,
-                                    childAspectRatio: 1.2,
-                                  ),
-                                  itemCount: sections.length,
-                                  itemBuilder: (context, index) {
-                                    return _buildSectionCard(sections[index]);
-                                  },
-                                )
-                              : Center(
-                                  child: Text(
-                                    'No sections available',
-                                    style: TextStyle(
-                                      fontFamily: 'DM Sans',
-                                      fontSize: 16.sp,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-
-                          SizedBox(height: 20.h), // Bottom spacing
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            
+            // Content area with loading/error states
+            _buildContent(),
           ],
         ),
       ),
     );
   }
 
-  // Widget for most used word card
-  Widget _buildWordCard(Map<String, dynamic> word) {
-    return GestureDetector(
-      onTap: () {
-        _navigateToWordDetail(word);
-      },
-      child: Container(
-        width: 160.w,
-        padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: Color(0xFFB1EEFF),
-          borderRadius: BorderRadius.circular(12.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 8,
-              spreadRadius: 1,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
+  Widget _buildContent() {
+    if (_isLoading) {
+      return Expanded(
         child: Center(
-          child: Text(
-            word['word'] ?? 'Unknown',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'DM Sans',
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
           ),
         ),
-      ),
-    );
-  }
-
-  // Widget for section card
-  Widget _buildSectionCard(Map<String, dynamic> section) {
-    return GestureDetector(
-      onTap: () {
-        _navigateToSection(section);
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: section['color'] ?? Color(0xFFE6DAFF),
-          borderRadius: BorderRadius.circular(12.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 8,
-              spreadRadius: 1,
-              offset: Offset(0, 3),
-            ),
-          ],
+      );
+    } else if (_errorMessage.isNotEmpty) {
+      return Expanded(
+        child: ErrorDisplay(
+          message: _errorMessage,
+          onRetry: _loadData,
         ),
-        padding: EdgeInsets.all(15.r),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(6.r),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Icon(
-                    Icons.arrow_back_ios,
-                    size: 14.sp,
-                    color: Colors.black54,
-                  ),
-                ),
-                // Image placeholder - replace with actual icon asset
-                Image.asset(
-                  section['icon'],
-                  width: 32.w,
-                  height: 32.h,
-                  errorBuilder: (context, error, stackTrace) => Icon(
-                    Icons.category,
-                    size: 32.sp,
-                    color: Colors.black87,
-                  ),
-                ),
-              ],
-            ),
-            Spacer(),
-            Align(
-              alignment: Alignment.centerLeft,
+      );
+    } else {
+      return Expanded(
+        child: RefreshIndicator(
+          onRefresh: _loadData,
+          color: AppColors.primary,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 28.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    section['title'] ?? 'Unknown Section',
-                    style: TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  SizedBox(height: 3.h),
-                  Text(
-                    section['subtitle'] ?? '',
-                    style: TextStyle(
-                      fontFamily: 'DM Sans',
-                      fontSize: 10.sp,
-                      color: Colors.black54,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  // Introduction text
+                  _buildIntroText(),
+                  SizedBox(height: 30.h),
+
+                  // Most Used Words section
+                  if (_mostUsedWords.isNotEmpty) _buildMostUsedWordsSection(),
+                  SizedBox(height: 60.h),
+
+                  // Sections
+                  _buildSectionsGrid(),
+                  
+                  SizedBox(height: 20.h), // Bottom spacing
                 ],
               ),
             ),
-          ],
+          ),
         ),
+      );
+    }
+  }
+
+  Widget _buildIntroText() {
+    return RichText(
+      text: TextSpan(
+        style: AppTextStyles.introText,
+        children: [
+          const TextSpan(text: 'Master '),
+          TextSpan(
+            text: 'essential signs',
+            style: TextStyle(
+              color: AppColors.primary,
+            ),
+          ),
+          const TextSpan(text: ' for everyday communication.'),
+        ],
       ),
     );
   }
 
-  // Navigate to word detail page
-  void _navigateToWordDetail(Map<String, dynamic> word) {
+  Widget _buildMostUsedWordsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Most Used Words :',
+          style: AppTextStyles.sectionTitle,
+        ),
+        SizedBox(height: 20.h),
+        SizedBox(
+          height: 80.h,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: _mostUsedWords.length,
+            separatorBuilder: (context, index) => SizedBox(width: 12.w),
+            itemBuilder: (context, index) {
+              return WordCard(
+                word: _mostUsedWords[index],
+                backgroundColor: AppColors.wordCardBackground,
+                onTap: () => _navigateToWordDetail(_mostUsedWords[index]),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionsGrid() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Sections :',
+          style: AppTextStyles.sectionTitle,
+        ),
+        SizedBox(height: 20.h),
+        _sections.isNotEmpty
+            ? GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 15.w,
+                  mainAxisSpacing: 15.h,
+                  childAspectRatio: 1.2,
+                ),
+                itemCount: _sections.length,
+                itemBuilder: (context, index) {
+                  return SectionCard(
+                    section: _sections[index],
+                    onTap: () => _navigateToSection(_sections[index]),
+                  );
+                },
+              )
+            : Center(
+                child: Text(
+                  'No sections available',
+                  style: TextStyle(
+                    fontFamily: 'DM Sans',
+                    fontSize: 16.sp,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+      ],
+    );
+  }
+
+  // Navigation methods
+  void _navigateToWordDetail(WordModel word) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => WordDetailPage(
-          wordId: word['id'],
-          word: word['word'] ?? 'Unknown',
-          description: word['description'] ?? '',
-          image: word['image_path'] ?? 'assets/images/signs/default.png',
-          categoryColor: Color(0xFFB1EEFF),
-          videoPath: word['video_path'],
+          wordId: word.id,
+          word: word.word,
+          description: word.description,
+          image: word.imagePath,
+          categoryColor: AppColors.wordCardBackground,
+          videoPath: word.videoPath,
         ),
       ),
     );
   }
 
-  // Navigate to section page
-  void _navigateToSection(Map<String, dynamic> section) {
+  void _navigateToSection(SectionModel section) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => SectionDetailPage(
-          sectionId: section['id'],
-          title: section['title'] ?? 'Unknown Section',
-          category: section['title'] ?? 'Unknown Section',
-          categoryColor: section['color'] ?? Color(0xFFE6DAFF),
+          sectionId: section.id,
+          title: section.title,
+          category: section.title,
+          categoryColor: section.color,
         ),
       ),
     );

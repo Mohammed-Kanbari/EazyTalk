@@ -1,7 +1,8 @@
 import 'package:device_preview/device_preview.dart';
+import 'package:eazytalk/Screens/main_screens/chatting.dart';
 import 'package:eazytalk/Screens/main_screens/learning_signs.dart';
 import 'package:eazytalk/Screens/main_screens/profile.dart';
-import 'package:eazytalk/Screens/secondary_screens/chatBot.dart';
+import 'package:eazytalk/Screens/secondary_screens/chatbot.dart';
 import 'package:eazytalk/Screens/secondary_screens/navigation.dart';
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/deaf_excursions.dart';
 import 'package:eazytalk/Screens/starting_screens/splash_screen.dart';
@@ -40,7 +41,7 @@ class EazyTalkApp extends StatelessWidget {
         builder: (context, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: SplashScreen(),
+          home: LearnSignsPage(),
         );
         });
    } );

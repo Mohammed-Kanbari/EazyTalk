@@ -1,6 +1,6 @@
 import 'package:eazytalk/Screens/main_screens/chatting.dart';
 import 'package:eazytalk/Screens/main_screens/learning_signs.dart';
-import 'package:eazytalk/Screens/main_screens/offline_tools.dart';
+import 'package:eazytalk/Screens/main_screens/smart_tools.dart';
 import 'package:eazytalk/Screens/main_screens/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

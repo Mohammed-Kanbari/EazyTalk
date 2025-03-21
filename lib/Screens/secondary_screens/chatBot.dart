@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
-
-class Message {
-  final String text;
-  final bool isUser;
-  final DateTime timestamp;
-
-  Message({
-    required this.text,
-    required this.isUser,
-    required this.timestamp,
-  });
-}
+import 'package:eazytalk/models/message_model.dart';
+import 'package:eazytalk/services/api/gemini_service.dart';
+import 'package:eazytalk/widgets/chat/message_bubble.dart';
+import 'package:eazytalk/widgets/chat/typing_indicator.dart';
+import 'package:eazytalk/widgets/chat/chat_input.dart';
+import 'package:eazytalk/widgets/common/secondary_header.dart';
+import 'package:eazytalk/core/theme/app_colors.dart';
+import 'package:eazytalk/core/theme/text_styles.dart';
 
 class Chatbot extends StatefulWidget {
   const Chatbot({super.key});
@@ -26,29 +20,43 @@ class _ChatbotState extends State<Chatbot> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<Message> _messages = [];
-  bool _isTyping = false;
-  bool _modelInitialized = false;
-  bool _canSendMessage = false;
+  final GeminiService _geminiService = GeminiService();
   
-  final String _apiKey = 'AIzaSyCd5WJ1RQArrz2mZ1P-voS6hIqNgglx8iI';
-  late GenerativeModel _model;
-  late ChatSession _chatSession;
+  bool _isTyping = false;
+  bool _canSendMessage = false;
   
   @override
   void initState() {
     super.initState();
-    _initializeModel();
-    
-    // Add listener to text controller to update send button state
+    _initializeChat();
     _messageController.addListener(_updateSendButtonState);
+  }
+  
+  Future<void> _initializeChat() async {
+    // Initialize the Gemini model
+    final initialized = await _geminiService.initializeModel();
     
-    _messages.add(
-      Message(
-        text: "Hello! I am your AI assistant.\nFeel free to ask me anything.",
-        isUser: false,
-        timestamp: DateTime.now(),
-      ),
-    );
+    // Add welcome message
+    setState(() {
+      _messages.add(
+        Message(
+          text: "Hello! I am your AI assistant.\nFeel free to ask me anything.",
+          isUser: false,
+          timestamp: DateTime.now(),
+        ),
+      );
+      
+      // If initialization failed, add error message
+      if (!initialized) {
+        _messages.add(
+          Message(
+            text: "Failed to initialize AI model. Please restart the app.",
+            isUser: false,
+            timestamp: DateTime.now(),
+          ),
+        );
+      }
+    });
   }
   
   void _updateSendButtonState() {
@@ -62,41 +70,6 @@ class _ChatbotState extends State<Chatbot> {
     }
   }
 
-  void _initializeModel() {
-    try {
-      _model = GenerativeModel(
-        model: 'gemini-1.5-pro',
-        apiKey: _apiKey,
-        generationConfig: GenerationConfig(
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1000,
-        ),
-      );
-      
-      _chatSession = _model.startChat(
-        history: [
-          Content.text("You are EazyChat AI, a helpful and friendly assistant."),
-        ],
-      );
-      
-      _modelInitialized = true;
-      print("Gemini model initialized successfully");
-    } catch (e) {
-      print("Error initializing Gemini model: $e");
-      setState(() {
-        _messages.add(
-          Message(
-            text: "Failed to initialize AI model: ${e.toString()}",
-            isUser: false,
-            timestamp: DateTime.now(),
-          ),
-        );
-      });
-    }
-  }
-
   @override
   void dispose() {
     _messageController.removeListener(_updateSendButtonState);
@@ -105,7 +78,6 @@ class _ChatbotState extends State<Chatbot> {
     super.dispose();
   }
 
-  // Add this method to clear chat
   void _clearChat() {
     showDialog(
       context: context,
@@ -139,89 +111,37 @@ class _ChatbotState extends State<Chatbot> {
     );
   }
 
-  Future<void> _sendMessageToGemini(String message) async {
-    if (!_modelInitialized) {
-      setState(() {
-        _messages.add(
-          Message(
-            text: "AI model is not initialized. Please restart the app or check logs for details.",
-            isUser: false,
-            timestamp: DateTime.now(),
-          ),
-        );
-      });
-      return;
-    }
-    
-    try {
-      setState(() {
-        _isTyping = true;
-      });
-      
-      final response = await _chatSession.sendMessage(
-        Content.text(message),
-      );
-      
-      final responseText = response.text;
-      
-      setState(() {
-        _messages.add(
-          Message(
-            text: responseText ?? "Sorry, I couldn't generate a response.",
-            isUser: false,
-            timestamp: DateTime.now(),
-          ),
-        );
-        _isTyping = false;
-      });
-      
-      _scrollToBottom();
-    } catch (e) {
-      print("Gemini API error: $e");
-      
-      String errorMsg = e.toString();
-      if (errorMsg.contains("API key")) {
-        errorMsg = "Invalid API key or API key not set up correctly.";
-      } else if (errorMsg.contains("network")) {
-        errorMsg = "Network error. Please check your internet connection.";
-      } else if (errorMsg.contains("quota")) {
-        errorMsg = "API quota exceeded. Please try again later.";
-      } else if (errorMsg.length > 100) {
-        errorMsg = "${errorMsg.substring(0, 100)}...";
-      }
-      
-      setState(() {
-        _messages.add(
-          Message(
-            text: "Sorry, there was an error: $errorMsg",
-            isUser: false,
-            timestamp: DateTime.now(),
-          ),
-        );
-        _isTyping = false;
-      });
-      _scrollToBottom();
-    }
-  }
-
-  void _sendMessage() {
+  Future<void> _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
     
-    final message = _messageController.text.trim();
+    final messageText = _messageController.text.trim();
+    
+    // Add user message to chat
     setState(() {
       _messages.add(
         Message(
-          text: message,
+          text: messageText,
           isUser: true,
           timestamp: DateTime.now(),
         ),
       );
       _messageController.clear();
       _canSendMessage = false;
+      _isTyping = true;
     });
     
     _scrollToBottom();
-    _sendMessageToGemini(message);
+    
+    // Get response from Gemini
+    final response = await _geminiService.sendMessage(messageText);
+    
+    // Add AI response to chat
+    setState(() {
+      _messages.add(response);
+      _isTyping = false;
+    });
+    
+    _scrollToBottom();
   }
 
   void _scrollToBottom() {
@@ -236,10 +156,6 @@ class _ChatbotState extends State<Chatbot> {
     });
   }
 
-  String _formatTime(DateTime time) {
-    return DateFormat('h:mm a').format(time).toLowerCase();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -251,198 +167,47 @@ class _ChatbotState extends State<Chatbot> {
           child: Column(
             children: [
               // Header
-              Padding(
-                padding: EdgeInsets.only(top: 27.h, left: 28.w, right: 28.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Image.asset(
-                        'assets/icons/back-arrow.png',
-                        width: 22.w,
-                        height: 22.h,
-                      ),
-                    ),
-                    Text(
-                      'EazyChat AI',
-                      style: TextStyle(
-                        fontFamily: 'Sora',
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: _clearChat, // Changed from _testAPI to _clearChat
-                      child: Image.asset(
-                        'assets/icons/message 1.png',
-                        width: 24.w,
-                        height: 24.h,
-                      ),
-                    ),
-                  ],
+              SecondaryHeader(
+                title: 'EazyChat AI',
+                onBackPressed: () => Navigator.pop(context),
+                actionWidget: GestureDetector(
+                  onTap: _clearChat,
+                  child: Image.asset(
+                    'assets/icons/message 1.png',
+                    width: 24.w,
+                    height: 24.h,
+                  ),
                 ),
               ),
               
               // AI Introduction Section
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 30.h),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'Your ',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'DM Sans',
-                                    fontSize: 16.sp,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: 'smart assistant',
-                                  style: TextStyle(
-                                    color: Color(0xFF00D0FF),
-                                    fontFamily: 'DM Sans',
-                                    fontSize: 16.sp,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: ' for effortless communication.',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'DM Sans',
-                                    fontSize: 16.sp,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 20.h),
-                          Text(
-                            'How may I help you today?',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'Sora',
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Image.asset('assets/icons/chatbot 1.png', width: 85.w, height: 85.h,)
-                  ],
-                ),
-              ),
+              _buildIntroSection(),
+              
               Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
               
               // Chat Messages
               Expanded(
                 child: Container(
-                  color: Color(0xFFF1F3F5),
+                  color: AppColors.backgroundGrey,
                   child: ListView.builder(
                     controller: _scrollController,
                     padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 16.h),
                     itemCount: _messages.length,
                     itemBuilder: (context, index) {
-                      final message = _messages[index];
-                      return _buildMessageBubble(message);
+                      return MessageBubble(message: _messages[index]);
                     },
                   ),
                 ),
               ),
               
               // Typing indicator
-              if (_isTyping)
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-                  alignment: Alignment.centerLeft,
-                  color: Colors.white,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 16.w,
-                        height: 16.h,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00D0FF)),
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        'AI is thinking...',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontFamily: 'DM Sans',
-                          fontSize: 12.sp,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              if (_isTyping) const TypingIndicator(),
               
               // Message input
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      spreadRadius: 1,
-                      blurRadius: 4,
-                      offset: Offset(0, -1),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _messageController,
-                        decoration: InputDecoration(
-                          hintText: 'Ask me anything...',
-                          hintStyle: TextStyle(
-                            color: Colors.grey,
-                            fontFamily: 'DM Sans',
-                            fontSize: 14.sp,
-                          ),
-                          border: InputBorder.none,
-                        ),
-                        style: TextStyle(
-                          fontFamily: 'DM Sans',
-                          fontSize: 16.sp,
-                        ),
-                        maxLines: 1,
-                        textInputAction: TextInputAction.send,
-                        onSubmitted: (_) => _canSendMessage ? _sendMessage() : null,
-                      ),
-                    ),
-                    Container(
-                      height: 38.h,
-                      width: 38.w,
-                      decoration: BoxDecoration(
-                        color: _canSendMessage 
-                            ? Color(0xFF00D0FF)
-                            : Colors.grey.shade300,
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        icon: Icon(Icons.send, color: Colors.white, size: 18.sp),
-                        onPressed: _canSendMessage ? _sendMessage : null,
-                      ),
-                    ),
-                  ],
-                ),
+              ChatInput(
+                controller: _messageController,
+                canSend: _canSendMessage,
+                onSend: _sendMessage,
               ),
             ],
           ),
@@ -451,58 +216,60 @@ class _ChatbotState extends State<Chatbot> {
     );
   }
 
-  Widget _buildMessageBubble(Message message) {
-    return Align(
-      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        constraints: BoxConstraints(
-          maxWidth: 0.75.sw,
-        ),
-        margin: EdgeInsets.only(
-          bottom: 12.h,
-          left: message.isUser ? 50.w : 0,
-          right: message.isUser ? 0 : 50.w,
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color: message.isUser ? Color(0xFF00D0FF) : Colors.white,
-          borderRadius: BorderRadius.circular(12.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              spreadRadius: 1,
-              blurRadius: 3,
-              offset: Offset(0, 1),
-            ),
-          ],
-        ),
-        child: IntrinsicWidth(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                message.text,
-                style: TextStyle(
-                  color: message.isUser ? Colors.white : Colors.black87,
-                  fontFamily: 'DM Sans',
-                  fontSize: 14.sp,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Text(
-                  _formatTime(message.timestamp),
-                  style: TextStyle(
-                    color: message.isUser ? Colors.white.withOpacity(0.8) : Colors.grey,
-                    fontFamily: 'DM Sans',
-                    fontSize: 10.sp,
+  Widget _buildIntroSection() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 30.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Your ',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontFamily: 'DM Sans',
+                          fontSize: 16.sp,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'smart assistant',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontFamily: 'DM Sans',
+                          fontSize: 16.sp,
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' for effortless communication.',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontFamily: 'DM Sans',
+                          fontSize: 16.sp,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: 20.h),
+                Text(
+                  'How may I help you today?',
+                  style: AppTextStyles.chatHeading,
+                ),
+              ],
+            ),
           ),
-        ),
+          Image.asset(
+            'assets/icons/chatbot 1.png',
+            width: 85.w,
+            height: 85.h,
+          )
+        ],
       ),
     );
   }
