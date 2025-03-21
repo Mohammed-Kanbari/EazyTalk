@@ -2,17 +2,18 @@ import 'package:eazytalk/Screens/secondary_screens/words&sections/words.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SectionDetailPage extends StatefulWidget {
   final int sectionId;
   final String title;
   final String category;
   final Color categoryColor;
-  
+
   const SectionDetailPage({
-    Key? key, 
+    Key? key,
     required this.sectionId,
-    required this.title, 
+    required this.title,
     required this.category,
     required this.categoryColor,
   }) : super(key: key);
@@ -23,29 +24,33 @@ class SectionDetailPage extends StatefulWidget {
 
 class _SectionDetailPageState extends State<SectionDetailPage> {
   final _supabase = Supabase.instance.client;
-  
+
   bool _isLoading = true;
   List<Map<String, dynamic>> words = [];
   String _errorMessage = '';
   String _searchQuery = '';
-  
+
   // Sorting and filtering options
   bool _showFavoritesOnly = false;
   String _sortOption = 'alphabetical'; // 'alphabetical', 'difficulty'
-  
+
+  // Store favorite word IDs
+  Set<int> favoriteWordIds = {};
+
   @override
   void initState() {
     super.initState();
     _loadWords();
+    _loadFavorites();
   }
-  
+
   // Load words from Supabase
   Future<void> _loadWords() async {
     setState(() {
       _isLoading = true;
       _errorMessage = '';
     });
-    
+
     try {
       // Fetch words for the current section
       final wordsResponse = await _supabase
@@ -53,7 +58,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
           .select()
           .eq('section_id', widget.sectionId)
           .order('word');
-      
+
       setState(() {
         words = wordsResponse;
         _isLoading = false;
@@ -66,30 +71,60 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
       });
     }
   }
-  
+
+  // Load user's favorites
+  Future<void> _loadFavorites() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        return;
+      }
+
+      final response = await _supabase
+          .from('UserFavorites')
+          .select('word_id')
+          .eq('user_id', user.uid);
+
+      setState(() {
+        favoriteWordIds =
+            response.map<int>((item) => item['word_id'] as int).toSet();
+      });
+    } catch (e) {
+      print('Error loading favorites: $e');
+    }
+  }
+
   // Filter and sort words based on user preferences
   List<Map<String, dynamic>> _getFilteredWords() {
     List<Map<String, dynamic>> filteredList = List.from(words);
-    
+
     // Apply search filter if query exists
     if (_searchQuery.isNotEmpty) {
       filteredList = filteredList.where((word) {
-        return word['word'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
-               (word['description'] != null && 
-                word['description'].toString().toLowerCase().contains(_searchQuery.toLowerCase()));
+        return word['word']
+                .toString()
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()) ||
+            (word['description'] != null &&
+                word['description']
+                    .toString()
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase()));
       }).toList();
     }
-    
+
     // Apply favorites filter if enabled
     if (_showFavoritesOnly) {
-      // In a real app, you'd have a 'favorites' field in your database
-      // For now, this is just a placeholder implementation
-      filteredList = filteredList.where((word) => word['is_favorite'] == true).toList();
+      filteredList = filteredList
+          .where((word) => favoriteWordIds.contains(word['id']))
+          .toList();
     }
-    
+
     // Apply sorting
     if (_sortOption == 'alphabetical') {
-      filteredList.sort((a, b) => a['word'].toString().compareTo(b['word'].toString()));
+      filteredList
+          .sort((a, b) => a['word'].toString().compareTo(b['word'].toString()));
     } else if (_sortOption == 'difficulty') {
       // Sort by difficulty level (assuming levels like 'beginner', 'intermediate', 'advanced')
       filteredList.sort((a, b) {
@@ -99,224 +134,260 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
           'intermediate': 1,
           'advanced': 2,
         };
-        
+
         final diffA = a['difficulty_level'] ?? 'beginner';
         final diffB = b['difficulty_level'] ?? 'beginner';
-        
-        return (difficultyOrder[diffA] ?? 0).compareTo(difficultyOrder[diffB] ?? 0);
+
+        return (difficultyOrder[diffA] ?? 0)
+            .compareTo(difficultyOrder[diffB] ?? 0);
       });
     }
-    
+
     return filteredList;
   }
 
   @override
   Widget build(BuildContext context) {
     final filteredWords = _getFilteredWords();
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Custom app bar
-            Padding(
-              padding: EdgeInsets.only(top: 27.h, left: 28.w, right: 28.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Image.asset(
-                      'assets/icons/back-arrow.png',
-                      width: 22.w,
-                      height: 22.h,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.arrow_back_ios,
+        child: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Custom app bar
+              Padding(
+                padding: EdgeInsets.only(top: 27.h, left: 28.w, right: 28.w),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Image.asset(
+                        'assets/icons/back-arrow.png',
+                        width: 22.w,
+                        height: 22.h,
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.black,
+                          size: 20.sp,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      'Words',
+                      style: TextStyle(
+                        fontFamily: 'Sora',
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        // Show options menu
+                        _showOptionsMenu();
+                      },
+                      child: Icon(
+                        Icons.more_vert,
                         color: Colors.black,
-                        size: 20.sp,
+                        size: 24.sp,
                       ),
                     ),
-                  ),
-                  Text(
-                    'Words',
-                    style: TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      // Show options menu
-                      _showOptionsMenu();
-                    },
-                    child: Icon(
-                      Icons.more_vert,
-                      color: Colors.black,
-                      size: 24.sp,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            
-            // Loading indicator or error message
-            if (_isLoading)
-              Expanded(
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFF00D0FF),
+
+              // Loading indicator or error message
+              if (_isLoading)
+                Expanded(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFF00D0FF),
+                    ),
                   ),
-                ),
-              )
-            else if (_errorMessage.isNotEmpty)
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                        size: 60.sp,
-                      ),
-                      SizedBox(height: 20.h),
-                      Text(
-                        _errorMessage,
-                        style: TextStyle(
-                          fontFamily: 'DM Sans',
-                          fontSize: 16.sp,
+                )
+              else if (_errorMessage.isNotEmpty)
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
                           color: Colors.red,
+                          size: 60.sp,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 30.h),
-                      ElevatedButton(
-                        onPressed: _loadWords,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF00D0FF),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 20.w,
-                            vertical: 10.h,
-                          ),
-                        ),
-                        child: Text(
-                          'Try Again',
+                        SizedBox(height: 20.h),
+                        Text(
+                          _errorMessage,
                           style: TextStyle(
-                            fontFamily: 'Sora',
+                            fontFamily: 'DM Sans',
                             fontSize: 16.sp,
-                            color: Colors.white,
+                            color: Colors.red,
                           ),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              // Expanded section with content
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: _loadWords,
-                  color: Color(0xFF00D0FF),
-                  child: ListView(
-                    padding: EdgeInsets.symmetric(horizontal: 28.w),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      // Search bar
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20.h),
-                        child: TextField(
-                          onChanged: (value) {
-                            setState(() {
-                              _searchQuery = value;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'Search words...',
-                            prefixIcon: Icon(Icons.search, color: Colors.grey),
-                            filled: true,
-                            fillColor: Color(0xFFF1F3F5),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
+                        SizedBox(height: 30.h),
+                        ElevatedButton(
+                          onPressed: _loadWords,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF00D0FF),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 20.w,
                               vertical: 10.h,
-                              horizontal: 15.w,
                             ),
                           ),
-                        ),
-                      ),
-                      
-                      // Category title with colored word
-                      Padding(
-                        padding: EdgeInsets.only(bottom: 30.h),
-                        child: RichText(
-                          text: TextSpan(
+                          child: Text(
+                            'Try Again',
                             style: TextStyle(
                               fontFamily: 'Sora',
-                              fontSize: 20.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
+                              fontSize: 16.sp,
+                              color: Colors.white,
                             ),
-                            children: [
-                              TextSpan(text: 'Common '),
-                              TextSpan(
-                                text: widget.title,
-                                style: TextStyle(
-                                  color: widget.categoryColor,
-                                ),
-                              ),
-                              TextSpan(text: ' In Sign Language'),
-                            ],
                           ),
                         ),
-                      ),
-
-                      // Words list or empty state
-                      filteredWords.isNotEmpty
-                          ? Column(
-                              children: filteredWords
-                                  .map((word) => _buildWordCard(word))
-                                  .toList(),
-                            )
-                          : Center(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 50.h),
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      Icons.search_off,
-                                      size: 60.sp,
-                                      color: Colors.grey,
-                                    ),
-                                    SizedBox(height: 20.h),
-                                    Text(
-                                      _searchQuery.isNotEmpty
-                                          ? 'No words matching "$_searchQuery"'
-                                          : 'No words available in this section',
-                                      style: TextStyle(
-                                        fontFamily: 'DM Sans',
-                                        fontSize: 16.sp,
-                                        color: Colors.grey,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
+                      ],
+                    ),
+                  ),
+                )
+              else
+                // Expanded section with content
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await _loadWords();
+                      await _loadFavorites();
+                    },
+                    color: Color(0xFF00D0FF),
+                    child: ListView(
+                      padding: EdgeInsets.symmetric(horizontal: 28.w),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        // Search bar
+                        // Search bar
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20.h),
+                          child: TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              hintText: 'Search words...',
+                              hintStyle: TextStyle(
+                                fontSize: 14.sp,
+                                fontFamily: 'DM Sans',
+                                fontWeight: FontWeight.w400,
+                                color: const Color(0xFFC7C7C7),
+                              ),
+                              prefixIcon: Icon(
+                                Icons.search,
+                                color: const Color(0xFF00D0FF),
+                                size: 20.sp,
+                              ),
+                              filled: true,
+                              fillColor: const Color(0xFFF1F3F5),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                                borderSide: BorderSide(
+                                  color: const Color(0xFF00D0FF),
+                                  width: 1.0,
                                 ),
                               ),
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 14.h,
+                                horizontal: 16.w,
+                              ),
                             ),
-                      
-                      // Bottom spacing
-                      SizedBox(height: 20.h),
-                    ],
+                            style: TextStyle(
+                              fontFamily: 'DM Sans',
+                              fontSize: 14.sp,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+
+                        // Category title with colored word
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 30.h),
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
+                              children: [
+                                TextSpan(text: 'Common '),
+                                TextSpan(
+                                  text: widget.title,
+                                  style: TextStyle(
+                                    color: widget.categoryColor,
+                                  ),
+                                ),
+                                TextSpan(text: ' In Sign Language'),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Words list or empty state
+                        filteredWords.isNotEmpty
+                            ? Column(
+                                children: filteredWords
+                                    .map((word) => _buildWordCard(word))
+                                    .toList(),
+                              )
+                            : Center(
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 50.h),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        _showFavoritesOnly
+                                            ? Icons.favorite_border
+                                            : Icons.search_off,
+                                        size: 60.sp,
+                                        color: Colors.grey,
+                                      ),
+                                      SizedBox(height: 20.h),
+                                      Text(
+                                        _showFavoritesOnly
+                                            ? 'No favorites found'
+                                            : (_searchQuery.isNotEmpty
+                                                ? 'No words matching "$_searchQuery"'
+                                                : 'No words available in this section'),
+                                        style: TextStyle(
+                                          fontFamily: 'DM Sans',
+                                          fontSize: 16.sp,
+                                          color: Colors.grey,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                        // Bottom spacing
+                        SizedBox(height: 20.h),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -477,7 +548,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
             ),
             // Show favorites only
             _buildOptionItem(
-              icon: Icons.star_border,
+              icon: Icons.favorite_border,
               title: 'Show favorites only',
               isSelected: _showFavoritesOnly,
               onTap: () {
@@ -545,6 +616,9 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
           videoPath: word['video_path'],
         ),
       ),
-    );
+    ).then((_) {
+      // Refresh favorites when coming back from word detail page
+      _loadFavorites();
+    });
   }
 }

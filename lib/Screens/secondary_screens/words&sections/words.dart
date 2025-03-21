@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -27,12 +28,13 @@ class WordDetailPage extends StatefulWidget {
 
 class _WordDetailPageState extends State<WordDetailPage> {
   final _supabase = Supabase.instance.client;
-  
+
   bool _isLoading = true;
   bool isFavorite = false;
   int _selectedTabIndex = 0;
   String _errorMessage = '';
-  
+  String translation = '';
+
   // Video player
   VideoPlayerController? _videoController;
   bool _isVideoInitialized = false;
@@ -83,28 +85,28 @@ class _WordDetailPageState extends State<WordDetailPage> {
           .order('step_number');
 
       // Fetch tips for this word
-      final tipsResponse = await _supabase
-          .from('Tips')
-          .select()
-          .eq('word_id', widget.wordId);
+      final tipsResponse =
+          await _supabase.from('Tips').select().eq('word_id', widget.wordId);
 
-      // Fetch additional word details
+      // Fetch additional word details - add 'translation' to the select query
       final wordDetailsResponse = await _supabase
           .from('Words')
-          .select('difficulty_level, is_common_phrase')
+          .select('difficulty_level, is_common_phrase, translation')
           .eq('id', widget.wordId)
           .single();
 
       setState(() {
         instructions = instructionsResponse;
         tips = tipsResponse;
-        
-        // Set difficulty level and commonality
+
+        // Set difficulty level, commonality, and translation
         if (wordDetailsResponse != null) {
-          difficultyLevel = wordDetailsResponse['difficulty_level'] ?? 'beginner';
+          difficultyLevel =
+              wordDetailsResponse['difficulty_level'] ?? 'beginner';
           isCommonPhrase = wordDetailsResponse['is_common_phrase'] ?? false;
+          translation = wordDetailsResponse['translation'] ?? '';
         }
-        
+
         _isLoading = false;
       });
     } catch (e) {
@@ -116,75 +118,77 @@ class _WordDetailPageState extends State<WordDetailPage> {
     }
   }
 
-  // Check if word is favorited
-// Fix for the user ID null check in _checkIfFavorite() method
-Future<void> _checkIfFavorite() async {
-  try {
-    final userId = _supabase.auth.currentUser?.id;
-    
-    // If user is not logged in, we can't check favorites
-    if (userId == null) {
-      return;
-    }
-    
-    // Now that we've checked userId is not null, we can safely use it
-    final response = await _supabase
-        .from('UserFavorites')
-        .select()
-        .eq('user_id', userId) // userId is guaranteed non-null here
-        .eq('word_id', widget.wordId);
+// Check if word is favorited
+  DateTime? favoritedAt;
 
-    setState(() {
-      isFavorite = response.isNotEmpty;
-    });
-  } catch (e) {
-    print('Error checking favorites: $e');
-  }
-}
+// Then modify _checkIfFavorite to also fetch the timestamp
+  Future<void> _checkIfFavorite() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
 
-// Similarly, fix the _toggleFavorite() method
-Future<void> _toggleFavorite() async {
-  try {
-    final userId = _supabase.auth.currentUser?.id;
-    
-    if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('You need to be signed in to save favorites')),
-      );
-      return;
-    }
+      if (user == null) {
+        return;
+      }
 
-    setState(() {
-      isFavorite = !isFavorite;
-    });
-
-    if (isFavorite) {
-      // Add to favorites
-      await _supabase.from('UserFavorites').insert({
-        'user_id': userId, // userId is guaranteed non-null here
-        'word_id': widget.wordId,
-        'created_at': DateTime.now().toIso8601String(),
-      });
-    } else {
-      // Remove from favorites
-      await _supabase
+      final response = await _supabase
           .from('UserFavorites')
-          .delete()
-          .eq('user_id', userId) // userId is guaranteed non-null here
+          .select('created_at')
+          .eq('user_id', user.uid)
           .eq('word_id', widget.wordId);
-    }
-  } catch (e) {
-    print('Error toggling favorite: $e');
-    // Revert state if operation failed
-    setState(() {
-      isFavorite = !isFavorite;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to update favorites')),
-    );
-  }
-}
 
+      setState(() {
+        isFavorite = response.isNotEmpty;
+        if (response.isNotEmpty && response[0]['created_at'] != null) {
+          favoritedAt = DateTime.parse(response[0]['created_at']);
+        }
+      });
+    } catch (e) {
+      print('Error checking favorites: $e');
+    }
+  }
+
+// Toggle favorite status
+  Future<void> _toggleFavorite() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('You need to be signed in to save favorites')),
+        );
+        return;
+      }
+
+      setState(() {
+        isFavorite = !isFavorite;
+      });
+
+      if (isFavorite) {
+        // Add to favorites
+        await _supabase.from('UserFavorites').insert({
+          'user_id': user.uid,
+          'word_id': widget.wordId,
+          'created_at': DateTime.now().toIso8601String(),
+        });
+      } else {
+        // Remove from favorites
+        await _supabase
+            .from('UserFavorites')
+            .delete()
+            .eq('user_id', user.uid)
+            .eq('word_id', widget.wordId);
+      }
+    } catch (e) {
+      print('Error toggling favorite: $e');
+      // Revert state if operation failed
+      setState(() {
+        isFavorite = !isFavorite;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update favorites')),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -309,7 +313,7 @@ Future<void> _toggleFavorite() async {
                             horizontal: 28.w, vertical: 60.h),
                         child: Container(
                           width: double.infinity,
-                          height: 200.h,
+                          height: 240.h,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16.r),
@@ -330,61 +334,65 @@ Future<void> _toggleFavorite() async {
                                 // Show video player if initialized, otherwise show image
                                 _isVideoInitialized && _videoController != null
                                     ? VideoPlayer(_videoController!)
-                                    : Image.asset(
-                                        widget.image,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) =>
-                                            Center(
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Icon(
-                                                Icons.videocam,
-                                                size: 50.sp,
-                                                color: Colors.grey[400],
+                                    : Center(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.videocam,
+                                              size: 60.sp,
+                                              color: Colors.grey[400],
+                                            ),
+                                            SizedBox(height: 12.h),
+                                            Text(
+                                              'Video coming soon',
+                                              style: TextStyle(
+                                                fontFamily: 'DM Sans',
+                                                fontSize: 16.sp,
+                                                color: Colors.grey[500],
+                                                fontWeight: FontWeight.w500,
                                               ),
-                                              SizedBox(height: 8.h),
-                                              Text(
-                                                'Video demonstration',
-                                                style: TextStyle(
-                                                  fontFamily: 'DM Sans',
-                                                  fontSize: 14.sp,
-                                                  color: Colors.grey[500],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                // Play button overlay
+                                // Play/Pause button overlay
                                 Center(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      if (_videoController != null && _isVideoInitialized) {
-                                        setState(() {
-                                          _videoController!.value.isPlaying
-                                              ? _videoController!.pause()
-                                              : _videoController!.play();
-                                        });
-                                      }
-                                    },
-                                    child: Container(
-                                      width: 60.h,
-                                      height: 60.h,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.8),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        _videoController != null && _isVideoInitialized && _videoController!.value.isPlaying
-                                            ? Icons.pause
-                                            : Icons.play_arrow,
-                                        color: Color(0xFF00D0FF),
-                                        size: 40.sp,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                  child: _videoController != null &&
+                                          _isVideoInitialized
+                                      ? GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              if (_videoController!
+                                                  .value.isPlaying) {
+                                                _videoController!.pause();
+                                              } else {
+                                                _videoController!.play();
+                                              }
+                                            });
+                                          },
+                                          child: _videoController!
+                                                  .value.isPlaying
+                                              ? SizedBox
+                                                  .shrink() // No visible button when playing
+                                              : Container(
+                                                  width: 60.h,
+                                                  height: 60.h,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white
+                                                        .withOpacity(0.8),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.play_arrow,
+                                                    color: Color(0xFF00D0FF),
+                                                    size: 40.sp,
+                                                  ),
+                                                ),
+                                        )
+                                      : SizedBox.shrink(),
+                                )
                               ],
                             ),
                           ),
@@ -426,14 +434,36 @@ Future<void> _toggleFavorite() async {
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(height: 20.h), // More spacing
+
+                              // Translation text (if available)
+                              if (translation.isNotEmpty)
+                                Padding(
+                                  padding:
+                                      EdgeInsets.only(top: 6.h, bottom: 12.h),
+                                  child: Text(
+                                    translation,
+                                    style: TextStyle(
+                                      fontFamily: 'DM Sans',
+                                      fontSize: 16.sp, // Smaller text size
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.grey[600],
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+
+                              SizedBox(
+                                  height: translation.isNotEmpty
+                                      ? 8.h
+                                      : 20.h), // Adjusted spacing
 
                               // Tags row
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   _buildTag(
-                                    _getDifficultyText(difficultyLevel), 
+                                    _getDifficultyText(difficultyLevel),
                                     _getDifficultyColor(difficultyLevel),
                                   ),
                                   SizedBox(width: 16.w), // Spacing between tags
