@@ -60,6 +60,7 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
         TextFormField(
           controller: widget.controller,
           obscureText: _obscureText,
+          autocorrect: false,
           style: TextStyle(fontSize: 16.sp, fontFamily: 'DM Sans'),
           decoration: InputDecoration(
             contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),

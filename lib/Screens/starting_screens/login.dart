@@ -1,5 +1,6 @@
 import 'package:eazytalk/Screens/secondary_screens/navigation.dart';
 import 'package:eazytalk/Screens/starting_screens/signup.dart';
+import 'package:eazytalk/widgets/buttons/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -261,32 +262,10 @@ class _LoginState extends State<Login> {
                         ),
                       ),
                       SizedBox(height: 100.h),
-                      Container(
-                        height: 50.h,
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: const Color(0xFF00D0FF),
-                        ),
-                        child: MaterialButton(
-                          onPressed: _isLoading ? null : _validateAndLogin, // Fixed callback
-                          minWidth: double.infinity,
-                          splashColor: const Color.fromARGB(83, 255, 255, 255),
-                          child: _isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : Text(
-                                  'Sign In',
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    fontFamily: 'Sora',
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                        ),
+                      PrimaryButton(
+                        text: 'Sign In',
+                        isLoading: _isLoading,
+                        onPressed: _validateAndLogin,
                       ),
                       SizedBox(height: 26.h),
                       Row(

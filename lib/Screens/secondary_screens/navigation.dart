@@ -2,9 +2,9 @@ import 'package:eazytalk/Screens/main_screens/chatting.dart';
 import 'package:eazytalk/Screens/main_screens/learning_signs.dart';
 import 'package:eazytalk/Screens/main_screens/smart_tools.dart';
 import 'package:eazytalk/Screens/main_screens/profile.dart';
+import 'package:eazytalk/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 
 class Navigation extends StatefulWidget {
   const Navigation({super.key});
@@ -13,48 +13,91 @@ class Navigation extends StatefulWidget {
   State<Navigation> createState() => _NavigationState();
 }
 
-class _NavigationState extends State<Navigation> {
+class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   int _selectedIndex = 0; // Default to "Connect" (Chatting page)
-
-  final List<Widget> _pages = [
-    const Chatting(),
-    const LearnSignsPage(),
-    const SmartToolsScreen(),
-    const Profile(),
+  
+  // Animation controllers for each tab
+  late List<AnimationController> _animationControllers;
+  late List<Animation<double>> _animations;
+  
+  // Using const constructors for better performance
+  static const List<Widget> _pages = [
+    Chatting(),
+    LearnSignsPage(),
+    SmartToolsScreen(),
+    Profile(),
   ];
 
-  // Define icon paths for selected and unselected states
-  final List<Map<String, String>> _iconPaths = [
-    {
-      'selected': 'assets/icons/chat_selected.png',
-      'unselected': 'assets/icons/chat_unselected.png',
-    },
-    {
-      'selected': 'assets/icons/sign_selected.png',
-      'unselected': 'assets/icons/sign_unselected.png',
-    },
-    {
-      'selected': 'assets/icons/tools_selected.png',
-      'unselected': 'assets/icons/tools_unselected.png',
-    },
-    {
-      'selected': 'assets/icons/profile_selected.png',
-      'unselected': 'assets/icons/profile_unselected.png',
-    },
+  // Define navigation items as constants for better organization
+  static const List<_NavigationItem> _navigationItems = [
+    _NavigationItem(
+      label: "Connect",
+      selectedIconPath: 'assets/icons/chat_selected.png',
+      unselectedIconPath: 'assets/icons/chat_unselected.png',
+    ),
+    _NavigationItem(
+      label: "Learn Signs",
+      selectedIconPath: 'assets/icons/sign_selected.png',
+      unselectedIconPath: 'assets/icons/sign_unselected.png',
+    ),
+    _NavigationItem(
+      label: "Smart Tools",
+      selectedIconPath: 'assets/icons/tools_selected.png',
+      unselectedIconPath: 'assets/icons/tools_unselected.png',
+    ),
+    _NavigationItem(
+      label: "Profile",
+      selectedIconPath: 'assets/icons/profile_selected.png',
+      unselectedIconPath: 'assets/icons/profile_unselected.png',
+    ),
   ];
+  
+  @override
+  void initState() {
+    super.initState();
+    
+    // Initialize animation controllers for each tab
+    _animationControllers = List.generate(
+      _navigationItems.length,
+      (index) => AnimationController(
+        duration: const Duration(milliseconds: 400),
+        vsync: this,
+      ),
+    );
+    
+    // Initialize animations
+    _animations = _animationControllers.map((controller) => 
+      Tween<double>(begin: 1.0, end: 1.2).animate(
+        CurvedAnimation(
+          parent: controller,
+          curve: Curves.elasticOut,
+        ),
+      )
+    ).toList();
+    
+    // Start the animation for the initial selected tab
+    _animationControllers[_selectedIndex].forward();
+  }
+  
+  @override
+  void dispose() {
+    // Dispose all animation controllers
+    for (final controller in _animationControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: Colors.white,
       body: SafeArea(
-        /* or use if you need to preserve the state of pages (e.g., form inputs, scroll positions).
+        // Using IndexedStack to preserve the state of pages
         child: IndexedStack(
           index: _selectedIndex,
           children: _pages,
         ),
-        */
-        child: _pages[_selectedIndex], //if state preservation isn’t necessary or if you want a fresh instance of the page each time - when memory efficiency is a priority         
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -69,8 +112,8 @@ class _NavigationState extends State<Navigation> {
         ),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-          selectedItemColor: const Color(0xFF00D0FF),
+          backgroundColor: Colors.white,
+          selectedItemColor: AppColors.primary,
           unselectedItemColor: Colors.black.withOpacity(0.62),
           selectedLabelStyle: TextStyle(
             fontSize: 14.sp,
@@ -84,35 +127,65 @@ class _NavigationState extends State<Navigation> {
           ),
           showUnselectedLabels: true,
           currentIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          items: [
-            _buildNavItem(0, "Connect"),
-            _buildNavItem(1, "Learn Signs"),
-            _buildNavItem(2, "Smart Tools"),
-            _buildNavItem(3, "Profile"),
-          ],
+          elevation: 0, // Remove default elevation to use custom shadow
+          onTap: _onItemTapped,
+          items: _navigationItems
+              .asMap()
+              .entries
+              .map((entry) => _buildNavItem(entry.key, entry.value))
+              .toList(),
         ),
       ),
     );
+  }
+  
+  void _onItemTapped(int index) {
+    if (_selectedIndex == index) return;
+    
+    setState(() {
+      // Reset previous animation
+      _animationControllers[_selectedIndex].reset();
+      
+      // Update selected index
+      _selectedIndex = index;
+      
+      // Start new animation
+      _animationControllers[_selectedIndex].forward();
+    });
   }
 
-  BottomNavigationBarItem _buildNavItem(int index, String label) {
+  BottomNavigationBarItem _buildNavItem(int index, _NavigationItem item) {
     return BottomNavigationBarItem(
-      icon: Padding(
-        padding: const EdgeInsets.only(top: 5.0),
-        child: Image.asset(
-          _selectedIndex == index
-              ? _iconPaths[index]['selected']!
-              : _iconPaths[index]['unselected']!,
-          width: 32.w,
-          height: 32.h,
-        ),
+      icon: AnimatedBuilder(
+        animation: _animations[index],
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _selectedIndex == index ? _animations[index].value : 1.0,
+            child: Padding(
+              padding: EdgeInsets.only(top: 5.h),
+              child: Image.asset(
+                _selectedIndex == index ? item.selectedIconPath : item.unselectedIconPath,
+                width: 32.w,
+                height: 32.h,
+              ),
+            ),
+          );
+        },
       ),
-      label: label,
+      label: item.label,
     );
   }
+}
+
+// Helper class to store navigation item data
+class _NavigationItem {
+  final String label;
+  final String selectedIconPath;
+  final String unselectedIconPath;
+
+  const _NavigationItem({
+    required this.label,
+    required this.selectedIconPath,
+    required this.unselectedIconPath,
+  });
 }

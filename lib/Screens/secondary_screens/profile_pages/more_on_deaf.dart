@@ -68,7 +68,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
 
             // Educational Resources Section
             _buildEducationalResourcesSection(),
-            
+
             SizedBox(height: 20.h), // Bottom padding
           ],
         ),
@@ -159,23 +159,30 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
         // Emirati Sign Language (ESL)
         InfoCard(
           title: 'Emirati Sign Language (ESL)',
-          content: 'Emirati Sign Language (ESL) is the main communication method for the deaf community in the UAE, with unique signs and cultural significance. The UAE government promotes its use in education, public services, and workplaces to increase inclusivity and awareness.',
-          url: 'https://zho.gov.ae/en/Sign-Language-Dictionary/UAE-Sign-Language-Categories',
-          onUrlTap: () => _launchUrl('https://zho.gov.ae/en/Sign-Language-Dictionary/UAE-Sign-Language-Categories'),
+          content:
+              'Emirati Sign Language (ESL) is the main communication method for the deaf community in the UAE, with unique signs and cultural significance. The UAE government promotes its use in education, public services, and workplaces to increase inclusivity and awareness.',
+          url:
+              'https://zho.gov.ae/en/Sign-Language-Dictionary/UAE-Sign-Language-Categories',
+          onUrlTap: () => _launchUrl(
+              'https://zho.gov.ae/en/Sign-Language-Dictionary/UAE-Sign-Language-Categories'),
         ),
 
         // What Are Their Needs?
         InfoCard(
           title: 'What Are Their Needs?',
-          content: 'The deaf community faces challenges in employment, healthcare, and social inclusion, requiring specialized services, job opportunities, and accessible technologies. There is a need for more awareness programs, and assistive devices to support their integration into society.',
+          content:
+              'The deaf community faces challenges in employment, healthcare, and social inclusion, requiring specialized services, job opportunities, and accessible technologies. There is a need for more awareness programs, and assistive devices to support their integration into society.',
         ),
 
         // UAE Government Support
         InfoCard(
           title: 'UAE Government Support for the Deaf Community',
-          content: 'The UAE government offers a range of services to the deaf community, including legal protections, inclusive education, and vocational training. It provides specialized healthcare, assistive technologies, and social services to ensure accessibility and integration. Public awareness and advocacy work to promote equality and reduce stigma for the deaf.',
-          url: 'https://u.ae/en/information-and-services/social-affairs/people-of-determination/protection-support-and-assistance-of-people-of-determination',
-          onUrlTap: () => _launchUrl('https://u.ae/en/information-and-services/social-affairs/people-of-determination/protection-support-and-assistance-of-people-of-determination'),
+          content:
+              'The UAE government offers a range of services to the deaf community, including legal protections, inclusive education, and vocational training. It provides specialized healthcare, assistive technologies, and social services to ensure accessibility and integration. Public awareness and advocacy work to promote equality and reduce stigma for the deaf.',
+          url:
+              'https://u.ae/en/information-and-services/social-affairs/people-of-determination/protection-support-and-assistance-of-people-of-determination',
+          onUrlTap: () => _launchUrl(
+              'https://u.ae/en/information-and-services/social-affairs/people-of-determination/protection-support-and-assistance-of-people-of-determination'),
         ),
       ],
     );
@@ -198,12 +205,14 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
           ),
         ),
         SizedBox(height: 15.h),
-        
+
         // Educational resource cards
         EducationalResourceCard(
-          institutionName: "Zayed Higher Organization for People of Determination",
+          institutionName:
+              "Zayed Higher Organization for People of Determination",
           type: "Specialized Education Center",
-          description: "Provides comprehensive educational programs tailored for deaf students with focus on bilingual education using Emirati Sign Language and Arabic.",
+          description:
+              "Provides comprehensive educational programs tailored for deaf students with focus on bilingual education using Emirati Sign Language and Arabic.",
           location: "Abu Dhabi",
           url: "https://zho.gov.ae",
           onUrlTap: () => _launchUrl("https://zho.gov.ae"),
@@ -212,7 +221,8 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
         EducationalResourceCard(
           institutionName: "Sharjah City for Humanitarian Services",
           type: "Inclusive Education Provider",
-          description: "Offers specialized courses for deaf students of all ages, including vocational training and integration programs with sign language support.",
+          description:
+              "Offers specialized courses for deaf students of all ages, including vocational training and integration programs with sign language support.",
           location: "Sharjah",
           url: "https://www.schs.ae",
           onUrlTap: () => _launchUrl("https://www.schs.ae"),
@@ -221,7 +231,8 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
         EducationalResourceCard(
           institutionName: "Al Amal School for the Deaf",
           type: "K-12 Education",
-          description: "One of the oldest specialized schools for deaf students in the UAE, offering academic curriculum delivered in sign language from kindergarten through high school.",
+          description:
+              "One of the oldest specialized schools for deaf students in the UAE, offering academic curriculum delivered in sign language from kindergarten through high school.",
           location: "Sharjah",
           url: "https://www.schs.ae",
           onUrlTap: () => _launchUrl("https://www.schs.ae"),
@@ -230,7 +241,8 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
         EducationalResourceCard(
           institutionName: "Emirates Association of the Deaf",
           type: "Training & Development",
-          description: "Provides sign language courses, interpreter training, and regular workshops to support education and employment for the deaf community.",
+          description:
+              "Provides sign language courses, interpreter training, and regular workshops to support education and employment for the deaf community.",
           location: "Multiple branches across UAE",
         ),
       ],
@@ -239,10 +251,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
 
   // Helper method to launch URLs using the URL launcher service
   Future<void> _launchUrl(String url) async {
-    await _urlLauncherService.launchUrlWithErrorHandling(
-      context, 
-      url,
-      errorMessage: 'Could not open website'
-    );
+    await UrlLauncherService.launchUrlWithErrorHandling(context, url,
+        errorMessage: 'Could not launch website');
   }
 }
