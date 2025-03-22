@@ -54,14 +54,36 @@ static TextStyle introText = TextStyle(
 
 static TextStyle buttonText = TextStyle(
   fontFamily: 'Sora',
-  fontSize: 16.sp,
+  fontSize: 14.sp,
   color: Colors.white,
+  fontWeight: FontWeight.w600,
 );
 
 static TextStyle emptyStateText = TextStyle(
   fontFamily: 'DM Sans',
   fontSize: 16.sp,
   color: Colors.grey,
+);
+
+static TextStyle featureTitle = TextStyle(
+  fontFamily: 'DM Sans',
+  fontSize: 18.sp,
+  fontWeight: FontWeight.w600,
+  color: AppColors.textPrimary,
+);
+
+static TextStyle featureDescription = TextStyle(
+  fontFamily: 'DM Sans',
+  fontSize: 10.sp,
+  fontWeight: FontWeight.w400,
+  color: AppColors.textPrimary,
+);
+
+static TextStyle smallButtonText = TextStyle(
+  fontSize: 8.sp,
+  fontFamily: 'Sora',
+  fontWeight: FontWeight.w600,
+  color: Colors.white,
 );
 
 }

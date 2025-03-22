@@ -2,9 +2,11 @@ import 'package:device_preview/device_preview.dart';
 import 'package:eazytalk/Screens/main_screens/chatting.dart';
 import 'package:eazytalk/Screens/main_screens/learning_signs.dart';
 import 'package:eazytalk/Screens/main_screens/profile.dart';
+import 'package:eazytalk/Screens/main_screens/smart_tools.dart';
 import 'package:eazytalk/Screens/secondary_screens/chatbot.dart';
 import 'package:eazytalk/Screens/secondary_screens/navigation.dart';
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/deaf_excursions.dart';
+import 'package:eazytalk/Screens/secondary_screens/speech-to-text.dart';
 import 'package:eazytalk/Screens/starting_screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +43,7 @@ class EazyTalkApp extends StatelessWidget {
         builder: (context, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: LearnSignsPage(),
+          home: SplashScreen(),
         );
         });
    } );

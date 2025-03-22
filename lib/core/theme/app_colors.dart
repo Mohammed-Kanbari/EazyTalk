@@ -18,4 +18,11 @@ class AppColors {
 
   static const Color wordCardBackground = Color(0xFFB1EEFF);
   static const Color defaultSectionColor = Color(0xFFE6DAFF);
+
+  static const Color dividerColor = Color(0xFFE8E8E8);
+  static const Color placeholderText = Color(0xFF9E9E9E);
+  static const Color menuTextColor = Color(0xFF333333);
+  static const Color userEmailColor = Color(0xFF706E71);
+  static const Color instructionBackground = Color(0xFFE8F8FC);
+  static const Color instructionBorder = Color(0xFFCCEEF5);
 }

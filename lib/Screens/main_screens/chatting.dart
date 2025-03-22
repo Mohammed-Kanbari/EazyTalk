@@ -23,18 +23,18 @@ class _ChattingState extends State<Chatting> {
           onTap: () {
             FocusScope.of(context).unfocus();
           },
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 28.w),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Screen title
-                const ScreenHeader(title: 'EazyTalk'),
-                SizedBox(height: 30.h),
-
-                // Search and add bar
-                Row(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Screen title
+              const ScreenHeader(title: 'EazyTalk'),
+              SizedBox(height: 30.h),
+          
+              // Search and add bar
+              Padding(
+                padding:  EdgeInsets.symmetric(horizontal: 28.w),
+                child: Row(
                   children: [
                     Flexible(
                       child: CustomSearchBar(
@@ -64,9 +64,9 @@ class _ChattingState extends State<Chatting> {
                     )
                   ],
                 ),
-                SizedBox(height: 30.h),
-              ],
-            ),
+              ),
+              SizedBox(height: 30.h),
+            ],
           ),
         ),
       ),

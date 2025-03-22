@@ -19,7 +19,7 @@ class _NavigationState extends State<Navigation> {
   final List<Widget> _pages = [
     const Chatting(),
     const LearnSignsPage(),
-    const OfflineTools(),
+    const SmartToolsScreen(),
     const Profile(),
   ];
 

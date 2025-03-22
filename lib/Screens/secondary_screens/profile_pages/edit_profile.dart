@@ -1,58 +1,15 @@
+import 'package:eazytalk/widgets/buttons/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io'; // For File
-import 'dart:convert'; // For base64 encoding
-import 'package:permission_handler/permission_handler.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';
+import 'package:eazytalk/core/theme/app_colors.dart';
+import 'package:eazytalk/models/user_model.dart';
+import 'package:eazytalk/services/image/image_service.dart';
+import 'package:eazytalk/services/user/user_profile_service.dart';
+import 'package:eazytalk/widgets/common/modal_header.dart';
+import 'package:eazytalk/widgets/profile/profile_image_picker.dart';
+import 'package:eazytalk/widgets/inputs/profile_form_field.dart';
 
-// User Model for better data management
-class UserModel {
-  final String id;
-  final String name;
-  final String email;
-  final String? profileImageBase64;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-
-  UserModel({
-    required this.id,
-    required this.name,
-    required this.email,
-    this.profileImageBase64,
-    this.createdAt,
-    this.updatedAt,
-  });
-
-  // Create a UserModel from Firestore data
-  factory UserModel.fromFirestore(Map<String, dynamic> data, String id) {
-    return UserModel(
-      id: id,
-      name: data['username'] ?? 'User',
-      email: data['email'] ?? '',
-      profileImageBase64: data['profileImageBase64'],
-      createdAt: data['createdAt'] != null 
-          ? (data['createdAt'] as Timestamp).toDate() 
-          : null,
-      updatedAt: data['updatedAt'] != null 
-          ? (data['updatedAt'] as Timestamp).toDate() 
-          : null,
-    );
-  }
-
-  // Convert UserModel to a Map for Firestore
-  Map<String, dynamic> toFirestore() {
-    return {
-      'username': name,
-      'email': email,
-      'profileImageBase64': profileImageBase64,
-      'updatedAt': FieldValue.serverTimestamp(),
-    };
-  }
-}
-
-// Main EditProfile Widget
 class EditProfile extends StatefulWidget {
   final String? currentName;
   final String? currentEmail;
@@ -72,14 +29,13 @@ class EditProfile extends StatefulWidget {
 class _EditProfileState extends State<EditProfile> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
-  final ImagePicker _picker = ImagePicker();
   File? _imageFile;
   String? _profileImageBase64;
   bool _isLoading = false;
 
-  // Firebase instances
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  // Service instances
+  final UserProfileService _userProfileService = UserProfileService();
+  final ImageService _imageService = ImageService();
 
   @override
   void initState() {
@@ -88,7 +44,7 @@ class _EditProfileState extends State<EditProfile> {
     _emailController = TextEditingController(text: widget.currentEmail ?? '');
     _profileImageBase64 = widget.currentProfileImageBase64;
     
-    // If no data was passed, fetch current user data from Firestore
+    // If no data was passed, fetch current user data
     if (widget.currentName == null || widget.currentEmail == null) {
       _fetchUserData();
     }
@@ -101,27 +57,24 @@ class _EditProfileState extends State<EditProfile> {
     super.dispose();
   }
 
-  // Fetch user data from Firestore
+  // Fetch user data from service
   Future<void> _fetchUserData() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final user = _auth.currentUser;
-      if (user != null) {
-        final userData = await _firestore.collection('users').doc(user.uid).get();
-        
-        if (userData.exists) {
-          setState(() {
-            _nameController.text = userData.data()?['username'] ?? 'User';
-            _emailController.text = userData.data()?['email'] ?? user.email ?? '';
-            _profileImageBase64 = userData.data()?['profileImageBase64'];
-          });
-        }
+      final userModel = await _userProfileService.fetchUserProfile();
+      
+      if (userModel != null) {
+        setState(() {
+          _nameController.text = userModel.userName;
+          _emailController.text = userModel.email;
+          _profileImageBase64 = userModel.profileImageBase64;
+        });
       }
     } catch (e) {
-      _showSnackBar('Error fetching user data: $e');
+      _showSnackBar('Error fetching user data: $e', isError: true);
     } finally {
       setState(() {
         _isLoading = false;
@@ -129,77 +82,48 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
-  // Function to pick an image from gallery with permission handling
-  Future<void> _pickAndSaveImageLocally() async {
-    // Request storage permission
-    var status = await Permission.storage.request();
-
-    if (status.isGranted) {
-      // Permission granted, proceed with picking the image
-      final pickedFile = await _picker.pickImage(
-        source: ImageSource.gallery,
-        // Using full quality with no dimension restrictions
-      );
-      
-      if (pickedFile != null) {
-        setState(() {
-          _imageFile = File(pickedFile.path);
-        });
-
-        // Convert image to base64
-        try {
-          final bytes = await _imageFile!.readAsBytes();
-          final base64Image = base64Encode(bytes);
-          
-          setState(() {
-            _profileImageBase64 = base64Image;
-          });
-          
-          _showSnackBar('Profile picture selected');
-        } catch (e) {
-          _showSnackBar('Error processing image: $e');
-        }
-      }
-    } else if (status.isDenied) {
-      // Permission denied
-      _showSnackBar('Storage permission is required to pick an image');
-    } else if (status.isPermanentlyDenied) {
-      // Permission permanently denied, open app settings
-      openAppSettings();
+  // Handle image picking
+  Future<void> _handleImagePick() async {
+    final result = await _imageService.pickImageFromGallery(context);
+    
+    if (result['success']) {
+      setState(() {
+        _imageFile = result['file'];
+        _profileImageBase64 = result['base64'];
+      });
+      _showSnackBar('Profile picture selected');
+    } else {
+      _showSnackBar(result['message'], isError: true);
     }
   }
 
-  // Function to save profile changes to Firestore
+  // Save profile changes
   Future<void> _saveProfile() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final user = _auth.currentUser;
-      if (user == null) {
-        _showSnackBar('No user logged in');
-        return;
-      }
+      final success = await _userProfileService.updateUserProfile(
+        name: _nameController.text.trim(),
+        profileImageBase64: _profileImageBase64,
+      );
 
-      // Update Firestore with new data
-      await _firestore.collection('users').doc(user.uid).update({
-        'username': _nameController.text.trim(),
-        'profileImageBase64': _profileImageBase64,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      _showSnackBar('Profile updated successfully');
-      
-      // Return to previous screen with updated data
-      if (mounted) {
-        Navigator.pop(context, {
-          'username': _nameController.text.trim(),
-          'profileImageBase64': _profileImageBase64,
-        });
+      if (success) {
+        _showSnackBar('Profile updated successfully');
+        
+        // Return to previous screen with updated data
+        if (mounted) {
+          Navigator.pop(context, {
+            'username': _nameController.text.trim(),
+            'profileImageBase64': _profileImageBase64,
+          });
+        }
+      } else {
+        _showSnackBar('Failed to update profile', isError: true);
       }
     } catch (e) {
-      _showSnackBar('Error updating profile: $e');
+      _showSnackBar('Error updating profile: $e', isError: true);
     } finally {
       if (mounted) {
         setState(() {
@@ -210,17 +134,8 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   // Helper method to show snackbar
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.r),
-        ),
-      ),
-    );
+  void _showSnackBar(String message, {bool isError = false}) {
+    UserProfileService.showResultSnackBar(context, message, isError: isError);
   }
 
   @override
@@ -234,256 +149,19 @@ class _EditProfileState extends State<EditProfile> {
           child: Stack(
             children: [
               Padding(
-                padding: EdgeInsets.only(top: 27.h, left: 28.w, right: 28.w),
+                padding: EdgeInsets.symmetric(horizontal: 28.w),
                 child: Column(
                   children: [
-                    // App Bar
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(width: 28.w, height: 28.h), // Placeholder for alignment
-                        Text(
-                          'Edit Profile',
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Icon(Icons.close, size: 28.sp),
-                        ),
-                      ],
+                    // Header
+                    ModalHeader(
+                      title: 'Edit Profile',
+                      onClose: () => Navigator.pop(context),
                     ),
                     SizedBox(height: 50.h),
+                    
+                    // Form content
                     Expanded(
-                      child: LayoutBuilder(builder: (context, constraints) {
-                        return SingleChildScrollView(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                            child: IntrinsicHeight(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Profile Image
-                                  Center(
-                                    child: Stack(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: _pickAndSaveImageLocally,
-                                          child: Container(
-                                            width: 140.w,
-                                            height: 140.h,
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFF5F5F5),
-                                              border: Border.all(
-                                                color: const Color(0xFFC7C7C7),
-                                                width: 1,
-                                              ),
-                                              borderRadius: BorderRadius.circular(12.r),
-                                            ),
-                                            clipBehavior: Clip.antiAlias,
-                                            child: _imageFile != null
-                                                ? Image.file(
-                                                    _imageFile!,
-                                                    fit: BoxFit.cover,
-                                                  )
-                                                : _profileImageBase64 != null
-                                                    ? Image.memory(
-                                                        base64Decode(_profileImageBase64!),
-                                                        fit: BoxFit.cover,
-                                                        errorBuilder: (context, error, stackTrace) => Icon(
-                                                          Icons.person,
-                                                          size: 60.sp,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      )
-                                                    : Icon(
-                                                        Icons.person,
-                                                        size: 60.sp,
-                                                        color: Colors.grey,
-                                                      ),
-                                          ),
-                                        ),
-                                        Positioned(
-                                          right: 0,
-                                          bottom: 0,
-                                          child: GestureDetector(
-                                            onTap: _pickAndSaveImageLocally,
-                                            child: Container(
-                                              width: 40.w,
-                                              height: 40.h,
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFF00D0FF),
-                                                borderRadius: BorderRadius.circular(8.r),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.black.withOpacity(0.1),
-                                                    blurRadius: 4,
-                                                    offset: const Offset(0, 2),
-                                                  ),
-                                                ],
-                                              ),
-                                              child: Icon(
-                                                Icons.camera_alt,
-                                                color: Colors.white,
-                                                size: 20.sp,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(height: 50.h),
-
-                                  // Name Input Field
-                                  Text(
-                                    'Name :',
-                                    style: TextStyle(
-                                      fontFamily: 'DM Sans',
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  SizedBox(height: 9.h),
-                                  TextFormField(
-                                    controller: _nameController,
-                                    keyboardType: TextInputType.name,
-                                    style: TextStyle(
-                                      fontSize: 16.sp,
-                                      fontFamily: 'DM Sans',
-                                    ),
-                                    decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 12.w,
-                                        vertical: 15.h,
-                                      ),
-                                      hintText: 'Enter your name',
-                                      hintStyle: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontFamily: 'DM Sans',
-                                        fontWeight: FontWeight.w400,
-                                        color: const Color(0xFFC7C7C7),
-                                      ),
-                                      prefixIcon: Icon(
-                                        Icons.person_outline,
-                                        color: const Color(0xFFC7C7C7),
-                                        size: 20.sp,
-                                      ),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12.r),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                          color: Color(0xFF00D0FF),
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(12.r),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                          color: Color(0xFFC7C7C7),
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(12.r),
-                                      ),
-                                    ),
-                                  ),
-
-                                  SizedBox(height: 30.h),
-
-                                  // Email Input Field (Disabled)
-                                  Text(
-                                    'Email :',
-                                    style: TextStyle(
-                                      fontFamily: 'DM Sans',
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  SizedBox(height: 9.h),
-                                  TextFormField(
-                                    controller: _emailController,
-                                    enabled: false,
-                                    keyboardType: TextInputType.emailAddress,
-                                    style: TextStyle(
-                                      fontSize: 16.sp,
-                                      fontFamily: 'DM Sans',
-                                      color: Colors.black54,
-                                    ),
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      fillColor: const Color(0xFFF5F5F5),
-                                      contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 12.w,
-                                        vertical: 15.h,
-                                      ),
-                                      prefixIcon: Icon(
-                                        Icons.email_outlined,
-                                        color: const Color(0xFFC7C7C7),
-                                        size: 20.sp,
-                                      ),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12.r),
-                                      ),
-                                      disabledBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                          color: Color(0xFFE0E0E0),
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(12.r),
-                                      ),
-                                    ),
-                                  ),
-
-                                  Spacer(),
-                                  SizedBox(height: 60.h),
-
-                                  // Save Button
-                                  Padding(
-                                    padding: EdgeInsets.only(bottom: 20.h),
-                                    child: SizedBox(
-                                      height: 50.h,
-                                      width: double.infinity,
-                                      child: ElevatedButton(
-                                        onPressed: _isLoading ? null : _saveProfile,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFF00D0FF),
-                                          foregroundColor: Colors.white,
-                                          disabledBackgroundColor: const Color(0xFF00D0FF).withOpacity(0.6),
-                                          elevation: 0,
-                                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12.r),
-                                          ),
-                                        ),
-                                        child: _isLoading
-                                            ? const CircularProgressIndicator(
-                                                color: Colors.white,
-                                                strokeWidth: 3,
-                                              )
-                                            : Text(
-                                                'Save Changes',
-                                                style: TextStyle(
-                                                  fontFamily: 'Sora',
-                                                  fontSize: 14.sp,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
+                      child: _buildFormContent(),
                     ),
                   ],
                 ),
@@ -493,8 +171,8 @@ class _EditProfileState extends State<EditProfile> {
               if (_isLoading)
                 Container(
                   color: Colors.black.withOpacity(0.3),
-                  child: const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF00D0FF)),
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
                   ),
                 ),
             ],
@@ -503,4 +181,68 @@ class _EditProfileState extends State<EditProfile> {
       ),
     );
   }
+
+  // Build the form content
+  Widget _buildFormContent() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Profile Image Picker
+                  ProfileImagePicker(
+                    profileImageBase64: _profileImageBase64,
+                    imageFile: _imageFile,
+                    onPickImage: _handleImagePick,
+                  ),
+                  SizedBox(height: 50.h),
+
+                  // Name Input Field
+                  ProfileFormField(
+                    label: 'Name :',
+                    controller: _nameController,
+                    keyboardType: TextInputType.name,
+                    prefixIcon: Icons.person_outline,
+                    hintText: 'Enter your name',
+                  ),
+
+                  SizedBox(height: 30.h),
+
+                  // Email Input Field (Disabled)
+                  ProfileFormField(
+                    label: 'Email :',
+                    controller: _emailController,
+                    enabled: false,
+                    keyboardType: TextInputType.emailAddress,
+                    prefixIcon: Icons.email_outlined,
+                    hintText: 'Your email address',
+                  ),
+
+                  Spacer(),
+                  SizedBox(height: 60.h),
+
+                  // Save Button
+                  _buildSaveButton(),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+    );
+  }
+
+  // Build the save button
+Widget _buildSaveButton() {
+  return PrimaryButton(
+    text: 'Save Changes',
+    onPressed: _saveProfile,
+    isLoading: _isLoading,
+    margin: EdgeInsets.only(bottom: 20.h),
+  );
+}
 }

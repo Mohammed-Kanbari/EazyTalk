@@ -1,16 +1,21 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:eazytalk/core/theme/app_colors.dart';
+import 'package:eazytalk/core/theme/text_styles.dart';
+import 'package:eazytalk/services/auth/auth_service.dart';
+import 'package:eazytalk/services/user/user_service.dart';
+import 'package:eazytalk/widgets/common/screen_header.dart';
+import 'package:eazytalk/widgets/profile/profile_header.dart';
+import 'package:eazytalk/widgets/profile/menu_item.dart';
+
+// Import screen pages
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/change_pass.dart';
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/deaf_excursions.dart';
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/edit_profile.dart';
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/help_us.dart';
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/more_on_deaf.dart';
 import 'package:eazytalk/Screens/secondary_screens/profile_pages/terms_and_services.dart';
-import 'package:eazytalk/Screens/starting_screens/login.dart'; // Import login page
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Import for local storage
-import 'dart:convert'; // For base64 decoding
+import 'package:eazytalk/Screens/starting_screens/login.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -20,8 +25,8 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AuthService _authService = AuthService();
+  final UserService _userService = UserService();
   
   bool _isLoading = false;
   bool _isLoadingUserData = true;
@@ -35,36 +40,22 @@ class _ProfileState extends State<Profile> {
     _fetchUserData();
   }
 
-  // Fetch user data from Firestore
+  // Fetch user data from service
   Future<void> _fetchUserData() async {
     setState(() {
       _isLoadingUserData = true;
     });
 
     try {
-      final user = _auth.currentUser;
-      if (user != null) {
-        // Set email from Firebase Auth
-        _userEmail = user.email ?? '';
-        
-        // Get additional data from Firestore
-        final userData = await _firestore.collection('users').doc(user.uid).get();
-        
-        if (userData.exists) {
-          setState(() {
-            _userName = userData.data()?['username'] ?? 'User';
-            _profileImageBase64 = userData.data()?['profileImageBase64'];
-          });
-        }
-      }
+      final userData = await _userService.fetchUserProfile();
+      
+      setState(() {
+        _userName = userData['userName'];
+        _userEmail = userData['userEmail'];
+        _profileImageBase64 = userData['profileImageBase64'];
+      });
     } catch (e) {
-      print('Error fetching user data: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to load profile data: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showSnackBar('Failed to load profile data: $e', isError: true);
     } finally {
       setState(() {
         _isLoadingUserData = false;
@@ -92,6 +83,15 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,31 +99,25 @@ class _ProfileState extends State<Profile> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: EdgeInsets.only(top: 27.0.h, right: 28.w, left: 28.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Profile',
-                    style: TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 28.sp,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      // Brightness toggle functionality
-                    },
+            // Header with title and brightness toggle
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const ScreenHeader(title: 'Profile'),
+                GestureDetector(
+                  onTap: () {
+                    // Brightness toggle functionality
+                  },
+                  child: Padding(
+                    padding:  EdgeInsets.only(right: 28.w, top: 27.h),
                     child: Image.asset(
                       'assets/icons/brightness 1.png',
                       width: 28.w,
                       height: 28.h,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
             SizedBox(height: 30.h),
             
@@ -133,125 +127,28 @@ class _ProfileState extends State<Profile> {
                   child: Padding(
                     padding: EdgeInsets.all(20.h),
                     child: CircularProgressIndicator(
-                      color: const Color(0xFF00D0FF),
+                      color: AppColors.primary,
                     ),
                   ),
                 )
               : Padding(
-                padding: EdgeInsets.only(right: 28.w, left: 28.w),
-                child: Row(
-                  children: [
-                    // Profile Image
-                    Container(
-                      width: 120.w,
-                      height: 120.h,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.r),
-                        color: const Color(0xFFF5F5F5),
-                        border: Border.all(
-                          color: const Color(0xFFE0E0E0),
-                          width: 1,
-                        ),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: _profileImageBase64 != null 
-                        ? Image.memory(
-                            base64Decode(_profileImageBase64!),
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => 
-                              Image.asset(
-                                'assets/images/Rectangle 24.png',
-                                width: 120.w,
-                                height: 120.h,
-                                fit: BoxFit.cover,
-                              ),
-                          )
-                        : Image.asset(
-                            'assets/images/Rectangle 24.png',
-                            width: 120.w,
-                            height: 120.h,
-                            fit: BoxFit.cover,
-                          ),
-                    ),
-                    SizedBox(width: 22.w),
-                    
-                    // User info section
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text(
-                            _userName,
-                            style: TextStyle(
-                              fontFamily: 'DM Sans',
-                              fontSize: 24.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(height: 5.h),
-                          Text(
-                            _userEmail,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: 'DM Sans',
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w400,
-                              color: const Color(0xFF706E71),
-                            ),
-                          ),
-                          SizedBox(height: 10.h),
-                          
-                          // Edit Profile Button
-                          Container(
-                            height: 32.h,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(6),
-                              color: const Color(0xFF00D0FF),
-                            ),
-                            child: IntrinsicWidth(
-                              child: MaterialButton(
-                                onPressed: _navigateToEditProfile,
-                                splashColor: const Color(0x52FFFFFF),
-                                minWidth: 0,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Image.asset(
-                                      'assets/icons/editing 1.png',
-                                      width: 20.w,
-                                      height: 20.h,
-                                    ),
-                                    SizedBox(width: 8.h),
-                                    Text(
-                                      'Edit Profile',
-                                      textAlign: TextAlign.center,
-                                      maxLines: 1,
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        fontFamily: 'Sora',
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  padding: EdgeInsets.only(right: 28.w, left: 28.w),
+                  child: ProfileHeader(
+                    userName: _userName,
+                    userEmail: _userEmail,
+                    profileImageBase64: _profileImageBase64,
+                    onEditPressed: _navigateToEditProfile,
+                  ),
                 ),
-              ),
+            
             SizedBox(height: 50.h),
+            
+            // Divider with shadow
             Container(
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.25),
+                    color: Colors.black.withOpacity(0.25),
                     spreadRadius: 0,
                     blurRadius: 8,
                     offset: const Offset(0, 4),
@@ -259,194 +156,105 @@ class _ProfileState extends State<Profile> {
                 ],
               ),
               child: Divider(
-                color: const Color.fromARGB(255, 232, 232, 232),
+                color: AppColors.dividerColor,
                 thickness: 1,
                 height: 2,
               ),
             ),
-            // Add the menu list below the divider
+            
+            // Menu list with loading overlay
             Expanded(
               child: Stack(
                 children: [
-                  ListView(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                    children: [
-                      _buildMenuItem(
-                        Icons.lock,
-                        'Change Password',
-                        const Color(0xFF00D0FF),
-                        () => _handleChangePassword(),
-                      ),
-                      _buildMenuItem(
-                        Icons.info,
-                        'More On Deaf People',
-                        const Color(0xFF00D0FF),
-                        () => _handleMoreOnDeafPeople(),
-                      ),
-                      _buildMenuItem(
-                        Icons.location_on,
-                        'Deaf-Friendly Excursions',
-                        const Color(0xFF00D0FF),
-                        () => _handleDeafFriendlyExcursions(),
-                      ),
-                      _buildMenuItem(
-                        Icons.help,
-                        'Help Us',
-                        const Color(0xFF00D0FF),
-                        () => _handleHelpUs(),
-                      ),
-                      _buildMenuItem(
-                        Icons.description,
-                        'Terms & Services',
-                        const Color(0xFF00D0FF),
-                        () => _handleTermsAndServices(),
-                      ),
-                      _buildMenuItem(
-                        Icons.language,
-                        'Language',
-                        const Color(0xFF00D0FF),
-                        () => _handleLanguage(),
-                      ),
-                      _buildMenuItem(
-                        Icons.logout,
-                        'Logout',
-                        Colors.red,
-                        () => _handleLogout(),
-                      ),
-                    ],
-                  ),
-                  // Overlay loading indicator when logging out
+                  _buildMenuList(),
                   if (_isLoading)
                     Container(
                       color: Colors.black.withOpacity(0.3),
                       child: Center(
                         child: CircularProgressIndicator(
-                          color: const Color(0xFF00D0FF),
+                          color: AppColors.primary,
                         ),
                       ),
                     ),
                 ],
               ),
             ),
-            
           ],
         ),
       ),
     );
   }
 
-  // Widget to build each menu item with a custom onTap action
-  Widget _buildMenuItem(
-      IconData icon, String text, Color iconColor, VoidCallback onTapAction) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 8.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.15),
-            spreadRadius: 0,
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: const Color.fromARGB(255, 255, 255, 255),
-        child: ListTile(
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 5.h),
-          leading: CircleAvatar(
-            backgroundColor: iconColor.withOpacity(0.1),
-            child: Icon(icon, color: iconColor, size: 24.sp),
-          ),
-          title: Text(
-            text,
-            style: TextStyle(
-              fontFamily: 'DM Sans',
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
-              color: text == 'Logout' ? Colors.red : const Color(0xFF333333),
-            ),
-          ),
-          onTap: onTapAction, // Use the passed callback
+  // Build the menu list
+  Widget _buildMenuList() {
+    return ListView(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      children: [
+        ProfileMenuItem(
+          icon: Icons.lock,
+          text: 'Change Password',
+          iconColor: AppColors.primary,
+          onTap: () => _navigateTo(const ChangePass()),
         ),
-      ),
+        ProfileMenuItem(
+          icon: Icons.info,
+          text: 'More On Deaf People',
+          iconColor: AppColors.primary,
+          onTap: () => _navigateTo(const MoreOnDeaf()),
+        ),
+        ProfileMenuItem(
+          icon: Icons.location_on,
+          text: 'Deaf-Friendly Excursions',
+          iconColor: AppColors.primary,
+          onTap: () => _navigateTo(const DeafFriendlyExcursions()),
+        ),
+        ProfileMenuItem(
+          icon: Icons.help,
+          text: 'Help Us',
+          iconColor: AppColors.primary,
+          onTap: () => _navigateTo(const HelpUsPage()),
+        ),
+        ProfileMenuItem(
+          icon: Icons.description,
+          text: 'Terms & Services',
+          iconColor: AppColors.primary,
+          onTap: () => _navigateTo(const TermsAndServicesPage()),
+        ),
+        ProfileMenuItem(
+          icon: Icons.language,
+          text: 'Language',
+          iconColor: AppColors.primary,
+          onTap: _handleLanguage,
+        ),
+        ProfileMenuItem(
+          icon: Icons.logout,
+          text: 'Logout',
+          iconColor: Colors.red,
+          isLogout: true,
+          onTap: _handleLogout,
+        ),
+      ],
     );
   }
 
-  // Placeholder methods for each action
-  void _handleChangePassword() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const ChangePass()));
+  // Helper method to navigate to a screen
+  void _navigateTo(Widget screen) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
   }
 
-  void _handleMoreOnDeafPeople() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const MoreOnDeaf()));
-  }
-
-  void _handleDeafFriendlyExcursions() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => DeafFriendlyExcursions()));
-  }
-
-  void _handleHelpUs() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpUsPage()));
-  }
-
-  void _handleTermsAndServices() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const TermsAndServicesPage()));
-  }
-
+  // Handle language selection
   void _handleLanguage() {
     print('Navigating to Language settings screen');
-    // Example: Navigator.push(context, MaterialPageRoute(builder: (context) => LanguageScreen()));
+    // To be implemented
   }
 
-  // Implement logout functionality with confirmation dialog
-  void _handleLogout() async {
+  // Handle logout with confirmation
+  Future<void> _handleLogout() async {
     // Show confirmation dialog
-    final bool confirmLogout = await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Confirm Logout',
-          style: TextStyle(
-            fontFamily: 'Sora',
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to logout?',
-          style: TextStyle(
-            fontFamily: 'DM Sans',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: const Color(0xFF00D0FF),
-                fontFamily: 'DM Sans',
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00D0FF),
-            ),
-            child: Text(
-              'Logout',
-              style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'Sora',
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    ) ?? false;
+    final bool confirmLogout = await _authService.showLogoutConfirmationDialog(
+      context, 
+      AppColors.primary
+    );
 
     // If user confirmed logout
     if (confirmLogout) {
@@ -455,12 +263,7 @@ class _ProfileState extends State<Profile> {
       });
 
       try {
-        // Clear any locally stored data (shared preferences)
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.clear();
-        
-        // Sign out from Firebase
-        await _auth.signOut();
+        await _authService.signOut();
         
         // Navigate to login screen and remove all previous routes
         if (mounted) {
@@ -472,12 +275,7 @@ class _ProfileState extends State<Profile> {
       } catch (e) {
         // Show error message if logout fails
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to logout: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          _showSnackBar('Failed to logout: $e', isError: true);
           setState(() {
             _isLoading = false;
           });
