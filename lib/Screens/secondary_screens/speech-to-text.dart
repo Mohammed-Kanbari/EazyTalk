@@ -43,7 +43,7 @@ class _SpeechState extends State<Speech> {
     super.dispose();
   }
 
-  // Toggle speech-to-text listening
+// Toggle speech-to-text listening
   Future<void> _toggleListening() async {
     try {
       if (!_isListening) {
@@ -53,6 +53,41 @@ class _SpeechState extends State<Speech> {
             _isListening = true;
             _accumulatedText = _textController.text;
           });
+          
+          // Define the status handler function that can be reused
+          void handleStatus(String status) {
+            if (status == 'done' && _isListening && mounted) {
+              // Save the current text
+              _accumulatedText = _textController.text;
+              
+              // Restart listening after a delay to prevent immediate stopping
+              Future.delayed(const Duration(milliseconds: 1), () {
+                if (_isListening && mounted) {
+                  _speechService.startListening(
+                    onResult: (text) {
+                      if (mounted) {
+                        setState(() {
+                          _transcribedText = text;
+                          _textController.text = text;
+                        });
+                      }
+                    },
+                    onSoundLevelChange: (level) {
+                      if (mounted) {
+                        setState(() {
+                          _soundLevel = level;
+                          if (level > _maxSoundLevel) _maxSoundLevel = level;
+                        });
+                      }
+                    },
+                    onStatus: handleStatus, // Use the same handler for recursive calls
+                    accumulatedText: _accumulatedText,
+                    pauseTimeout: const Duration(seconds: 15),
+                  );
+                }
+              });
+            }
+          }
           
           await _speechService.startListening(
             onResult: (text) {
@@ -71,18 +106,9 @@ class _SpeechState extends State<Speech> {
                 });
               }
             },
-            onStatus: (status) {
-              if (status == 'done' && _isListening && mounted) {
-                _accumulatedText = _textController.text;
-                
-                Future.delayed(const Duration(milliseconds: 200), () {
-                  if (_isListening && mounted) {
-                    _toggleListening();
-                  }
-                });
-              }
-            },
+            onStatus: handleStatus, // Use the defined handler
             accumulatedText: _accumulatedText,
+            pauseTimeout: const Duration(seconds: 15), // Increased pause timeout to 15 seconds
           );
         } else {
           _showSnackBar('Speech recognition not available');

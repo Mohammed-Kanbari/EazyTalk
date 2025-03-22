@@ -13,12 +13,13 @@ class SpeechRecognitionService {
     return _isInitialized;
   }
 
-  // Start listening with continuous recognition
+ // Start listening with continuous recognition
   Future<void> startListening({
     required Function(String) onResult,
     required Function(double) onSoundLevelChange,
     required Function(String) onStatus,
     String accumulatedText = '',
+    Duration pauseTimeout = const Duration(seconds: 15), // Increased pause timeout to 15 seconds
   }) async {
     if (!_isInitialized) {
       await initialize();
@@ -33,11 +34,11 @@ class SpeechRecognitionService {
           }
         },
         listenFor: const Duration(minutes: 30),
-        pauseFor: const Duration(minutes: 5),
+        pauseFor: pauseTimeout, // Use the provided pause timeout
         partialResults: true,
         onSoundLevelChange: onSoundLevelChange,
         cancelOnError: false,
-        listenMode: stt.ListenMode.confirmation,
+        listenMode: stt.ListenMode.dictation, // Use dictation mode for continuous speech
       );
       
       _speech.statusListener = onStatus;

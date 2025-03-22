@@ -8,23 +8,56 @@ class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   
+  // Stream caching to prevent recreation
+  Stream<List<ConversationModel>>? _conversationsStream;
+  
   // Get current user ID
   String? get currentUserId => _auth.currentUser?.uid;
 
-  // Get all conversations for current user
+  // Clear cached streams (useful when logging out)
+  void clearCache() {
+    _conversationsStream = null;
+  }
+
+  // Get all conversations for current user with caching
   Stream<List<ConversationModel>> getConversations() {
-    if (currentUserId == null) return Stream.value([]);
+    // Only recreate the stream if necessary
+    if (_conversationsStream == null) {
+      if (currentUserId == null) {
+        // Return empty stream if not logged in
+        return Stream.value([]);
+      }
+      
+      print('Creating new conversations stream for user: $currentUserId');
+      
+      // Create and cache the stream
+      _conversationsStream = _firestore
+          .collection('conversations')
+          .where('participants', arrayContains: currentUserId)
+          .orderBy('lastMessageTime', descending: true)
+          .snapshots()
+          .map((snapshot) {
+            try {
+              print('Received ${snapshot.docs.length} conversations from Firestore');
+              return snapshot.docs.map((doc) {
+                try {
+                  return ConversationModel.fromFirestore(doc.data(), doc.id);
+                } catch (e) {
+                  print('Error parsing conversation ${doc.id}: $e');
+                  // Skip this conversation rather than failing the whole list
+                  return null;
+                }
+              }).where((element) => element != null)
+                  .cast<ConversationModel>()
+                  .toList();
+            } catch (e) {
+              print('Error mapping conversations: $e');
+              return <ConversationModel>[];
+            }
+          });
+    }
     
-    return _firestore
-        .collection('conversations')
-        .where('participants', arrayContains: currentUserId)
-        .orderBy('lastMessageTime', descending: true)
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs.map((doc) {
-            return ConversationModel.fromFirestore(doc.data(), doc.id);
-          }).toList();
-        });
+    return _conversationsStream!;
   }
   
   // Get messages for a specific conversation
@@ -113,8 +146,7 @@ class ChatService {
       participantIds.add(currentUserId!);
     }
     
-    // Here's the fix: check if a conversation exists where all participants are present
-    // regardless of their order
+    // Check if a conversation exists where all participants are present
     final query = await _firestore
         .collection('conversations')
         .where('participants', arrayContains: currentUserId)
@@ -143,8 +175,11 @@ class ChatService {
       'lastMessage': '',
       'lastMessageTime': Timestamp.fromDate(DateTime.now()),
       'unreadStatus': unreadStatus,
-      'createdAt': Timestamp.fromDate(DateTime.now()), // Add creation timestamp
+      'createdAt': Timestamp.fromDate(DateTime.now()), 
     });
+    
+    // Clear the cache to ensure the new conversation appears
+    clearCache();
     
     return doc.id;
   }

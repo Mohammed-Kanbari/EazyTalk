@@ -12,7 +12,7 @@ import 'dart:convert';
 
 class ChatDetail extends StatefulWidget {
   final ConversationModel conversation;
-  
+
   const ChatDetail({
     Key? key,
     required this.conversation,
@@ -27,11 +27,11 @@ class _ChatDetailState extends State<ChatDetail> {
   final ScrollController _scrollController = ScrollController();
   final ChatService _chatService = ChatService();
   final UserService _userService = UserService();
-  
+
   bool _canSendMessage = false;
   String _otherUserName = 'User';
   String? _otherUserProfileImage;
-  
+
   @override
   void initState() {
     super.initState();
@@ -39,7 +39,7 @@ class _ChatDetailState extends State<ChatDetail> {
     _fetchOtherUserInfo();
     _markConversationAsRead();
   }
-  
+
   @override
   void dispose() {
     _messageController.removeListener(_updateSendButtonState);
@@ -47,34 +47,33 @@ class _ChatDetailState extends State<ChatDetail> {
     _scrollController.dispose();
     super.dispose();
   }
-  
+
   // Update send button state based on message text
   void _updateSendButtonState() {
     final text = _messageController.text.trim();
     final canSend = text.isNotEmpty;
-    
+
     if (canSend != _canSendMessage) {
       setState(() {
         _canSendMessage = canSend;
       });
     }
   }
-  
+
   // Fetch other user's profile info
   Future<void> _fetchOtherUserInfo() async {
     if (_chatService.currentUserId == null) return;
-    
+
     // Find the other participant's ID
     final otherUserId = widget.conversation.participants
-        .firstWhere((id) => id != _chatService.currentUserId, 
-                   orElse: () => '');
-    
+        .firstWhere((id) => id != _chatService.currentUserId, orElse: () => '');
+
     if (otherUserId.isEmpty) return;
-    
+
     try {
       // Fetch user data from Firestore
       final userData = await _userService.fetchUserProfileById(otherUserId);
-      
+
       setState(() {
         _otherUserName = userData['userName'] ?? 'User';
         _otherUserProfileImage = userData['profileImageBase64'];
@@ -83,31 +82,31 @@ class _ChatDetailState extends State<ChatDetail> {
       print('Error fetching user data: $e');
     }
   }
-  
+
   // Mark conversation as read
   Future<void> _markConversationAsRead() async {
     await _chatService.markAsRead(widget.conversation.id);
   }
-  
+
   // Send message
   Future<void> _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
-    
+
     final messageText = _messageController.text.trim();
-    
+
     // Clear text field
     _messageController.clear();
     setState(() {
       _canSendMessage = false;
     });
-    
+
     // Send message
     await _chatService.sendMessage(widget.conversation.id, messageText);
-    
+
     // Scroll to bottom
     _scrollToBottom();
   }
-  
+
   // Scroll to bottom of chat
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -132,7 +131,7 @@ class _ChatDetailState extends State<ChatDetail> {
             children: [
               // Header with user info
               _buildHeader(),
-              
+
               // Chat messages
               Expanded(
                 child: Container(
@@ -143,7 +142,7 @@ class _ChatDetailState extends State<ChatDetail> {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      
+
                       if (snapshot.hasError) {
                         return Center(
                           child: Text(
@@ -156,9 +155,9 @@ class _ChatDetailState extends State<ChatDetail> {
                           ),
                         );
                       }
-                      
+
                       final messages = snapshot.data ?? [];
-                      
+
                       if (messages.isEmpty) {
                         return Center(
                           child: Padding(
@@ -174,11 +173,12 @@ class _ChatDetailState extends State<ChatDetail> {
                           ),
                         );
                       }
-                      
+
                       return ListView.builder(
                         controller: _scrollController,
                         reverse: true, // Display newest message at the bottom
-                        padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 16.h),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 28.w, vertical: 16.h),
                         itemCount: messages.length,
                         itemBuilder: (context, index) {
                           return MessageBubble(message: messages[index]);
@@ -188,7 +188,7 @@ class _ChatDetailState extends State<ChatDetail> {
                   ),
                 ),
               ),
-              
+
               // Message input
               ChatInput(
                 controller: _messageController,
@@ -201,11 +201,12 @@ class _ChatDetailState extends State<ChatDetail> {
       ),
     );
   }
-  
+
   // Build header with user info
   Widget _buildHeader() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 10.h),
+      padding:
+          EdgeInsets.only(top: 27.h, bottom: 10.h, right: 28.w, left: 28.w),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -221,21 +222,23 @@ class _ChatDetailState extends State<ChatDetail> {
           // Back button
           GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: EdgeInsets.all(8.r),
-              child: Icon(
+            child: Image.asset(
+              'assets/icons/back-arrow.png',
+              width: 22.w,
+              height: 22.h,
+              errorBuilder: (context, error, stackTrace) => Icon(
                 Icons.arrow_back_ios,
                 size: 20.sp,
                 color: Colors.black,
               ),
             ),
           ),
-          SizedBox(width: 16.w),
-          
+          SizedBox(width: 10.w),
+
           // User profile image
           Container(
-            width: 40.w,
-            height: 40.h,
+            width: 50.w,
+            height: 50.h,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.backgroundGrey,
@@ -260,7 +263,7 @@ class _ChatDetailState extends State<ChatDetail> {
                   ),
           ),
           SizedBox(width: 12.w),
-          
+
           // User name
           Expanded(
             child: Column(
@@ -270,38 +273,29 @@ class _ChatDetailState extends State<ChatDetail> {
                   _otherUserName,
                   style: TextStyle(
                     fontFamily: 'Sora',
-                    fontSize: 16.sp,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  'Online', // This could be dynamic based on user's online status
-                  style: TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 12.sp,
-                    color: Colors.green,
-                  ),
-                ),
               ],
             ),
           ),
-          
+
           // Call button (could be implemented later)
-          IconButton(
-            icon: Icon(
-              Icons.videocam,
-              color: AppColors.primary,
-              size: 24.sp,
-            ),
-            onPressed: () {
-              // Implement video call functionality
+          GestureDetector(
+            onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Video call feature coming soon')),
-              );
+                const SnackBar(content: Text('Video call feature coming soon')),);
+              
             },
-          ),
+              child: Image.asset(
+            'assets/icons/camera.png',
+            width: 28.w,
+            height: 28.h,
+          )),
+         
         ],
       ),
     );
