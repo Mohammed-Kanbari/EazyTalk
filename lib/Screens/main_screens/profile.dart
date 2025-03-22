@@ -27,12 +27,13 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   final AuthService _authService = AuthService();
   final UserService _userService = UserService();
-  
+
   bool _isLoading = false;
   bool _isLoadingUserData = true;
   String _userName = 'User';
   String _userEmail = '';
   String? _profileImageBase64;
+  String? _profileImageUrl;
 
   @override
   void initState() {
@@ -48,10 +49,11 @@ class _ProfileState extends State<Profile> {
 
     try {
       final userData = await _userService.fetchUserProfile();
-      
+
       setState(() {
         _userName = userData['userName'];
         _userEmail = userData['userEmail'];
+        _profileImageUrl = userData['profileImageUrl'];
         _profileImageBase64 = userData['profileImageBase64'];
       });
     } catch (e) {
@@ -66,15 +68,23 @@ class _ProfileState extends State<Profile> {
   // Navigate to edit profile and refresh data when returning
   Future<void> _navigateToEditProfile() async {
     final result = await Navigator.push(
-      context, 
-      MaterialPageRoute(builder: (context) => const EditProfile())
-    );
-    
+        context,
+        MaterialPageRoute(
+            builder: (context) => EditProfile(
+                  currentName: _userName,
+                  currentEmail: _userEmail,
+                  currentProfileImageUrl: _profileImageUrl,
+                  currentProfileImageBase64: _profileImageBase64,
+                )));
+
     // If profile was updated, refresh the data
     if (result != null && result is Map<String, dynamic>) {
       setState(() {
         if (result['username'] != null) {
           _userName = result['username'];
+        }
+        if (result['profileImageUrl'] != null) {
+          _profileImageUrl = result['profileImageUrl'];
         }
         if (result['profileImageBase64'] != null) {
           _profileImageBase64 = result['profileImageBase64'];
@@ -109,7 +119,7 @@ class _ProfileState extends State<Profile> {
                     // Brightness toggle functionality
                   },
                   child: Padding(
-                    padding:  EdgeInsets.only(right: 28.w, top: 27.h),
+                    padding: EdgeInsets.only(right: 28.w, top: 27.h),
                     child: Image.asset(
                       'assets/icons/brightness 1.png',
                       width: 28.w,
@@ -120,29 +130,30 @@ class _ProfileState extends State<Profile> {
               ],
             ),
             SizedBox(height: 30.h),
-            
+
             // User profile section with data
-            _isLoadingUserData 
-              ? Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(20.h),
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
+            _isLoadingUserData
+                ? Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20.h),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  )
+                : Padding(
+                    padding: EdgeInsets.only(right: 28.w, left: 28.w),
+                    child: ProfileHeader(
+                      userName: _userName,
+                      userEmail: _userEmail,
+                      profileImageUrl: _profileImageUrl,
+                      profileImageBase64: _profileImageBase64,
+                      onEditPressed: _navigateToEditProfile,
                     ),
                   ),
-                )
-              : Padding(
-                  padding: EdgeInsets.only(right: 28.w, left: 28.w),
-                  child: ProfileHeader(
-                    userName: _userName,
-                    userEmail: _userEmail,
-                    profileImageBase64: _profileImageBase64,
-                    onEditPressed: _navigateToEditProfile,
-                  ),
-                ),
-            
+
             SizedBox(height: 50.h),
-            
+
             // Divider with shadow
             Container(
               decoration: BoxDecoration(
@@ -161,7 +172,7 @@ class _ProfileState extends State<Profile> {
                 height: 2,
               ),
             ),
-            
+
             // Menu list with loading overlay
             Expanded(
               child: Stack(
@@ -252,9 +263,7 @@ class _ProfileState extends State<Profile> {
   Future<void> _handleLogout() async {
     // Show confirmation dialog
     final bool confirmLogout = await _authService.showLogoutConfirmationDialog(
-      context, 
-      AppColors.primary
-    );
+        context, AppColors.primary);
 
     // If user confirmed logout
     if (confirmLogout) {
@@ -264,7 +273,7 @@ class _ProfileState extends State<Profile> {
 
       try {
         await _authService.signOut();
-        
+
         // Navigate to login screen and remove all previous routes
         if (mounted) {
           Navigator.of(context).pushAndRemoveUntil(

@@ -1,10 +1,11 @@
+// lib/Screens/secondary_screens/profile_pages/edit_profile.dart
 import 'package:eazytalk/widgets/buttons/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:io';
 import 'package:eazytalk/core/theme/app_colors.dart';
 import 'package:eazytalk/models/user_model.dart';
-import 'package:eazytalk/services/image/image_service.dart';
+import 'package:eazytalk/services/profile/profile_image_service.dart';
 import 'package:eazytalk/services/user/user_profile_service.dart';
 import 'package:eazytalk/widgets/common/modal_header.dart';
 import 'package:eazytalk/widgets/profile/profile_image_picker.dart';
@@ -13,12 +14,14 @@ import 'package:eazytalk/widgets/inputs/profile_form_field.dart';
 class EditProfile extends StatefulWidget {
   final String? currentName;
   final String? currentEmail;
+  final String? currentProfileImageUrl;
   final String? currentProfileImageBase64;
 
   const EditProfile({
     Key? key,
     this.currentName,
     this.currentEmail,
+    this.currentProfileImageUrl,
     this.currentProfileImageBase64,
   }) : super(key: key);
 
@@ -30,18 +33,20 @@ class _EditProfileState extends State<EditProfile> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   File? _imageFile;
+  String? _profileImageUrl;
   String? _profileImageBase64;
   bool _isLoading = false;
 
   // Service instances
   final UserProfileService _userProfileService = UserProfileService();
-  final ImageService _imageService = ImageService();
+  final ProfileImageService _profileImageService = ProfileImageService();
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.currentName ?? 'User');
     _emailController = TextEditingController(text: widget.currentEmail ?? '');
+    _profileImageUrl = widget.currentProfileImageUrl;
     _profileImageBase64 = widget.currentProfileImageBase64;
     
     // If no data was passed, fetch current user data
@@ -70,6 +75,7 @@ class _EditProfileState extends State<EditProfile> {
         setState(() {
           _nameController.text = userModel.userName;
           _emailController.text = userModel.email;
+          _profileImageUrl = userModel.profileImageUrl;
           _profileImageBase64 = userModel.profileImageBase64;
         });
       }
@@ -84,7 +90,7 @@ class _EditProfileState extends State<EditProfile> {
 
   // Handle image picking
   Future<void> _handleImagePick() async {
-    final result = await _imageService.pickImageFromGallery(context);
+    final result = await _profileImageService.pickImageFromGallery(context);
     
     if (result['success']) {
       setState(() {
@@ -106,7 +112,7 @@ class _EditProfileState extends State<EditProfile> {
     try {
       final success = await _userProfileService.updateUserProfile(
         name: _nameController.text.trim(),
-        profileImageBase64: _profileImageBase64,
+        profileImageFile: _imageFile,
       );
 
       if (success) {
@@ -114,10 +120,22 @@ class _EditProfileState extends State<EditProfile> {
         
         // Return to previous screen with updated data
         if (mounted) {
-          Navigator.pop(context, {
-            'username': _nameController.text.trim(),
-            'profileImageBase64': _profileImageBase64,
-          });
+          // If we have a new image, we need to return the URL
+          if (_imageFile != null) {
+            // But we don't have the URL yet since it's just uploaded
+            // We'll pass the base64 for immediate display
+            Navigator.pop(context, {
+              'username': _nameController.text.trim(),
+              'profileImageBase64': _profileImageBase64,
+              'profileImageUrl': _profileImageUrl,
+            });
+          } else {
+            Navigator.pop(context, {
+              'username': _nameController.text.trim(),
+              'profileImageBase64': _profileImageBase64,
+              'profileImageUrl': _profileImageUrl,
+            });
+          }
         }
       } else {
         _showSnackBar('Failed to update profile', isError: true);
@@ -195,6 +213,7 @@ class _EditProfileState extends State<EditProfile> {
                 children: [
                   // Profile Image Picker
                   ProfileImagePicker(
+                    profileImageUrl: _profileImageUrl,
                     profileImageBase64: _profileImageBase64,
                     imageFile: _imageFile,
                     onPickImage: _handleImagePick,
@@ -237,12 +256,12 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   // Build the save button
-Widget _buildSaveButton() {
-  return PrimaryButton(
-    text: 'Save Changes',
-    onPressed: _saveProfile,
-    isLoading: _isLoading,
-    margin: EdgeInsets.only(bottom: 20.h),
-  );
-}
+  Widget _buildSaveButton() {
+    return PrimaryButton(
+      text: 'Save Changes',
+      onPressed: _saveProfile,
+      isLoading: _isLoading,
+      margin: EdgeInsets.only(bottom: 20.h),
+    );
+  }
 }

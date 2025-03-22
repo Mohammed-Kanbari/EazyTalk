@@ -1,11 +1,15 @@
+// lib/services/user/user_profile_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eazytalk/models/user_model.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:eazytalk/services/profile/profile_image_service.dart';
 
 class UserProfileService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ProfileImageService _profileImageService = ProfileImageService();
   
   // Fetch user data from Firestore
   Future<UserModel?> fetchUserProfile() async {
@@ -35,7 +39,7 @@ class UserProfileService {
   // Update user profile in Firestore
   Future<bool> updateUserProfile({
     required String name,
-    String? profileImageBase64,
+    File? profileImageFile,
   }) async {
     try {
       final user = _auth.currentUser;
@@ -43,14 +47,29 @@ class UserProfileService {
         return false;
       }
 
-      // Update Firestore with new data
-      await _firestore.collection('users').doc(user.uid).update({
+      // Update data to Firestore
+      Map<String, dynamic> updateData = {
         'username': name.trim(),
-        'profileImageBase64': profileImageBase64,
         'updatedAt': FieldValue.serverTimestamp(),
-      });
-      
-      return true;
+      };
+
+      // Upload image if provided
+      if (profileImageFile != null) {
+        final uploadResult = await _profileImageService.uploadProfileImage(profileImageFile);
+        if (uploadResult['success']) {
+          // No need to update Firestore again as the upload method already does it
+          return true;
+        } else {
+          print('Error uploading profile image: ${uploadResult['message']}');
+          // Still update the name even if image upload fails
+          await _firestore.collection('users').doc(user.uid).update(updateData);
+          return true;
+        }
+      } else {
+        // Just update the name
+        await _firestore.collection('users').doc(user.uid).update(updateData);
+        return true;
+      }
     } catch (e) {
       print('Error updating profile: $e');
       return false;

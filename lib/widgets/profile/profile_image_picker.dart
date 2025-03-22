@@ -1,16 +1,20 @@
+// lib/widgets/profile/profile_image_picker.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:eazytalk/core/theme/app_colors.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfileImagePicker extends StatelessWidget {
+  final String? profileImageUrl;
   final String? profileImageBase64;
   final File? imageFile;
   final VoidCallback onPickImage;
   
   const ProfileImagePicker({
     Key? key,
+    this.profileImageUrl,
     this.profileImageBase64,
     this.imageFile,
     required this.onPickImage,
@@ -76,21 +80,48 @@ class ProfileImagePicker extends StatelessWidget {
   // Helper method to display the appropriate image
   Widget _buildProfileImage() {
     if (imageFile != null) {
+      // Show selected file if available
       return Image.file(
         imageFile!,
         fit: BoxFit.cover,
       );
-    } else if (profileImageBase64 != null) {
-      return Image.memory(
-        base64Decode(profileImageBase64!),
+    } else if (profileImageUrl != null && profileImageUrl!.isNotEmpty) {
+      // Use cached network image for URL
+      return CachedNetworkImage(
+        imageUrl: profileImageUrl!,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Icon(
+        placeholder: (context, url) => Center(
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+          ),
+        ),
+        errorWidget: (context, url, error) => Icon(
           Icons.person,
           size: 60.sp,
           color: Colors.grey,
         ),
       );
+    } else if (profileImageBase64 != null && profileImageBase64!.isNotEmpty) {
+      // Fallback to base64 if URL not available
+      try {
+        return Image.memory(
+          base64Decode(profileImageBase64!),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Icon(
+            Icons.person,
+            size: 60.sp,
+            color: Colors.grey,
+          ),
+        );
+      } catch (e) {
+        return Icon(
+          Icons.person,
+          size: 60.sp,
+          color: Colors.grey,
+        );
+      }
     } else {
+      // Default placeholder
       return Icon(
         Icons.person,
         size: 60.sp,

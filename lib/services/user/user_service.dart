@@ -13,6 +13,7 @@ class UserService {
     String userName = 'User';
     String userEmail = '';
     String? profileImageBase64;
+    String? profileImageUrl;
     
     if (user != null) {
       // Set email from Firebase Auth
@@ -25,6 +26,7 @@ class UserService {
         if (userData.exists) {
           userName = userData.data()?['username'] ?? 'User';
           profileImageBase64 = userData.data()?['profileImageBase64'];
+          profileImageUrl = userData.data()?['profileImageUrl'];
         }
       } catch (e) {
         print('Error fetching user data: $e');
@@ -36,6 +38,7 @@ class UserService {
       'userName': userName,
       'userEmail': userEmail,
       'profileImageBase64': profileImageBase64,
+      'profileImageUrl': profileImageUrl,
     };
   }
   
@@ -46,6 +49,7 @@ class UserService {
       await _firestore.collection('users').doc(user.uid).update(updatedData);
     }
   }
+
 
   // Add these methods to lib/services/user/user_service.dart
 
