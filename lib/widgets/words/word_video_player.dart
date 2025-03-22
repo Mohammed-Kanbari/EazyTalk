@@ -18,6 +18,46 @@ class WordVideoPlayer extends StatefulWidget {
 }
 
 class _WordVideoPlayerState extends State<WordVideoPlayer> {
+  bool _showControls = true;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller != null) {
+      // Add listener to video controller to update UI when video state changes
+      widget.controller!.addListener(_videoListener);
+    }
+  }
+
+  @override
+  void didUpdateWidget(WordVideoPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?.removeListener(_videoListener);
+      widget.controller?.addListener(_videoListener);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller?.removeListener(_videoListener);
+    super.dispose();
+  }
+
+  void _videoListener() {
+    if (mounted) {
+      // Update UI when video playback state changes
+      setState(() {});
+    }
+  }
+
+  // Toggle show/hide controls
+  void _toggleControls() {
+    setState(() {
+      _showControls = !_showControls;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -37,18 +77,44 @@ class _WordVideoPlayerState extends State<WordVideoPlayer> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16.r),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Show video player if initialized, otherwise show placeholder
-            widget.isInitialized && widget.controller != null
-                ? VideoPlayer(widget.controller!)
-                : _buildVideoPlaceholder(),
+        child: GestureDetector(
+          onTap: _toggleControls, // Show/hide controls on tap
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Show video player if initialized, otherwise show placeholder
+              widget.isInitialized && widget.controller != null
+                  ? AspectRatio(
+                      aspectRatio: widget.controller!.value.aspectRatio,
+                      child: VideoPlayer(widget.controller!),
+                    )
+                  : _buildVideoPlaceholder(),
+                  
+              // Play/Pause button overlay - show based on control visibility state
+              if (widget.controller != null && widget.isInitialized && _showControls)
+                _buildPlayPauseButton(),
                 
-            // Play/Pause button overlay
-            if (widget.controller != null && widget.isInitialized)
-              _buildPlayPauseButton(),
-          ],
+              // Progress indicator at bottom of video
+              if (widget.controller != null && widget.isInitialized)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 5.h,
+                    child: VideoProgressIndicator(
+                      widget.controller!,
+                      allowScrubbing: true,
+                      colors: VideoProgressColors(
+                        playedColor: AppColors.primary,
+                        bufferedColor: AppColors.primary.withOpacity(0.3),
+                        backgroundColor: Colors.grey.shade300,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -81,28 +147,41 @@ class _WordVideoPlayerState extends State<WordVideoPlayer> {
   
   Widget _buildPlayPauseButton() {
     return Center(
-      child: widget.controller!.value.isPlaying
-          ? SizedBox.shrink() // No visible button when playing
-          : GestureDetector(
-              onTap: () {
-                setState(() {
-                  widget.controller!.play();
+      child: Container(
+        width: 60.h,
+        height: 60.h,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.8),
+          shape: BoxShape.circle,
+        ),
+        child: IconButton(
+          icon: Icon(
+            widget.controller!.value.isPlaying
+                ? Icons.pause
+                : Icons.play_arrow,
+            color: AppColors.primary,
+            size: 40.sp,
+          ),
+          onPressed: () {
+            setState(() {
+              if (widget.controller!.value.isPlaying) {
+                widget.controller!.pause();
+              } else {
+                widget.controller!.play();
+                
+                // Hide controls after short delay when playing starts
+                Future.delayed(Duration(seconds: 2), () {
+                  if (mounted && widget.controller!.value.isPlaying) {
+                    setState(() {
+                      _showControls = false;
+                    });
+                  }
                 });
-              },
-              child: Container(
-                width: 60.h,
-                height: 60.h,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.8),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.play_arrow,
-                  color: AppColors.primary,
-                  size: 40.sp,
-                ),
-              ),
-            ),
+              }
+            });
+          },
+        ),
+      ),
     );
   }
 }

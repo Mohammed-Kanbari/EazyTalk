@@ -31,22 +31,16 @@ void main() async{
 class EazyTalkApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return DevicePreview(
-      enabled: true,
-      builder: (context) {
-        
-      
-      return ScreenUtilInit(
-        designSize: const Size(428, 926),
-        minTextAdapt: true,
-        splitScreenMode: true,
-        builder: (context, child) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: SplashScreen(),
-        );
-        });
-   } );
+    return ScreenUtilInit(
+      designSize: const Size(428, 926),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Navigation(),
+      );
+      });
   }
 }
 

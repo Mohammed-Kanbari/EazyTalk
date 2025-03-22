@@ -80,8 +80,8 @@ class _InstructionCardState extends State<InstructionCard> {
                   IconButton(
                     icon: Image.asset(
                       'assets/icons/arrow-left.png',
-                      width: 18.w,
-                      height: 18.h,
+                      width: 25.w,
+                      height: 25.h,
                     ),
                     onPressed: previousInstruction,
                   ),
@@ -99,8 +99,8 @@ class _InstructionCardState extends State<InstructionCard> {
                   IconButton(
                     icon: Image.asset(
                       'assets/icons/arrow-right 1.png',
-                      width: 18.w,
-                      height: 18.h,
+                      width: 25.w,
+                      height: 25.h,
                     ),
                     onPressed: nextInstruction,
                   ),

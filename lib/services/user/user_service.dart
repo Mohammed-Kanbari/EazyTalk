@@ -46,4 +46,53 @@ class UserService {
       await _firestore.collection('users').doc(user.uid).update(updatedData);
     }
   }
+
+  // Add these methods to lib/services/user/user_service.dart
+
+// Fetch user profile by ID
+Future<Map<String, dynamic>> fetchUserProfileById(String userId) async {
+  try {
+    final userData = await _firestore.collection('users').doc(userId).get();
+    
+    if (userData.exists) {
+      final data = userData.data() ?? {};
+      return {
+        'id': userId,
+        'userName': data['username'] ?? 'User',
+        'profileImageBase64': data['profileImageBase64'],
+      };
+    }
+    return {
+      'id': userId,
+      'userName': 'User',
+      'profileImageBase64': null,
+    };
+  } catch (e) {
+    print('Error fetching user data: $e');
+    return {
+      'id': userId,
+      'userName': 'User',
+      'profileImageBase64': null,
+    };
+  }
+}
+
+// Fetch all users
+Future<List<Map<String, dynamic>>> fetchAllUsers() async {
+  try {
+    final usersSnapshot = await _firestore.collection('users').get();
+    
+    return usersSnapshot.docs.map((doc) {
+      final data = doc.data();
+      return {
+        'id': doc.id,
+        'userName': data['username'] ?? 'User',
+        'profileImageBase64': data['profileImageBase64'],
+      };
+    }).toList();
+  } catch (e) {
+    print('Error fetching users: $e');
+    return [];
+  }
+}
 }
