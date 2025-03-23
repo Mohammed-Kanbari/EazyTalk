@@ -1,6 +1,7 @@
 import 'package:eazytalk/Screens/secondary_screens/navigation.dart';
 import 'package:eazytalk/Screens/starting_screens/login.dart';
 import 'package:eazytalk/widgets/buttons/primary_button.dart';
+import 'package:eazytalk/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -112,13 +113,33 @@ class _SignupState extends State<Signup> {
   // Show a dialog to prompt user to verify email and return verification status
   Future<bool> _showVerificationDialog(User user) async {
     bool isVerified = false;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final dialogBgColor = isDarkMode ? AppColors.darkSurface : Colors.white;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final buttonColor = AppColors.primary;
 
     await showDialog<void>(
       context: context,
       barrierDismissible: true, // Allow closing the dialog
       builder: (context) => AlertDialog(
-        title: const Text('Verify Your Email'),
-        content: const Text('Please click the link in the email we sent to complete signup.'),
+        backgroundColor: dialogBgColor,
+        title: Text(
+          'Verify Your Email',
+          style: TextStyle(
+            fontFamily: 'Sora',
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+            color: textColor,
+          ),
+        ),
+        content: Text(
+          'Please click the link in the email we sent to complete signup.',
+          style: TextStyle(
+            fontFamily: 'DM Sans',
+            fontSize: 14.sp,
+            color: textColor,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () async {
@@ -134,7 +155,14 @@ class _SignupState extends State<Signup> {
                 );
               }
             },
-            child: const Text('I’ve Verified'),
+            child: Text(
+              "I've Verified",
+              style: TextStyle(
+                color: buttonColor,
+                fontFamily: 'DM Sans',
+                fontSize: 14.sp,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -143,13 +171,27 @@ class _SignupState extends State<Signup> {
                 const SnackBar(content: Text('Verification email resent.')),
               );
             },
-            child: const Text('Resend Email'),
+            child: Text(
+              'Resend Email',
+              style: TextStyle(
+                color: buttonColor,
+                fontFamily: 'DM Sans',
+                fontSize: 14.sp,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context); // Close dialog without verifying
             },
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Colors.red,
+                fontFamily: 'DM Sans',
+                fontSize: 14.sp,
+              ),
+            ),
           ),
         ],
       ),
@@ -160,11 +202,29 @@ class _SignupState extends State<Signup> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.sizeOf(context).width;
     final screenHeight = MediaQuery.sizeOf(context).height;
 
+    // Theme-appropriate colors
+    final backgroundColor = AppColors.getBackgroundColor(context);
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
+    // Input field styling
+    final borderColor = isDarkMode 
+        ? const Color(0xFF3A3A3A)
+        : const Color(0xFFC7C7C7);
+
+    final hintColor = isDarkMode 
+        ? const Color(0xFF7A7A7A)
+        : const Color(0xFFC7C7C7);
+        
+    final inputFillColor = isDarkMode 
+        ? const Color(0xFF1E1E1E) 
+        : null;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: GestureDetector(
@@ -226,7 +286,7 @@ class _SignupState extends State<Signup> {
                           fontFamily: 'DM Sans',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color.fromARGB(255, 0, 0, 0),
+                          color: textColor,
                         ),
                       ),
                       SizedBox(height: 31.h),
@@ -236,13 +296,13 @@ class _SignupState extends State<Signup> {
                           fontFamily: 'DM Sans',
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color.fromARGB(255, 0, 0, 0),
+                          color: textColor,
                         ),
                       ),
                       SizedBox(height: 9.h),
                       TextFormField(
                         controller: _usernameController,
-                        style: TextStyle(fontSize: 16.sp, fontFamily: 'DM Sans'),
+                        style: TextStyle(fontSize: 16.sp, fontFamily: 'DM Sans', color: textColor),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           hintText: 'Enter your name',
@@ -250,15 +310,17 @@ class _SignupState extends State<Signup> {
                             fontSize: 14.sp,
                             fontFamily: 'DM Sans',
                             fontWeight: FontWeight.w400,
-                            color: const Color(0xFFC7C7C7),
+                            color: hintColor,
                           ),
+                          filled: true,
+                          fillColor: inputFillColor,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           focusedBorder: OutlineInputBorder(
                             borderSide: const BorderSide(color: Color(0xFF00D0FF), width: 1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Color(0xFFC7C7C7), width: 1),
+                            borderSide: BorderSide(color: borderColor, width: 1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           errorMaxLines: 2,
@@ -280,14 +342,14 @@ class _SignupState extends State<Signup> {
                           fontFamily: 'DM Sans',
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color.fromARGB(255, 0, 0, 0),
+                          color: textColor,
                         ),
                       ),
                       SizedBox(height: 9.h),
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        style: TextStyle(fontSize: 16.sp, fontFamily: 'DM Sans'),
+                        style: TextStyle(fontSize: 16.sp, fontFamily: 'DM Sans', color: textColor),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           hintText: 'Enter your email',
@@ -295,15 +357,17 @@ class _SignupState extends State<Signup> {
                             fontSize: 14.sp,
                             fontFamily: 'DM Sans',
                             fontWeight: FontWeight.w400,
-                            color: const Color(0xFFC7C7C7),
+                            color: hintColor,
                           ),
+                          filled: true,
+                          fillColor: inputFillColor,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           focusedBorder: OutlineInputBorder(
                             borderSide: const BorderSide(color: Color(0xFF00D0FF), width: 1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Color(0xFFC7C7C7), width: 1),
+                            borderSide: BorderSide(color: borderColor, width: 1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           errorMaxLines: 2,
@@ -325,7 +389,7 @@ class _SignupState extends State<Signup> {
                           fontFamily: 'DM Sans',
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color.fromARGB(255, 0, 0, 0),
+                          color: textColor,
                         ),
                       ),
                       SizedBox(height: 9.h),
@@ -333,7 +397,7 @@ class _SignupState extends State<Signup> {
                         controller: _passwordController,
                         autocorrect: false,
                         obscureText: _obsecurePassword,
-                        style: TextStyle(fontSize: 16.sp, fontFamily: 'DM Sans'),
+                        style: TextStyle(fontSize: 16.sp, fontFamily: 'DM Sans', color: textColor),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           hintText: 'Enter your password',
@@ -341,15 +405,17 @@ class _SignupState extends State<Signup> {
                             fontSize: 14.sp,
                             fontFamily: 'DM Sans',
                             fontWeight: FontWeight.w400,
-                            color: const Color(0xFFC7C7C7),
+                            color: hintColor,
                           ),
+                          filled: true,
+                          fillColor: inputFillColor,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           focusedBorder: OutlineInputBorder(
                             borderSide: const BorderSide(color: Color(0xFF00D0FF), width: 1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Color(0xFFC7C7C7), width: 1),
+                            borderSide: BorderSide(color: borderColor, width: 1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           suffixIcon: IconButton(
@@ -359,7 +425,7 @@ class _SignupState extends State<Signup> {
                               });
                             },
                             icon: Icon(
-                              color: const Color(0xFFC7C7C7),
+                              color: hintColor,
                               _obsecurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
                             ),
                           ),
@@ -393,7 +459,7 @@ class _SignupState extends State<Signup> {
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontFamily: 'DM Sans',
-                              color: const Color(0xFF757575),
+                              color: isDarkMode ? Colors.grey[400] : const Color(0xFF757575),
                             ),
                           ),
                           InkWell(

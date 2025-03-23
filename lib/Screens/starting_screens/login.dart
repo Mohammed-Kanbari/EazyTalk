@@ -144,7 +144,6 @@ class _LoginState extends State<Login> {
                           child: Image.asset(
                             'assets/images/welcome.png',
                             width: screenWidth * 0.8,
-                            color: isDarkMode ? Colors.white70 : null,
                           ),
                         ),
                       ),

@@ -81,8 +81,8 @@ class _WelcomeState extends State<Welcome> {
                   },
                   child: Container(
                     margin: EdgeInsets.only(bottom: screenWidth * 0.06),
-                    width: screenWidth * 0.29,
-                    height: screenHeight * 0.053,
+                    width: screenWidth * 0.35,
+                    height: screenHeight * 0.065,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF1F3F5),
@@ -109,8 +109,8 @@ class _WelcomeState extends State<Welcome> {
                   },
                   child: Container(
                     margin: EdgeInsets.only(bottom: screenWidth * 0.06),
-                    width: screenWidth * 0.29,
-                    height: screenHeight * 0.053,
+                    width: screenWidth * 0.35,
+                    height: screenHeight * 0.065,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       color: const Color(0xFF00D0FF),
@@ -166,7 +166,6 @@ class Onboarding1 extends StatelessWidget {
                 'assets/images/onboarding1.png',
                 width: screenWidth * 0.8,
                 height: screenHeight * 0.31,
-                color: isDarkMode ? Colors.white70 : null,
               ),
               SizedBox(
                 height: screenHeight * 0.05,
@@ -244,7 +243,6 @@ class Onboarding2 extends StatelessWidget {
                 'assets/images/onboarding2.png',
                 width: screenWidth * 0.95,
                 height: screenHeight * 0.29,
-                color: isDarkMode ? Colors.white70 : null,
               ),
               SizedBox(
                 height: screenHeight * 0.047,
@@ -322,7 +320,6 @@ class Onboarding3 extends StatelessWidget {
                 'assets/images/onboarding3.png',
                 width: screenWidth * 0.95,
                 height: screenHeight * 0.26,
-                color: isDarkMode ? Colors.white70 : null,
               ),
               SizedBox(
                 height: screenHeight * 0.036,

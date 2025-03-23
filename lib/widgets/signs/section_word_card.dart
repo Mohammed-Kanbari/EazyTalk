@@ -15,23 +15,51 @@ class SectionWordCard extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    // Check if we're in dark mode
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    // Get theme-appropriate colors
+    final backgroundColor = isDarkMode 
+        ? AppColors.getSurfaceColor(context)
+        : Colors.white;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final descriptionColor = isDarkMode 
+        ? Colors.grey[400] 
+        : Colors.black54;
+    final borderColor = isDarkMode 
+        ? Colors.grey[800] 
+        : Colors.grey[200];
+        
+    // Custom shadow for dark vs light mode
+    final shadow = BoxShadow(
+      color: isDarkMode 
+          ? Colors.black.withOpacity(0.2)
+          : Colors.black.withOpacity(0.08),
+      blurRadius: 8,
+      spreadRadius: isDarkMode ? 1 : 1,
+      offset: Offset(0, 3),
+    );
+    
+    // Arrow container background color
+    final arrowBgColor = isDarkMode 
+        ? AppColors.primary.withOpacity(0.8)
+        : AppColors.primary;
+    
+    // Arrow shadow color
+    final arrowShadowColor = isDarkMode 
+        ? AppColors.primary.withOpacity(0.5)
+        : AppColors.primary.withOpacity(0.3);
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: EdgeInsets.only(bottom: 16.h),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: Colors.grey[200]!),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 8,
-              spreadRadius: 1,
-              offset: Offset(0, 3),
-            ),
-          ],
+          border: Border.all(color: borderColor!),
+          boxShadow: [shadow],
         ),
         child: Row(
           children: [
@@ -47,15 +75,17 @@ class SectionWordCard extends StatelessWidget {
                   width: 60.w,
                   height: 60.h,
                   decoration: BoxDecoration(
-                    color: Color(0xFFF5F5F5),
+                    color: isDarkMode ? Color(0xFF2A2A2A) : Color(0xFFF5F5F5),
                     borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(color: Colors.grey[300]!),
+                    border: Border.all(
+                      color: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!
+                    ),
                   ),
                   child: Center(
                     child: Icon(
                       Icons.sign_language,
                       size: 30.sp,
-                      color: Colors.grey[400],
+                      color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
                     ),
                   ),
                 ),
@@ -73,7 +103,7 @@ class SectionWordCard extends StatelessWidget {
                       fontFamily: 'Sora',
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      color: textColor,
                     ),
                   ),
                   SizedBox(height: 4.h),
@@ -82,7 +112,7 @@ class SectionWordCard extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'DM Sans',
                       fontSize: 12.sp,
-                      color: Colors.black54,
+                      color: descriptionColor,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -95,11 +125,11 @@ class SectionWordCard extends StatelessWidget {
               width: 36.w,
               height: 36.h,
               decoration: BoxDecoration(
-                color: AppColors.primary,
+                color: arrowBgColor,
                 borderRadius: BorderRadius.circular(18.r),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
+                    color: arrowShadowColor,
                     blurRadius: 8,
                     spreadRadius: 0,
                     offset: Offset(0, 2),

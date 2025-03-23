@@ -90,8 +90,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    // Check if we're in dark mode
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    // Theme-appropriate colors
+    final backgroundColor = AppColors.getBackgroundColor(context);
+    final navBarColor = isDarkMode ? AppColors.darkSurface : Colors.white;
+    final unselectedColor = isDarkMode ? Colors.grey[600] : Colors.black.withOpacity(0.62);
+    final shadowColor = isDarkMode 
+        ? Colors.black.withOpacity(0.3)
+        : Colors.black.withOpacity(0.1);
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         // Using IndexedStack to preserve the state of pages
         child: IndexedStack(
@@ -101,10 +112,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: navBarColor,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: shadowColor,
               offset: const Offset(0, -5),
               blurRadius: 30,
             ),
@@ -112,9 +123,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         ),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
+          backgroundColor: navBarColor,
           selectedItemColor: AppColors.primary,
-          unselectedItemColor: Colors.black.withOpacity(0.62),
+          unselectedItemColor: unselectedColor,
           selectedLabelStyle: TextStyle(
             fontSize: 14.sp,
             fontFamily: 'DM Sans',
@@ -132,7 +143,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           items: _navigationItems
               .asMap()
               .entries
-              .map((entry) => _buildNavItem(entry.key, entry.value))
+              .map((entry) => _buildNavItem(entry.key, entry.value, isDarkMode))
               .toList(),
         ),
       ),
@@ -154,7 +165,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     });
   }
 
-  BottomNavigationBarItem _buildNavItem(int index, _NavigationItem item) {
+  BottomNavigationBarItem _buildNavItem(int index, _NavigationItem item, bool isDarkMode) {
     return BottomNavigationBarItem(
       icon: AnimatedBuilder(
         animation: _animations[index],
@@ -167,6 +178,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 _selectedIndex == index ? item.selectedIconPath : item.unselectedIconPath,
                 width: 32.w,
                 height: 32.h,
+                // Apply white tint for unselected icons in dark mode
+                color: (_selectedIndex != index && isDarkMode) ? Colors.white70 : null,
               ),
             ),
           );

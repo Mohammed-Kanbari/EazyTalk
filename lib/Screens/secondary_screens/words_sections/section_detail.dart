@@ -88,8 +88,13 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
   
   // Show options menu for sorting and filtering
   void _showOptionsMenu() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = AppColors.getSurfaceColor(context);
+    final bottomSheetHandleColor = isDarkMode ? Colors.grey[700] : Colors.grey[300];
+    
     showModalBottomSheet(
       context: context,
+      backgroundColor: backgroundColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
@@ -102,7 +107,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: bottomSheetHandleColor,
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),
@@ -168,6 +173,14 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
   
   // Navigation to word detail page
   void _navigateToWordDetail(WordModel word) {
+    // Get current theme
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    // Create a thematically appropriate category color
+    final Color categoryColor = isDarkMode 
+        ? _getDarkModeColor(widget.categoryColor)
+        : widget.categoryColor;
+    
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -176,7 +189,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
           word: word.word,
           description: word.description,
           image: word.imagePath,
-          categoryColor: widget.categoryColor,
+          categoryColor: categoryColor,
           videoPath: word.videoPath,
         ),
       ),
@@ -184,6 +197,22 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
       // Refresh favorites when returning
       _refreshFavorites();
     });
+  }
+  
+  // Helper method for dark mode colors
+  Color _getDarkModeColor(Color originalColor) {
+    // If color is too light, darken it for better visibility in dark mode
+    final hsl = HSLColor.fromColor(originalColor);
+    
+    // Lower lightness for dark mode to make colors deeper
+    if (hsl.lightness > 0.5) {
+      return hsl.withLightness(0.3).toColor();
+    } else if (hsl.lightness > 0.3) {
+      return hsl.withLightness(0.25).toColor();
+    }
+    
+    // If already dark enough, return as is
+    return originalColor;
   }
   
   // Refresh favorites without reloading all words
@@ -196,10 +225,12 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
   
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
     final filteredWords = _getFilteredWords();
     
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.getBackgroundColor(context),
       body: SafeArea(
         child: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
@@ -214,7 +245,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
                   onTap: _showOptionsMenu,
                   child: Icon(
                     Icons.more_vert,
-                    color: Colors.black,
+                    color: textColor,
                     size: 24.sp,
                   ),
                 ),
@@ -222,7 +253,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
               SizedBox(height: 30.h,),
               
               // Main content area
-              _buildContent(filteredWords),
+              _buildContent(filteredWords, isDarkMode),
             ],
           ),
         ),
@@ -230,7 +261,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
     );
   }
   
-  Widget _buildContent(List<WordModel> filteredWords) {
+  Widget _buildContent(List<WordModel> filteredWords, bool isDarkMode) {
     if (_isLoading) {
       return Expanded(
         child: Center(
@@ -267,10 +298,10 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
               ),
               
               // Category title
-              _buildCategoryTitle(),
+              _buildCategoryTitle(isDarkMode),
               
               // Words list or empty state
-              _buildWordsList(filteredWords),
+              _buildWordsList(filteredWords, isDarkMode),
               
               // Bottom spacing
               SizedBox(height: 20.h),
@@ -281,18 +312,30 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
     }
   }
   
-  Widget _buildCategoryTitle() {
+  Widget _buildCategoryTitle(bool isDarkMode) {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
+    // Create a thematically appropriate category color
+    final Color categoryColor = isDarkMode 
+        ? _getDarkModeColor(widget.categoryColor)
+        : widget.categoryColor;
+    
     return Padding(
       padding: EdgeInsets.only(bottom: 30.h),
       child: RichText(
         text: TextSpan(
-          style: AppTextStyles.sectionTitle,
+          style: TextStyle(
+            fontFamily: 'Sora',
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+            color: textColor,
+          ),
           children: [
             TextSpan(text: 'Common '),
             TextSpan(
               text: widget.title,
               style: TextStyle(
-                color: widget.categoryColor,
+                color: categoryColor,
               ),
             ),
             TextSpan(text: ' In Sign Language'),
@@ -302,7 +345,11 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
     );
   }
   
-  Widget _buildWordsList(List<WordModel> filteredWords) {
+  Widget _buildWordsList(List<WordModel> filteredWords, bool isDarkMode) {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final emptyStateColor = isDarkMode ? Colors.grey[500] : Colors.grey;
+    final iconColor = isDarkMode ? Colors.grey[600] : Colors.grey;
+    
     if (filteredWords.isEmpty) {
       return Center(
         child: Padding(
@@ -314,7 +361,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
                     ? Icons.favorite_border
                     : Icons.search_off,
                 size: 60.sp,
-                color: Colors.grey,
+                color: iconColor,
               ),
               SizedBox(height: 20.h),
               Text(
@@ -326,7 +373,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
                 style: TextStyle(
                   fontFamily: 'DM Sans',
                   fontSize: 16.sp,
-                  color: Colors.grey,
+                  color: emptyStateColor,
                 ),
                 textAlign: TextAlign.center,
               ),

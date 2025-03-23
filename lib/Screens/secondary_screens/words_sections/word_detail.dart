@@ -170,8 +170,12 @@ class _WordDetailPageState extends State<WordDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if dark mode
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.getBackgroundColor(context),
       body: SafeArea(
         child: Column(
           children: [
@@ -187,9 +191,10 @@ class _WordDetailPageState extends State<WordDetailPage> {
                       'assets/icons/back-arrow.png',
                       width: 22.w,
                       height: 22.h,
+                      color: textColor,
                       errorBuilder: (context, error, stackTrace) => Icon(
                         Icons.arrow_back_ios,
-                        color: Colors.black,
+                        color: textColor,
                         size: 20.sp,
                       ),
                     ),
@@ -199,11 +204,11 @@ class _WordDetailPageState extends State<WordDetailPage> {
                     child: Container(
                       padding: EdgeInsets.all(8.r),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDarkMode ? Color(0xFF2A2A2A) : Colors.white,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.1),
                             blurRadius: 8,
                             spreadRadius: 1,
                             offset: Offset(0, 2),
@@ -212,7 +217,7 @@ class _WordDetailPageState extends State<WordDetailPage> {
                       ),
                       child: Icon(
                         _isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: _isFavorite ? Colors.red : Colors.black,
+                        color: _isFavorite ? Colors.red : textColor,
                         size: 18.sp,
                       ),
                     ),
@@ -231,6 +236,8 @@ class _WordDetailPageState extends State<WordDetailPage> {
 
   // Build content based on loading state
   Widget _buildContent() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     if (_isLoading) {
       return Expanded(
         child: Center(
@@ -267,8 +274,9 @@ class _WordDetailPageState extends State<WordDetailPage> {
                   word: widget.word,
                   translation: _translation,
                   difficultyLevel: _getDifficultyText(_difficultyLevel),
-                  difficultyColor: _getDifficultyColor(_difficultyLevel),
+                  difficultyColor: _getDifficultyColor(_difficultyLevel, isDarkMode),
                   isCommonPhrase: _isCommonPhrase,
+                  isDarkMode: isDarkMode,
                 ),
               ),
 
@@ -291,7 +299,7 @@ class _WordDetailPageState extends State<WordDetailPage> {
                     // Tab content
                     Padding(
                       padding: EdgeInsets.all(28.r),
-                      child: _buildTabContent(),
+                      child: _buildTabContent(isDarkMode),
                     ),
                   ],
                 ),
@@ -304,21 +312,23 @@ class _WordDetailPageState extends State<WordDetailPage> {
   }
 
   // Build tab content based on selected tab
-  Widget _buildTabContent() {
+  Widget _buildTabContent(bool isDarkMode) {
     switch (_selectedTabIndex) {
       case 0: // Description
-        return _buildDescriptionTab();
+        return _buildDescriptionTab(isDarkMode);
       case 1: // Instructions
-        return _buildInstructionsTab();
+        return _buildInstructionsTab(isDarkMode);
       case 2: // Tips
-        return _buildTipsTab();
+        return _buildTipsTab(isDarkMode);
       default:
-        return _buildDescriptionTab();
+        return _buildDescriptionTab(isDarkMode);
     }
   }
 
   // Description tab content
-  Widget _buildDescriptionTab() {
+  Widget _buildDescriptionTab(bool isDarkMode) {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -328,7 +338,7 @@ class _WordDetailPageState extends State<WordDetailPage> {
             fontFamily: 'DM Sans',
             fontSize: 16.sp,
             height: 1.5,
-            color: Colors.black87,
+            color: textColor,
           ),
           textDirection: TextDirection.rtl,
         ),
@@ -341,7 +351,7 @@ class _WordDetailPageState extends State<WordDetailPage> {
             fontFamily: 'DM Sans',
             fontSize: 16.sp,
             height: 1.5,
-            color: Colors.black87,
+            color: textColor,
           ),
           textDirection: TextDirection.rtl,
         ),
@@ -350,41 +360,44 @@ class _WordDetailPageState extends State<WordDetailPage> {
   }
 
   // Instructions tab content
-  Widget _buildInstructionsTab() {
-    if (_instructions.isEmpty) {
-      return EmptyTabContent(
-        message: 'لا توجد تعليمات متاحة لهذه الإشارة',
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: _instructions.map((instruction) {
-        return InstructionStep(
-          number: instruction.stepNumber.toString(),
-          description: instruction.instruction,
-        );
-      }).toList(),
+// Instructions tab content
+Widget _buildInstructionsTab(bool isDarkMode) {
+  
+  if (_instructions.isEmpty) {
+    return EmptyTabContent(
+      message: 'لا توجد تعليمات متاحة لهذه الإشارة',
     );
   }
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: _instructions.map((instruction) {
+      return InstructionStep(
+        number: instruction.stepNumber.toString(),
+        description: instruction.instruction,
+      );
+    }).toList(),
+  );
+}
 
 // Tips tab content
-  Widget _buildTipsTab() {
-    if (_tips.isEmpty) {
-      return EmptyTabContent(
-        message: 'لا توجد نصائح متاحة لهذه الإشارة',
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: _tips.map((tip) {
-        return TipItem(
-          text: tip.tip,
-        );
-      }).toList(),
+Widget _buildTipsTab(bool isDarkMode) {
+  
+  if (_tips.isEmpty) {
+    return EmptyTabContent(
+      message: 'لا توجد نصائح متاحة لهذه الإشارة',
     );
   }
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: _tips.map((tip) {
+      return TipItem(
+        text: tip.tip,
+      );
+    }).toList(),
+  );
+}
   
   // Helper method to get difficulty text in Arabic
   String _getDifficultyText(String level) {
@@ -400,17 +413,30 @@ class _WordDetailPageState extends State<WordDetailPage> {
     }
   }
 
-  // Helper method to get difficulty color
-  Color _getDifficultyColor(String level) {
+  // Helper method to get difficulty color with dark mode support
+  Color _getDifficultyColor(String level, bool isDarkMode) {
+    Color baseColor;
+    
     switch (level) {
       case 'beginner':
-        return Color(0xFFFCE8DD); // Light orange
+        baseColor = Color(0xFFFCE8DD); // Light orange
+        break;
       case 'intermediate':
-        return Color(0xFFD4F8E5); // Light green
+        baseColor = Color(0xFFD4F8E5); // Light green
+        break;
       case 'advanced':
-        return Color(0xFFFFDDF4); // Light pink
+        baseColor = Color(0xFFFFDDF4); // Light pink
+        break;
       default:
-        return Color(0xFFFCE8DD); // Light orange
+        baseColor = Color(0xFFFCE8DD); // Light orange
     }
+    
+    // If in dark mode, adjust the color to be darker but still visible
+    if (isDarkMode) {
+      final hsl = HSLColor.fromColor(baseColor);
+      return hsl.withLightness(hsl.lightness * 0.6).toColor(); // Reduce lightness for dark mode
+    }
+    
+    return baseColor;
   }
 }

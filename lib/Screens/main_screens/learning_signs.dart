@@ -60,14 +60,21 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Detect dark mode
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.getBackgroundColor(context),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Screen header
-            const ScreenHeader(title: 'Learn Sign Language'),
+            // Screen header with theme-aware text color
+            ScreenHeader(
+              title: 'Learn Sign Language',
+              textColor: textColor,
+            ),
             SizedBox(height: 30.h),
             
             // Content area with loading/error states
@@ -79,6 +86,9 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
   }
 
   Widget _buildContent() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     if (_isLoading) {
       return Expanded(
         child: Center(
@@ -128,9 +138,15 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
   }
 
   Widget _buildIntroText() {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return RichText(
       text: TextSpan(
-        style: AppTextStyles.introText,
+        style: TextStyle(
+          fontFamily: 'DM Sans',
+          fontSize: 16.sp,
+          color: textColor,
+        ),
         children: [
           const TextSpan(text: 'Master '),
           TextSpan(
@@ -146,12 +162,21 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
   }
 
   Widget _buildMostUsedWordsSection() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final backgroundColor = AppColors.getWordCardBackgroundColor(context);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Most Used Words :',
-          style: AppTextStyles.sectionTitle,
+          style: TextStyle(
+            fontFamily: 'Sora',
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+            color: textColor,
+          ),
         ),
         SizedBox(height: 20.h),
         SizedBox(
@@ -163,7 +188,7 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
             itemBuilder: (context, index) {
               return WordCard(
                 word: _mostUsedWords[index],
-                backgroundColor: AppColors.wordCardBackground,
+                backgroundColor: backgroundColor,
                 onTap: () => _navigateToWordDetail(_mostUsedWords[index]),
               );
             },
@@ -174,12 +199,21 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
   }
 
   Widget _buildSectionsGrid() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final noSectionsColor = isDarkMode ? Colors.grey[500] : Colors.grey;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Sections :',
-          style: AppTextStyles.sectionTitle,
+          style: TextStyle(
+            fontFamily: 'Sora',
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+            color: textColor,
+          ),
         ),
         SizedBox(height: 20.h),
         _sections.isNotEmpty
@@ -197,6 +231,7 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
                   return SectionCard(
                     section: _sections[index],
                     onTap: () => _navigateToSection(_sections[index]),
+                    isDarkMode: isDarkMode,
                   );
                 },
               )
@@ -206,7 +241,7 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
                   style: TextStyle(
                     fontFamily: 'DM Sans',
                     fontSize: 16.sp,
-                    color: Colors.grey,
+                    color: noSectionsColor,
                   ),
                 ),
               ),
@@ -224,7 +259,7 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
           word: word.word,
           description: word.description,
           image: word.imagePath,
-          categoryColor: AppColors.wordCardBackground,
+          categoryColor: AppColors.getWordCardBackgroundColor(context),
           videoPath: word.videoPath,
         ),
       ),
