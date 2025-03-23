@@ -10,7 +10,6 @@ import 'package:eazytalk/widgets/buttons/gradient_fab.dart';
 import 'package:eazytalk/widgets/chat/conversation_item.dart';
 import 'package:eazytalk/widgets/common/screen_header.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
-import 'package:eazytalk/widgets/inputs/search_bar.dart';
 import 'package:eazytalk/widgets/signs/section_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

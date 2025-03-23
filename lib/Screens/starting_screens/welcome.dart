@@ -67,8 +67,8 @@ class _WelcomeState extends State<Welcome> {
                   },
                   child: Container(
                     margin: EdgeInsets.only(bottom: screenWidth * 0.06),
-                    width: screenWidth * 0.29,
-                    height: screenHeight * 0.053,
+                    width: screenWidth * 0.33,
+                    height: screenHeight * 0.063,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       color: const Color(0xFFF1F3F5),
@@ -95,8 +95,8 @@ class _WelcomeState extends State<Welcome> {
                   },
                   child: Container(
                     margin: EdgeInsets.only(bottom: screenWidth * 0.06),
-                    width: screenWidth * 0.29,
-                    height: screenHeight * 0.053,
+                    width: screenWidth * 0.33,
+                    height: screenHeight * 0.063,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       color: const Color(0xFF00D0FF),
