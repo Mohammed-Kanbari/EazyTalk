@@ -26,6 +26,7 @@ class ModalHeader extends StatelessWidget {
           // Title in the center
           Text(
             title,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Sora',
               fontSize: 20.sp,

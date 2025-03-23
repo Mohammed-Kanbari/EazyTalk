@@ -21,13 +21,17 @@ class ProfileMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       margin: EdgeInsets.symmetric(vertical: 8.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.getSurfaceColor(context),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.3)
+                : Colors.black.withOpacity(0.15),
             spreadRadius: 0,
             blurRadius: 10,
             offset: const Offset(0, 2),
@@ -35,7 +39,7 @@ class ProfileMenuItem extends StatelessWidget {
         ],
       ),
       child: Material(
-        color: Colors.white,
+        color: AppColors.getSurfaceColor(context),
         child: ListTile(
           contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 5.h),
           leading: CircleAvatar(
@@ -48,7 +52,9 @@ class ProfileMenuItem extends StatelessWidget {
               fontFamily: 'DM Sans',
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
-              color: isLogout ? Colors.red : const Color(0xFF333333),
+              color: isLogout 
+                  ? Colors.red 
+                  : (isDarkMode ? Colors.white : const Color(0xFF333333)),
             ),
           ),
           onTap: onTap,

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
+import 'package:eazytalk/core/theme/text_styles.dart';
 import 'package:eazytalk/services/auth/auth_service.dart';
+import 'package:eazytalk/services/theme/theme_service.dart';
 import 'package:eazytalk/services/user/user_service.dart';
 import 'package:eazytalk/widgets/common/screen_header.dart';
 import 'package:eazytalk/widgets/profile/profile_header.dart';
@@ -33,6 +35,7 @@ class _ProfileState extends State<Profile> {
   String _userEmail = '';
   String? _profileImageBase64;
   String? _profileImageUrl;
+  bool _isDarkMode = ThemeService.isDarkMode;
 
   @override
   void initState() {
@@ -62,6 +65,14 @@ class _ProfileState extends State<Profile> {
         _isLoadingUserData = false;
       });
     }
+  }
+
+  // Toggle theme
+  Future<void> _toggleTheme() async {
+    final isDarkMode = await ThemeService.toggleTheme();
+    setState(() {
+      _isDarkMode = isDarkMode;
+    });
   }
 
   // Navigate to edit profile and refresh data when returning
@@ -103,8 +114,10 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.getBackgroundColor(context),
       body: SafeArea(
         child: Column(
           children: [
@@ -112,17 +125,18 @@ class _ProfileState extends State<Profile> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const ScreenHeader(title: 'Profile'),
+                ScreenHeader(
+                  title: 'Profile',
+                  textColor: AppColors.getTextPrimaryColor(context),
+                ),
                 GestureDetector(
-                  onTap: () {
-                    // Brightness toggle functionality
-                  },
+                  onTap: _toggleTheme,
                   child: Padding(
                     padding: EdgeInsets.only(right: 28.w, top: 27.h),
-                    child: Image.asset(
-                      'assets/icons/brightness 1.png',
-                      width: 28.w,
-                      height: 28.h,
+                    child: Icon(
+                      isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                      color: AppColors.getTextPrimaryColor(context),
+                      size: 28.sp,
                     ),
                   ),
                 ),
@@ -158,7 +172,9 @@ class _ProfileState extends State<Profile> {
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.25),
+                    color: isDarkMode 
+                        ? Colors.black.withOpacity(0.4)
+                        : Colors.black.withOpacity(0.25),
                     spreadRadius: 0,
                     blurRadius: 8,
                     offset: const Offset(0, 4),
@@ -166,7 +182,7 @@ class _ProfileState extends State<Profile> {
                 ],
               ),
               child: Divider(
-                color: AppColors.dividerColor,
+                color: AppColors.getDividerColor(context),
                 thickness: 1,
                 height: 2,
               ),

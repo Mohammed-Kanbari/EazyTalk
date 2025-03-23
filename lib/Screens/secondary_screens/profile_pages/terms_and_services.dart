@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:eazytalk/core/theme/app_colors.dart';
 
 class TermsAndServicesPage extends StatelessWidget {
   const TermsAndServicesPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final subtitleColor = isDarkMode ? Colors.grey[400] : Colors.grey;
+    final contentColor = isDarkMode ? Colors.grey[300] : Colors.black87;
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.getBackgroundColor(context),
       body: SafeArea(
         child: Column(
           children: [
@@ -24,11 +30,12 @@ class TermsAndServicesPage extends StatelessWidget {
                       fontFamily: 'Sora',
                       fontSize: 20.sp,
                       fontWeight: FontWeight.w600,
+                      color: textColor,
                     ),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: Icon(Icons.close, size: 28.sp),
+                    child: Icon(Icons.close, size: 28.sp, color: textColor),
                   ),
                 ],
               ),
@@ -51,58 +58,65 @@ class TermsAndServicesPage extends StatelessWidget {
                           fontFamily: 'DM Sans',
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w400,
-                          color: Colors.grey,
+                          color: subtitleColor,
                         ),
                       ),
                       SizedBox(height: 20.h),
                       
                       // Introduction
-                      _buildSectionTitle('1. Acceptance of Terms'),
+                      _buildSectionTitle(context, '1. Acceptance of Terms'),
                       _buildParagraph(
+                        context,
                         'By using the Eazy Talk application, you agree to comply with and be bound by these terms and conditions. If you do not agree with any part of these terms, you are advised to discontinue using the application.'
                       ),
                       
                       // User Accounts
-                      _buildSectionTitle('2. Service Overview'),
+                      _buildSectionTitle(context, '2. Service Overview'),
                       _buildParagraph(
+                        context,
                         'Eazy Talk is a platform designed to assist users in translating Arabic sign language to text and vice versa. It also offers features to contribute data and provide feedback to enhance the platform. All functionalities are intended for personal, non-commercial use only.'
                       ),
                       
                       // Privacy Policy
-                      _buildSectionTitle('3. User Responsibilities'),
-                      _buildListItem('Use the application solely for its intended purpose.'),
-                      _buildListItem('Avoid uploading inappropriate, offensive, or harmful content.'),
-                      _buildListItem('Provide accurate information when contributing data or providing feedback.'),
+                      _buildSectionTitle(context, '3. User Responsibilities'),
+                      _buildListItem(context, 'Use the application solely for its intended purpose.'),
+                      _buildListItem(context, 'Avoid uploading inappropriate, offensive, or harmful content.'),
+                      _buildListItem(context, 'Provide accurate information when contributing data or providing feedback.'),
                       
                       // User Content
-                      _buildSectionTitle('4. Data Contribution'),
+                      _buildSectionTitle(context, '4. Data Contribution'),
                       _buildParagraph(
-                        'Users contributing data (e.g., videos, photos, or textual labels) grant AI Signs a non-exclusive, royalty-free license to use the content for improving the application’s performance and expanding its database. AI Signs will not use this data for any purpose outside its scope.'
+                        context,
+                        "Users contributing data (e.g., videos, photos, or textual labels) grant AI Signs a non-exclusive, royalty-free license to use the content for improving the application's performance and expanding its database. AI Signs will not use this data for any purpose outside its scope."
                       ),
                      
                       
                       // Prohibited Activities
-                      _buildSectionTitle('5. Privacy Policy'),
+                      _buildSectionTitle(context, '5. Privacy Policy'),
                       _buildParagraph(
+                        context,
                         'Eazy Talk respects your privacy and handles your data responsibly. Collected data will only be used to enhance application functionality and will not be shared with third parties without your consent. For more details, refer to our Privacy Policy.'
- ),
+                      ),
                       
                       // Limitation of Liability
-                      _buildSectionTitle('6. Limitation of Liability'),
+                      _buildSectionTitle(context, '6. Limitation of Liability'),
                       _buildParagraph(
-                        'Eazy Talk is provided on an “as-is” basis. While we strive to ensure accurate translations and smooth functionality, we do not guarantee the application’s performance at all times. AI Signs will not be liable for any damages or losses resulting from the use or inability to use the application.'
+                        context,
+                        "Eazy Talk is provided on an 'as-is' basis. While we strive to ensure accurate translations and smooth functionality, we do not guarantee the application's performance at all times. AI Signs will not be liable for any damages or losses resulting from the use or inability to use the application."
                       ),
                       
                       // Termination
-                      _buildSectionTitle('7. Updates and Changes'),
+                      _buildSectionTitle(context, '7. Updates and Changes'),
                       _buildParagraph(
-                        'Eazy Talk reserves the right to modify these terms and the application’s features at any time. Users will be notified of significant changes through the application or other communication channels.'
+                        context,
+                        "Eazy Talk reserves the right to modify these terms and the application's features at any time. Users will be notified of significant changes through the application or other communication channels."
                       ),
                       
                       
                       // Contact Information
-                      _buildSectionTitle('8. Contact Information'),
+                      _buildSectionTitle(context, '8. Contact Information'),
                       _buildParagraph(
+                        context,
                         'If you have any questions, concerns, or feedback regarding these terms or the application, please reach out to us at: \nEmail: Ammaralhawamdeh@gmail.com \nPhone: 0567132854'
                       ),
                       
@@ -120,7 +134,9 @@ class TermsAndServicesPage extends StatelessWidget {
   
   // Helper widgets for consistent styling
   
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return Padding(
       padding: EdgeInsets.only(top: 24.h, bottom: 12.h),
       child: Text(
@@ -129,13 +145,16 @@ class TermsAndServicesPage extends StatelessWidget {
           fontFamily: 'Sora',
           fontSize: 18.sp,
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: textColor,
         ),
       ),
     );
   }
   
-  Widget _buildParagraph(String text) {
+  Widget _buildParagraph(BuildContext context, String text) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final contentColor = isDarkMode ? Colors.grey[300] : Colors.black87;
+    
     return Padding(
       padding: EdgeInsets.only(bottom: 12.h),
       child: Text(
@@ -144,14 +163,17 @@ class TermsAndServicesPage extends StatelessWidget {
           fontFamily: 'DM Sans',
           fontSize: 14.sp,
           fontWeight: FontWeight.w400,
-          color: Colors.black87,
+          color: contentColor,
           height: 1.5,
         ),
       ),
     );
   }
   
-  Widget _buildListItem(String text) {
+  Widget _buildListItem(BuildContext context, String text) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final contentColor = isDarkMode ? Colors.grey[300] : Colors.black87;
+    
     return Padding(
       padding: EdgeInsets.only(left: 16.w, bottom: 8.h),
       child: Row(
@@ -174,7 +196,7 @@ class TermsAndServicesPage extends StatelessWidget {
                 fontFamily: 'DM Sans',
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w400,
-                color: Colors.black87,
+                color: contentColor,
                 height: 1.5,
               ),
             ),

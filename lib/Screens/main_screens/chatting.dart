@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eazytalk/Screens/secondary_screens/chat_detail.dart';
+import 'package:eazytalk/core/theme/app_colors.dart';
 import 'package:eazytalk/models/conversation_model.dart';
 import 'package:eazytalk/screens/secondary_screens/chatbot.dart';
 import 'package:eazytalk/services/chat/chat_service.dart';
@@ -9,7 +10,7 @@ import 'package:eazytalk/services/user/user_service.dart';
 import 'package:eazytalk/widgets/buttons/gradient_fab.dart';
 import 'package:eazytalk/widgets/chat/conversation_item.dart';
 import 'package:eazytalk/widgets/common/screen_header.dart';
-import 'package:eazytalk/core/theme/app_colors.dart';
+import 'package:eazytalk/widgets/inputs/search_bar.dart';
 import 'package:eazytalk/widgets/signs/section_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -44,8 +45,10 @@ class _ChattingState extends State<Chatting> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.getBackgroundColor(context),
       body: SafeArea(
         child: GestureDetector(
           onTap: () {
@@ -56,7 +59,10 @@ class _ChattingState extends State<Chatting> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Screen title
-              const ScreenHeader(title: 'EazyTalk'),
+              ScreenHeader(
+                title: 'EazyTalk',
+                textColor: AppColors.getTextPrimaryColor(context),
+              ),
               SizedBox(height: 30.h),
 
               // Search and add bar
@@ -173,7 +179,7 @@ class _ChattingState extends State<Chatting> {
                             Icon(
                               Icons.chat_bubble_outline,
                               size: 60.sp,
-                              color: Colors.grey[400],
+                              color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
                             ),
                             SizedBox(height: 16.h),
                             Text(
@@ -181,7 +187,7 @@ class _ChattingState extends State<Chatting> {
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 16.sp,
-                                color: Colors.grey[600],
+                                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                               ),
                             ),
                             SizedBox(height: 8.h),
@@ -190,7 +196,7 @@ class _ChattingState extends State<Chatting> {
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 14.sp,
-                                color: Colors.grey[400],
+                                color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
                               ),
                             ),
                           ],
@@ -210,7 +216,7 @@ class _ChattingState extends State<Chatting> {
                             Icon(
                               Icons.search_off,
                               size: 48.sp,
-                              color: Colors.grey[400],
+                              color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
                             ),
                             SizedBox(height: 16.h),
                             Text(
@@ -218,7 +224,7 @@ class _ChattingState extends State<Chatting> {
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 16.sp,
-                                color: Colors.grey[600],
+                                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -243,7 +249,9 @@ class _ChattingState extends State<Chatting> {
                                 child: Container(
                                   height: 70.h,
                                   decoration: BoxDecoration(
-                                    color: Colors.grey[100],
+                                    color: isDarkMode 
+                                        ? Colors.grey[800]
+                                        : Colors.grey[100],
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
@@ -308,29 +316,29 @@ class _ChattingState extends State<Chatting> {
   }
 
   // Filter conversations based on search query
-List<ConversationModel> _filterConversations(List<ConversationModel> conversations) {
-  if (_searchQuery.isEmpty) {
-    return conversations;
-  }
-  
-  return conversations.where((conv) {
-    // Search in message content
-    if (conv.lastMessage.toLowerCase().contains(_searchQuery.toLowerCase())) {
-      return true;
+  List<ConversationModel> _filterConversations(List<ConversationModel> conversations) {
+    if (_searchQuery.isEmpty) {
+      return conversations;
     }
     
-    // Search in user names
-    final otherUserId = _getOtherParticipantId(conv);
-    if (_userCache.containsKey(otherUserId)) {
-      final userName = _userCache[otherUserId]!['userName'] ?? '';
-      if (userName.toLowerCase().contains(_searchQuery.toLowerCase())) {
+    return conversations.where((conv) {
+      // Search in message content
+      if (conv.lastMessage.toLowerCase().contains(_searchQuery.toLowerCase())) {
         return true;
       }
-    }
-    
-    return false;
-  }).toList();
-}
+      
+      // Search in user names
+      final otherUserId = _getOtherParticipantId(conv);
+      if (_userCache.containsKey(otherUserId)) {
+        final userName = _userCache[otherUserId]!['userName'] ?? '';
+        if (userName.toLowerCase().contains(_searchQuery.toLowerCase())) {
+          return true;
+        }
+      }
+      
+      return false;
+    }).toList();
+  }
 
   // Get the other user's information for a conversation
   Future<Map<String, dynamic>> _getOtherUserInfo(
@@ -379,8 +387,11 @@ List<ConversationModel> _filterConversations(List<ConversationModel> conversatio
 
   // Show modal to select contact for new conversation
   void _showContactsModal() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
       isScrollControlled:
           true, // Make the modal take up to 90% of screen height
       shape: RoundedRectangleBorder(
@@ -403,7 +414,7 @@ List<ConversationModel> _filterConversations(List<ConversationModel> conversatio
                     bottom: 20.h,
                     left: MediaQuery.of(context).size.width * 0.4),
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: isDarkMode ? Colors.grey[700] : Colors.grey[300],
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
@@ -413,6 +424,7 @@ List<ConversationModel> _filterConversations(List<ConversationModel> conversatio
                   fontFamily: 'Sora',
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
+                  color: AppColors.getTextPrimaryColor(context),
                 ),
               ),
               SizedBox(height: 20.h),
@@ -444,6 +456,7 @@ List<ConversationModel> _filterConversations(List<ConversationModel> conversatio
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 14.sp,
+                                color: AppColors.getTextPrimaryColor(context),
                               ),
                             ),
                           ],
@@ -462,6 +475,7 @@ List<ConversationModel> _filterConversations(List<ConversationModel> conversatio
                           style: TextStyle(
                             fontFamily: 'DM Sans',
                             fontSize: 14.sp,
+                            color: AppColors.getTextPrimaryColor(context),
                           ),
                         ),
                       );
@@ -482,7 +496,9 @@ List<ConversationModel> _filterConversations(List<ConversationModel> conversatio
                               vertical: 8.h, horizontal: 12.w),
                           leading: CircleAvatar(
                             radius: 25.r,
-                            backgroundColor: AppColors.backgroundGrey,
+                            backgroundColor: isDarkMode 
+                                ? const Color(0xFF2A2A2A)
+                                : AppColors.backgroundGrey,
                             backgroundImage: user['profileImageBase64'] != null
                                 ? MemoryImage(
                                     base64Decode(user['profileImageBase64']),
@@ -496,7 +512,7 @@ List<ConversationModel> _filterConversations(List<ConversationModel> conversatio
                                     style: TextStyle(
                                       fontSize: 18.sp,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.grey[600],
+                                      color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                                     ),
                                   )
                                 : null,
@@ -507,6 +523,7 @@ List<ConversationModel> _filterConversations(List<ConversationModel> conversatio
                               fontFamily: 'DM Sans',
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w500,
+                              color: AppColors.getTextPrimaryColor(context),
                             ),
                           ),
                           onTap: () => _createAndNavigateToConversation(user),

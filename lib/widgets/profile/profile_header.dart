@@ -24,6 +24,8 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Row(
       children: [
         // Profile Image
@@ -32,14 +34,14 @@ class ProfileHeader extends StatelessWidget {
           height: 120.h,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8.r),
-            color: const Color(0xFFF5F5F5),
+            color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF5F5F5),
             border: Border.all(
-              color: const Color(0xFFE0E0E0),
+              color: isDarkMode ? const Color(0xFF3A3A3A) : const Color(0xFFE0E0E0),
               width: 1,
             ),
           ),
           clipBehavior: Clip.antiAlias,
-          child: _buildProfileImage(),
+          child: _buildProfileImage(isDarkMode),
         ),
         SizedBox(width: 22.w),
         
@@ -55,6 +57,7 @@ class ProfileHeader extends StatelessWidget {
                   fontFamily: 'DM Sans',
                   fontSize: 24.sp,
                   fontWeight: FontWeight.w600,
+                  color: AppColors.getTextPrimaryColor(context),
                 ),
               ),
               SizedBox(height: 5.h),
@@ -66,7 +69,7 @@ class ProfileHeader extends StatelessWidget {
                   fontFamily: 'DM Sans',
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF706E71),
+                  color: isDarkMode ? const Color(0xFFACACAC) : const Color(0xFF706E71),
                 ),
               ),
               SizedBox(height: 10.h),
@@ -90,6 +93,7 @@ class ProfileHeader extends StatelessWidget {
                           'assets/icons/editing 1.png',
                           width: 20.w,
                           height: 20.h,
+                          color: Colors.white,
                         ),
                         SizedBox(width: 8.h),
                         Text(
@@ -116,7 +120,7 @@ class ProfileHeader extends StatelessWidget {
   }
   
   // Helper method to build profile image
-  Widget _buildProfileImage() {
+  Widget _buildProfileImage(bool isDarkMode) {
     if (profileImageUrl != null && profileImageUrl!.isNotEmpty) {
       // Use cached network image for URL
       return CachedNetworkImage(
@@ -127,7 +131,7 @@ class ProfileHeader extends StatelessWidget {
             color: AppColors.primary,
           ),
         ),
-        errorWidget: (context, error, stackTrace) => _fallbackImage(),
+        errorWidget: (context, error, stackTrace) => _fallbackImage(isDarkMode),
       );
     } else if (profileImageBase64 != null && profileImageBase64!.isNotEmpty) {
       // Fallback to base64
@@ -135,28 +139,22 @@ class ProfileHeader extends StatelessWidget {
         return Image.memory(
           base64Decode(profileImageBase64!),
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => _fallbackImage(),
+          errorBuilder: (context, error, stackTrace) => _fallbackImage(isDarkMode),
         );
       } catch (e) {
-        return _fallbackImage();
+        return _fallbackImage(isDarkMode);
       }
     } else {
-      return _fallbackImage();
+      return _fallbackImage(isDarkMode);
     }
   }
   
   // Fallback image when URL or Base64 fails
-  Widget _fallbackImage() {
-    return Image.asset(
-      'assets/images/Rectangle 24.png', // Default image
-      width: 120.w,
-      height: 120.h,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) => Icon(
-        Icons.person,
-        size: 60.sp,
-        color: Colors.grey,
-      ),
+  Widget _fallbackImage(bool isDarkMode) {
+    return Icon(
+      Icons.person,
+      size: 60.sp,
+      color: isDarkMode ? Colors.grey[600] : Colors.grey,
     );
   }
 }

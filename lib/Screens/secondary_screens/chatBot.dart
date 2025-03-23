@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:eazytalk/core/theme/app_colors.dart';
 import 'package:eazytalk/models/message_model.dart';
 import 'package:eazytalk/services/api/gemini_service.dart';
 import 'package:eazytalk/widgets/chat/message_bubble.dart';
 import 'package:eazytalk/widgets/chat/typing_indicator.dart';
 import 'package:eazytalk/widgets/chat/chat_input.dart';
 import 'package:eazytalk/widgets/common/secondary_header.dart';
-import 'package:eazytalk/core/theme/app_colors.dart';
 import 'package:eazytalk/core/theme/text_styles.dart';
 
 class Chatbot extends StatefulWidget {
@@ -79,15 +79,40 @@ class _ChatbotState extends State<Chatbot> {
   }
 
   void _clearChat() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Clear Chat'),
-        content: Text('Are you sure you want to clear the chat history?'),
+        backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+        title: Text(
+          'Clear Chat',
+          style: TextStyle(
+            fontFamily: 'Sora',
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.getTextPrimaryColor(context),
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to clear the chat history?',
+          style: TextStyle(
+            fontFamily: 'DM Sans',
+            fontSize: 14.sp,
+            color: AppColors.getTextPrimaryColor(context),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontFamily: 'DM Sans',
+                fontSize: 14.sp,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -104,7 +129,14 @@ class _ChatbotState extends State<Chatbot> {
               });
               Navigator.pop(context);
             },
-            child: Text('Clear', style: TextStyle(color: Colors.red)),
+            child: Text(
+              'Clear', 
+              style: TextStyle(
+                color: Colors.red,
+                fontFamily: 'DM Sans',
+                fontSize: 14.sp,
+              ),
+            ),
           ),
         ],
       ),
@@ -158,8 +190,12 @@ class _ChatbotState extends State<Chatbot> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textPrimaryColor = AppColors.getTextPrimaryColor(context);
+    final textSecondaryColor = AppColors.getTextSecondaryColor(context);
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.getBackgroundColor(context),
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: GestureDetector(
@@ -176,19 +212,83 @@ class _ChatbotState extends State<Chatbot> {
                     'assets/icons/message 1.png',
                     width: 24.w,
                     height: 24.h,
+                    color: textPrimaryColor,
                   ),
                 ),
               ),
               
               // AI Introduction Section
-              _buildIntroSection(),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 30.h),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Your ',
+                                  style: TextStyle(
+                                    color: textPrimaryColor,
+                                    fontFamily: 'DM Sans',
+                                    fontSize: 16.sp,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'smart assistant',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontFamily: 'DM Sans',
+                                    fontSize: 16.sp,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: ' for effortless communication.',
+                                  style: TextStyle(
+                                    color: textPrimaryColor,
+                                    fontFamily: 'DM Sans',
+                                    fontSize: 16.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 20.h),
+                          Text(
+                            'How may I help you today?',
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w600,
+                              color: textPrimaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Image.asset(
+                      'assets/icons/chatbot 1.png',
+                      width: 85.w,
+                      height: 85.h,
+                    )
+                  ],
+                ),
+              ),
               
-              Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
+              Divider(
+                height: 1, 
+                thickness: 1, 
+                color: isDarkMode ? const Color(0xFF2A2A2A) : Colors.grey.shade200
+              ),
               
               // Chat Messages
               Expanded(
                 child: Container(
-                  color: AppColors.backgroundGrey,
+                  color: isDarkMode ? const Color(0xFF121212) : AppColors.backgroundGrey,
                   child: ListView.builder(
                     controller: _scrollController,
                     padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 16.h),
@@ -201,7 +301,7 @@ class _ChatbotState extends State<Chatbot> {
               ),
               
               // Typing indicator
-              if (_isTyping) const TypingIndicator(),
+              if (_isTyping) TypingIndicator(),
               
               // Message input
               ChatInput(
@@ -212,64 +312,6 @@ class _ChatbotState extends State<Chatbot> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildIntroSection() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 30.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Your ',
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontFamily: 'DM Sans',
-                          fontSize: 16.sp,
-                        ),
-                      ),
-                      TextSpan(
-                        text: 'smart assistant',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontFamily: 'DM Sans',
-                          fontSize: 16.sp,
-                        ),
-                      ),
-                      TextSpan(
-                        text: ' for effortless communication.',
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontFamily: 'DM Sans',
-                          fontSize: 16.sp,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                Text(
-                  'How may I help you today?',
-                  style: AppTextStyles.chatHeading,
-                ),
-              ],
-            ),
-          ),
-          Image.asset(
-            'assets/icons/chatbot 1.png',
-            width: 85.w,
-            height: 85.h,
-          )
-        ],
       ),
     );
   }

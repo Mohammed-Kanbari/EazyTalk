@@ -16,13 +16,15 @@ class ChatInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.05),
             spreadRadius: 1,
             blurRadius: 4,
             offset: Offset(0, -1),
@@ -37,7 +39,7 @@ class ChatInput extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Ask me anything...',
                 hintStyle: TextStyle(
-                  color: Colors.grey,
+                  color: isDarkMode ? Colors.grey[600] : Colors.grey,
                   fontFamily: 'DM Sans',
                   fontSize: 14.sp,
                 ),
@@ -46,6 +48,7 @@ class ChatInput extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'DM Sans',
                 fontSize: 16.sp,
+                color: AppColors.getTextPrimaryColor(context),
               ),
               maxLines: 1,
               textInputAction: TextInputAction.send,
@@ -58,7 +61,7 @@ class ChatInput extends StatelessWidget {
             decoration: BoxDecoration(
               color: canSend 
                   ? AppColors.primary
-                  : Colors.grey.shade300,
+                  : (isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300),
               shape: BoxShape.circle,
             ),
             child: IconButton(

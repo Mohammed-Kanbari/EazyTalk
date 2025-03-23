@@ -1,5 +1,6 @@
 import 'package:eazytalk/Screens/starting_screens/login.dart';
 import 'package:eazytalk/Screens/starting_screens/signup.dart';
+import 'package:eazytalk/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -16,17 +17,26 @@ class _WelcomeState extends State<Welcome> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     pageController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.sizeOf(context).width;
     final screenHeight = MediaQuery.sizeOf(context).height;
+    
+    final backgroundColor = isDarkMode 
+        ? AppColors.darkBackground
+        : Colors.white;
+    
+    final textColor = isDarkMode 
+        ? AppColors.darkTextPrimary
+        : AppColors.textPrimary;
+        
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
         body: Column(
           children: [
             Expanded(
@@ -34,7 +44,11 @@ class _WelcomeState extends State<Welcome> {
                 children: [
                   PageView(
                       controller: pageController,
-                      children: [Onboarding1(), Onboarding2(), Onboarding3()]),
+                      children: [
+                        Onboarding1(isDarkMode: isDarkMode),
+                        Onboarding2(isDarkMode: isDarkMode),
+                        Onboarding3(isDarkMode: isDarkMode)
+                      ]),
                   Container(
                       alignment: Alignment.center,
                       padding: EdgeInsets.only(
@@ -46,7 +60,7 @@ class _WelcomeState extends State<Welcome> {
                         count: 3,
                         effect: WormEffect(
                           // You can use different effects here
-                          dotColor: Colors.grey, // Inactive dots
+                          dotColor: isDarkMode ? Colors.grey[700]! : Colors.grey, // Inactive dots
                           activeDotColor: Color(0xFF00D0FF), // Active dot
                           dotHeight: screenWidth < 400 ? 10 : 12,
                           dotWidth: screenWidth < 400 ? 10 : 12,
@@ -67,11 +81,11 @@ class _WelcomeState extends State<Welcome> {
                   },
                   child: Container(
                     margin: EdgeInsets.only(bottom: screenWidth * 0.06),
-                    width: screenWidth * 0.33,
-                    height: screenHeight * 0.063,
+                    width: screenWidth * 0.29,
+                    height: screenHeight * 0.053,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      color: const Color(0xFFF1F3F5),
+                      color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF1F3F5),
                     ),
                     alignment: Alignment.center,
                     child: Text(
@@ -82,7 +96,7 @@ class _WelcomeState extends State<Welcome> {
                           fontSize: screenWidth < 400 ? 10 : 14,
                           fontFamily: 'Sora',
                           fontWeight: FontWeight.w600,
-                          color: Colors.black),
+                          color: textColor),
                     ),
                   ),
                 ),
@@ -95,8 +109,8 @@ class _WelcomeState extends State<Welcome> {
                   },
                   child: Container(
                     margin: EdgeInsets.only(bottom: screenWidth * 0.06),
-                    width: screenWidth * 0.33,
-                    height: screenHeight * 0.063,
+                    width: screenWidth * 0.29,
+                    height: screenHeight * 0.053,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       color: const Color(0xFF00D0FF),
@@ -122,15 +136,25 @@ class _WelcomeState extends State<Welcome> {
 }
 
 class Onboarding1 extends StatelessWidget {
-  Onboarding1({super.key});
+  final bool isDarkMode;
+  
+  Onboarding1({super.key, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final screenHeight = MediaQuery.sizeOf(context).height;
+    
+    final backgroundColor = isDarkMode 
+        ? AppColors.darkBackground
+        : Colors.white;
+    
+    final textColor = isDarkMode 
+        ? AppColors.darkTextPrimary
+        : AppColors.textPrimary;
 
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -142,6 +166,7 @@ class Onboarding1 extends StatelessWidget {
                 'assets/images/onboarding1.png',
                 width: screenWidth * 0.8,
                 height: screenHeight * 0.31,
+                color: isDarkMode ? Colors.white70 : null,
               ),
               SizedBox(
                 height: screenHeight * 0.05,
@@ -161,7 +186,7 @@ class Onboarding1 extends StatelessWidget {
                                   : 28,
                       fontFamily: 'Sora',
                       fontWeight: FontWeight.w600,
-                      color: Color(0xff1A1A1A)),
+                      color: textColor),
                 ),
               ),
               SizedBox(
@@ -179,7 +204,7 @@ class Onboarding1 extends StatelessWidget {
                       fontSize: screenWidth < 400 ? 14 : 16,
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w400,
-                      color: Color(0xff1A1A1A)),
+                      color: textColor),
                 ),
               ),
             ],
@@ -189,15 +214,25 @@ class Onboarding1 extends StatelessWidget {
 }
 
 class Onboarding2 extends StatelessWidget {
-  Onboarding2({super.key});
+  final bool isDarkMode;
+  
+  Onboarding2({super.key, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final screenHeight = MediaQuery.sizeOf(context).height;
 
+    final backgroundColor = isDarkMode 
+        ? AppColors.darkBackground
+        : Colors.white;
+    
+    final textColor = isDarkMode 
+        ? AppColors.darkTextPrimary
+        : AppColors.textPrimary;
+
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -209,6 +244,7 @@ class Onboarding2 extends StatelessWidget {
                 'assets/images/onboarding2.png',
                 width: screenWidth * 0.95,
                 height: screenHeight * 0.29,
+                color: isDarkMode ? Colors.white70 : null,
               ),
               SizedBox(
                 height: screenHeight * 0.047,
@@ -228,7 +264,7 @@ class Onboarding2 extends StatelessWidget {
                                   : 28,
                       fontFamily: 'Sora',
                       fontWeight: FontWeight.w600,
-                      color: Color(0xff1A1A1A)),
+                      color: textColor),
                 ),
               ),
               SizedBox(
@@ -246,7 +282,7 @@ class Onboarding2 extends StatelessWidget {
                       fontSize: screenWidth < 400 ? 14 : 16,
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w400,
-                      color: Color(0xff1A1A1A)),
+                      color: textColor),
                 ),
               ),
             ],
@@ -256,15 +292,25 @@ class Onboarding2 extends StatelessWidget {
 }
 
 class Onboarding3 extends StatelessWidget {
-  Onboarding3({super.key});
+  final bool isDarkMode;
+  
+  Onboarding3({super.key, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final screenHeight = MediaQuery.sizeOf(context).height;
 
+    final backgroundColor = isDarkMode 
+        ? AppColors.darkBackground
+        : Colors.white;
+    
+    final textColor = isDarkMode 
+        ? AppColors.darkTextPrimary
+        : AppColors.textPrimary;
+
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -276,6 +322,7 @@ class Onboarding3 extends StatelessWidget {
                 'assets/images/onboarding3.png',
                 width: screenWidth * 0.95,
                 height: screenHeight * 0.26,
+                color: isDarkMode ? Colors.white70 : null,
               ),
               SizedBox(
                 height: screenHeight * 0.036,
@@ -295,7 +342,7 @@ class Onboarding3 extends StatelessWidget {
                                   : 28,
                       fontFamily: 'Sora',
                       fontWeight: FontWeight.w600,
-                      color: Color(0xff1A1A1A)),
+                      color: textColor),
                 ),
               ),
               SizedBox(
@@ -313,7 +360,7 @@ class Onboarding3 extends StatelessWidget {
                       fontSize: screenWidth < 400 ? 14 : 16,
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w400,
-                      color: Color(0xff1A1A1A)),
+                      color: textColor),
                 ),
               ),
             ],

@@ -40,6 +40,9 @@ class _InstructionCardState extends State<InstructionCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return Row(
       children: [
         Container(
@@ -82,6 +85,7 @@ class _InstructionCardState extends State<InstructionCard> {
                       'assets/icons/arrow-left.png',
                       width: 25.w,
                       height: 25.h,
+                      color: isDarkMode ? Colors.white70 : null,
                     ),
                     onPressed: previousInstruction,
                   ),
@@ -91,7 +95,11 @@ class _InstructionCardState extends State<InstructionCard> {
                     child: Text(
                       widget.instructions[currentIndex],
                       textAlign: TextAlign.center,
-                      style: AppTextStyles.bodyText,
+                      style: TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontSize: 14.sp,
+                        color: textColor,
+                      ),
                     ),
                   ),
                 ),
@@ -101,6 +109,7 @@ class _InstructionCardState extends State<InstructionCard> {
                       'assets/icons/arrow-right 1.png',
                       width: 25.w,
                       height: 25.h,
+                      color: isDarkMode ? Colors.white70 : null,
                     ),
                     onPressed: nextInstruction,
                   ),

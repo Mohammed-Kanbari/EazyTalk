@@ -57,12 +57,12 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
         fontFamily: 'Sora',
         fontSize: 18.sp,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: AppColors.getTextPrimaryColor(context),
       ),
       TextStyle(
         fontFamily: 'DM Sans',
         fontSize: 14.sp,
-        color: AppColors.textPrimary,
+        color: AppColors.getTextPrimaryColor(context),
       ),
       TextStyle(
         color: AppColors.primary,
@@ -74,8 +74,10 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.getBackgroundColor(context),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +85,10 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const ScreenHeader(title: 'Smart Tools'),
+                ScreenHeader(
+                  title: 'Smart Tools',
+                  textColor: AppColors.getTextPrimaryColor(context),
+                ),
                 if (_isOffline)
                   GestureDetector(
                     onTap: _showConnectivityMessage,
@@ -91,6 +96,7 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
                       padding:  EdgeInsets.only(right: 28.w, top: 27.h),
                       child: Image.asset(
                         'assets/icons/exclamation 1.png',
+                        color: isDarkMode ? Colors.yellowAccent : null,
                         width: 28.w,
                         height: 28.h,
                       ),
@@ -135,7 +141,7 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
                       
                       Text(
                         'How to use smart tools :',
-                        style: AppTextStyles.sectionTitle,
+                        style: AppTextStyles.getSectionTitle(context),
                       ),
                       SizedBox(height: 20.h),
                       
@@ -143,7 +149,9 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
                       InstructionCard(
                         instructions: _instructions,
                         numberBackgroundColor: AppColors.primary,
-                        cardBackgroundColor: AppColors.backgroundGrey,
+                        cardBackgroundColor: isDarkMode 
+                            ? const Color(0xFF2A2A2A) 
+                            : AppColors.backgroundGrey,
                       ),
                       
                       SizedBox(height: 20.h),
@@ -159,9 +167,16 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
   }
 
   Widget _buildIntroText() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return RichText(
       text: TextSpan(
-        style: AppTextStyles.introText,
+        style: TextStyle(
+          fontFamily: 'DM Sans',
+          fontSize: 16.sp,
+          color: textColor,
+        ),
         children: [
           const TextSpan(text: 'Enhance communication with '),
           TextSpan(

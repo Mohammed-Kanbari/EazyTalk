@@ -1,5 +1,6 @@
 import 'package:eazytalk/Screens/secondary_screens/navigation.dart';
 import 'package:eazytalk/Screens/starting_screens/signup.dart';
+import 'package:eazytalk/core/theme/app_colors.dart';
 import 'package:eazytalk/widgets/buttons/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -99,11 +100,28 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.sizeOf(context).width;
     final screenHeight = MediaQuery.sizeOf(context).height;
 
+    final backgroundColor = isDarkMode 
+        ? AppColors.darkBackground
+        : Colors.white;
+    
+    final textColor = isDarkMode 
+        ? AppColors.darkTextPrimary
+        : AppColors.textPrimary;
+    
+    final borderColor = isDarkMode 
+        ? const Color(0xFF3A3A3A)
+        : const Color(0xFFC7C7C7);
+
+    final hintColor = isDarkMode 
+        ? const Color(0xFF7A7A7A)
+        : const Color(0xFFC7C7C7);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: GestureDetector(
@@ -126,6 +144,7 @@ class _LoginState extends State<Login> {
                           child: Image.asset(
                             'assets/images/welcome.png',
                             width: screenWidth * 0.8,
+                            color: isDarkMode ? Colors.white70 : null,
                           ),
                         ),
                       ),
@@ -146,7 +165,7 @@ class _LoginState extends State<Login> {
                           fontFamily: 'DM Sans',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color.fromARGB(255, 0, 0, 0),
+                          color: textColor,
                         ),
                       ),
                       SizedBox(height: 31.h),
@@ -156,14 +175,18 @@ class _LoginState extends State<Login> {
                           fontFamily: 'DM Sans',
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color.fromARGB(255, 0, 0, 0),
+                          color: textColor,
                         ),
                       ),
                       SizedBox(height: 9.h),
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        style: TextStyle(fontSize: 16.sp, fontFamily: 'DM Sans'),
+                        style: TextStyle(
+                          fontSize: 16.sp, 
+                          fontFamily: 'DM Sans',
+                          color: textColor,
+                        ),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           hintText: 'Enter your email',
@@ -171,15 +194,17 @@ class _LoginState extends State<Login> {
                             fontSize: 14.sp,
                             fontFamily: 'DM Sans',
                             fontWeight: FontWeight.w400,
-                            color: const Color(0xFFC7C7C7),
+                            color: hintColor,
                           ),
+                          filled: true,
+                          fillColor: isDarkMode ? const Color(0xFF1E1E1E) : null,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           focusedBorder: OutlineInputBorder(
                             borderSide: const BorderSide(color: Color(0xFF00D0FF), width: 1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Color(0xFFC7C7C7), width: 1),
+                            borderSide: BorderSide(color: borderColor, width: 1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           errorMaxLines: 2,
@@ -201,7 +226,7 @@ class _LoginState extends State<Login> {
                           fontFamily: 'DM Sans',
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color.fromARGB(255, 0, 0, 0),
+                          color: textColor,
                         ),
                       ),
                       SizedBox(height: 9.h),
@@ -209,7 +234,11 @@ class _LoginState extends State<Login> {
                         controller: _passwordController,
                         autocorrect: false,
                         obscureText: _obsecurePassword,
-                        style: TextStyle(fontSize: 16.sp, fontFamily: 'DM Sans'),
+                        style: TextStyle(
+                          fontSize: 16.sp, 
+                          fontFamily: 'DM Sans',
+                          color: textColor,
+                        ),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           hintText: 'Enter your password',
@@ -217,15 +246,17 @@ class _LoginState extends State<Login> {
                             fontSize: 14.sp,
                             fontFamily: 'DM Sans',
                             fontWeight: FontWeight.w400,
-                            color: const Color(0xFFC7C7C7),
+                            color: hintColor,
                           ),
+                          filled: true,
+                          fillColor: isDarkMode ? const Color(0xFF1E1E1E) : null,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           focusedBorder: OutlineInputBorder(
                             borderSide: const BorderSide(color: Color(0xFF00D0FF), width: 1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Color(0xFFC7C7C7), width: 1),
+                            borderSide: BorderSide(color: borderColor, width: 1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           suffixIcon: IconButton(
@@ -235,7 +266,7 @@ class _LoginState extends State<Login> {
                               });
                             },
                             icon: Icon(
-                              color: const Color(0xFFC7C7C7),
+                              color: hintColor,
                               _obsecurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
                             ),
                           ),
@@ -257,7 +288,7 @@ class _LoginState extends State<Login> {
                             fontFamily: 'DM Sans',
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF787579),
+                            color: isDarkMode ? const Color(0xFFAAAAAAA) : const Color(0xFF787579),
                           ),
                         ),
                       ),
@@ -276,7 +307,7 @@ class _LoginState extends State<Login> {
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontFamily: 'DM Sans',
-                              color: const Color(0xFF757575),
+                              color: isDarkMode ? Colors.grey[400] : const Color(0xFF757575),
                             ),
                           ),
                           InkWell(

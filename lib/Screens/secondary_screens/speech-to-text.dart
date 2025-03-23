@@ -149,8 +149,10 @@ class _SpeechState extends State<Speech> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.getBackgroundColor(context),
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: GestureDetector(
@@ -174,10 +176,13 @@ class _SpeechState extends State<Speech> {
                           onChanged: (value) => _transcribedText = value,
                           onCopy: _copyText,
                           onClear: _clearText,
+                          isDarkMode: isDarkMode,
                         ),
                         SizedBox(height: 36.h),
                         Divider(
-                          color: AppColors.dividerColor,
+                          color: isDarkMode 
+                              ? const Color(0xFF323232) 
+                              : AppColors.dividerColor,
                           thickness: 1,
                           height: 1,
                         ),
@@ -187,6 +192,7 @@ class _SpeechState extends State<Speech> {
                           maxSoundLevel: _maxSoundLevel,
                           onToggleListening: _toggleListening,
                           onStopListening: _stopListening,
+                          isDarkMode: isDarkMode,
                         ),
                       ],
                     ),

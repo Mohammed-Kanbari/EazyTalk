@@ -4,9 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 
-
-
-
 class SplashScreen extends StatefulWidget {
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -60,6 +57,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 'assets/images/DesignerIn.png', 
                 width: screenWidth * 0.47,
                 height: screenHeight * 0.22,
+                color: Colors.white,
               ),
 
               SizedBox(height: 15),

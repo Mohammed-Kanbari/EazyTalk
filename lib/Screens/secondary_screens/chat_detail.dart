@@ -122,8 +122,10 @@ class _ChatDetailState extends State<ChatDetail> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.getBackgroundColor(context),
       body: SafeArea(
         child: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
@@ -135,7 +137,7 @@ class _ChatDetailState extends State<ChatDetail> {
               // Chat messages
               Expanded(
                 child: Container(
-                  color: AppColors.backgroundGrey,
+                  color: isDarkMode ? const Color(0xFF121212) : AppColors.backgroundGrey,
                   child: StreamBuilder<List<Message>>(
                     stream: _chatService.getMessages(widget.conversation.id),
                     builder: (context, snapshot) {
@@ -167,7 +169,7 @@ class _ChatDetailState extends State<ChatDetail> {
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 16.sp,
-                                color: Colors.grey[600],
+                                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                               ),
                             ),
                           ),
@@ -204,14 +206,17 @@ class _ChatDetailState extends State<ChatDetail> {
 
   // Build header with user info
   Widget _buildHeader() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return Container(
       padding:
           EdgeInsets.only(top: 27.h, bottom: 10.h, right: 28.w, left: 28.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.05),
             offset: const Offset(0, 2),
             blurRadius: 6,
           ),
@@ -226,10 +231,11 @@ class _ChatDetailState extends State<ChatDetail> {
               'assets/icons/back-arrow.png',
               width: 22.w,
               height: 22.h,
+              color: textColor,
               errorBuilder: (context, error, stackTrace) => Icon(
                 Icons.arrow_back_ios,
                 size: 20.sp,
-                color: Colors.black,
+                color: textColor,
               ),
             ),
           ),
@@ -241,7 +247,7 @@ class _ChatDetailState extends State<ChatDetail> {
             height: 50.h,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.backgroundGrey,
+              color: isDarkMode ? const Color(0xFF2A2A2A) : AppColors.backgroundGrey,
             ),
             child: _otherUserProfileImage != null
                 ? ClipRRect(
@@ -252,14 +258,14 @@ class _ChatDetailState extends State<ChatDetail> {
                       errorBuilder: (context, error, stackTrace) => Icon(
                         Icons.person,
                         size: 20.sp,
-                        color: Colors.grey,
+                        color: isDarkMode ? Colors.grey[600] : Colors.grey,
                       ),
                     ),
                   )
                 : Icon(
                     Icons.person,
                     size: 20.sp,
-                    color: Colors.grey,
+                    color: isDarkMode ? Colors.grey[600] : Colors.grey,
                   ),
           ),
           SizedBox(width: 12.w),
@@ -275,6 +281,7 @@ class _ChatDetailState extends State<ChatDetail> {
                     fontFamily: 'Sora',
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w600,
+                    color: textColor,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -294,6 +301,7 @@ class _ChatDetailState extends State<ChatDetail> {
             'assets/icons/camera.png',
             width: 28.w,
             height: 28.h,
+            color: isDarkMode ? Colors.white : null,
           )),
          
         ],

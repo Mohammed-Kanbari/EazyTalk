@@ -13,6 +13,24 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    // User message bubble is always primary color
+    // Other user's message bubble is white in light mode, darker gray in dark mode
+    final backgroundColor = message.isUser 
+        ? AppColors.primary 
+        : (isDarkMode ? const Color(0xFF2A2A2A) : Colors.white);
+    
+    // Text color is white for user messages, theme-aware for other messages
+    final textColor = message.isUser 
+        ? Colors.white 
+        : AppColors.getTextPrimaryColor(context);
+    
+    // Time color is semi-transparent based on bubble color
+    final timeColor = message.isUser 
+        ? Colors.white.withOpacity(0.8) 
+        : (isDarkMode ? Colors.grey[400] : Colors.grey);
+
     return Align(
       alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -26,7 +44,7 @@ class MessageBubble extends StatelessWidget {
         ),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
-          color: message.isUser ? AppColors.primary : Colors.white,
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             BoxShadow(
@@ -44,7 +62,7 @@ class MessageBubble extends StatelessWidget {
               Text(
                 message.text,
                 style: TextStyle(
-                  color: message.isUser ? Colors.white : AppColors.textPrimary,
+                  color: textColor,
                   fontFamily: 'DM Sans',
                   fontSize: 14.sp,
                 ),
@@ -55,7 +73,7 @@ class MessageBubble extends StatelessWidget {
                 child: Text(
                   message.formattedTime,
                   style: TextStyle(
-                    color: message.isUser ? Colors.white.withOpacity(0.8) : Colors.grey,
+                    color: timeColor,
                     fontFamily: 'DM Sans',
                     fontSize: 10.sp,
                   ),

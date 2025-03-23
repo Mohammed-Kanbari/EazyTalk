@@ -24,6 +24,12 @@ class ConversationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final subtitleColor = isDarkMode 
+        ? (isUnread ? Colors.grey[300] : Colors.grey[500])
+        : (isUnread ? Colors.black : Colors.grey[600]);
+    
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -31,7 +37,9 @@ class ConversationItem extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: Colors.grey.withOpacity(0.2),
+              color: isDarkMode 
+                  ? Colors.grey.withOpacity(0.3)
+                  : Colors.grey.withOpacity(0.2),
               width: 1,
             ),
           ),
@@ -44,7 +52,9 @@ class ConversationItem extends StatelessWidget {
               height: 50.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.backgroundGrey,
+                color: isDarkMode 
+                    ? const Color(0xFF2A2A2A)
+                    : AppColors.backgroundGrey,
               ),
               child: profileImage != null
                   ? ClipRRect(
@@ -55,14 +65,14 @@ class ConversationItem extends StatelessWidget {
                         errorBuilder: (context, error, stackTrace) => Icon(
                           Icons.person,
                           size: 25.sp,
-                          color: Colors.grey,
+                          color: isDarkMode ? Colors.grey[600] : Colors.grey,
                         ),
                       ),
                     )
                   : Icon(
                       Icons.person,
                       size: 25.sp,
-                      color: Colors.grey,
+                      color: isDarkMode ? Colors.grey[600] : Colors.grey,
                     ),
             ),
             SizedBox(width: 16.w),
@@ -84,7 +94,7 @@ class ConversationItem extends StatelessWidget {
                           fontSize: 16.sp,
                           fontWeight:
                               isUnread ? FontWeight.w600 : FontWeight.w500,
-                          color: Colors.black,
+                          color: textColor,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -95,7 +105,7 @@ class ConversationItem extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: 'DM Sans',
                           fontSize: 12.sp,
-                          color: Colors.grey,
+                          color: isDarkMode ? Colors.grey[500] : Colors.grey,
                         ),
                       ),
                     ],
@@ -116,7 +126,7 @@ class ConversationItem extends StatelessWidget {
                             fontSize: 14.sp,
                             fontWeight:
                                 isUnread ? FontWeight.w500 : FontWeight.w400,
-                            color: isUnread ? Colors.black : Colors.grey[600],
+                            color: subtitleColor,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -124,7 +134,6 @@ class ConversationItem extends StatelessWidget {
                       ),
                       SizedBox(width: 8.w),
 
-                      // lib/widgets/chat/conversation_item.dart (continued)
                       // Unread indicator
                       if (isUnread)
                         Container(

@@ -21,14 +21,19 @@ class FeatureCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withOpacity(0.2),
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.3)
+                : AppColors.textPrimary.withOpacity(0.2),
             spreadRadius: 0,
             blurRadius: 10,
             offset: const Offset(0, 0),
@@ -54,13 +59,23 @@ class FeatureCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: AppTextStyles.featureTitle,
+                        style: TextStyle(
+                          fontFamily: 'DM Sans',
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                          color: textColor,
+                        ),
                       ),
                       SizedBox(height: 5.h),
                       Text(
                         description,
                         maxLines: 3,
-                        style: AppTextStyles.featureDescription,
+                        style: TextStyle(
+                          fontFamily: 'DM Sans',
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w400,
+                          color: textColor,
+                        ),
                       ),
                     ],
                   ),
@@ -70,7 +85,7 @@ class FeatureCard extends StatelessWidget {
           ),
           Container(
             margin: EdgeInsets.only(right: 17.w, bottom: 10.h),
-            height: 40.h,
+            height: 35.h,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: AppColors.primary,

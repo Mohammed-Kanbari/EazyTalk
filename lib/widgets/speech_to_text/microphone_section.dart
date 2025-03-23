@@ -10,6 +10,7 @@ class MicrophoneSection extends StatelessWidget {
   final double maxSoundLevel;
   final VoidCallback onToggleListening;
   final VoidCallback onStopListening;
+  final bool isDarkMode;
   
   const MicrophoneSection({
     Key? key,
@@ -18,10 +19,16 @@ class MicrophoneSection extends StatelessWidget {
     required this.maxSoundLevel,
     required this.onToggleListening,
     required this.onStopListening,
+    required this.isDarkMode,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final textSecondaryColor = isDarkMode 
+        ? Colors.grey[400]
+        : AppColors.textSecondary;
+    
     return ConstrainedBox(
       constraints: BoxConstraints(
         minHeight: MediaQuery.of(context).size.height * 0.45,
@@ -35,7 +42,7 @@ class MicrophoneSection extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'DM Sans',
               fontSize: 14.sp,
-              color: AppColors.textSecondary,
+              color: textSecondaryColor,
             ),
           ),
           Row(
@@ -109,7 +116,9 @@ class MicrophoneSection extends StatelessWidget {
                 icon: Icon(
                   Icons.stop,
                   size: 28.w,
-                  color: isListening ? Colors.red : Colors.grey[300],
+                  color: isListening 
+                      ? Colors.red 
+                      : (isDarkMode ? Colors.grey[700] : Colors.grey[300]),
                 ),
                 onPressed: isListening ? onStopListening : null,
               ),
@@ -120,7 +129,7 @@ class MicrophoneSection extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'DM Sans',
               fontSize: 20.sp,
-              color: AppColors.textSecondary,
+              color: textSecondaryColor,
             ),
           ),
         ],

@@ -100,8 +100,11 @@ class _ChangePassState extends State<ChangePass> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.getBackgroundColor(context),
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: GestureDetector(
@@ -130,7 +133,7 @@ class _ChangePassState extends State<ChangePass> {
                         SizedBox(height: 12.h),
 
                         // Instructions box
-                        _buildInstructionsBox(),
+                        _buildInstructionsBox(isDarkMode),
 
                         SizedBox(height: 24.h),
 
@@ -140,6 +143,7 @@ class _ChangePassState extends State<ChangePass> {
                           label: 'Current Password :',
                           hintText: 'Enter your current password',
                           onVisibilityChanged: (_) {},
+                          isDarkMode: isDarkMode,
                         ),
 
                         SizedBox(height: 24.h),
@@ -152,6 +156,7 @@ class _ChangePassState extends State<ChangePass> {
                           showValidationIcon: true,
                           isValid: _isPasswordValid,
                           onVisibilityChanged: (_) {},
+                          isDarkMode: isDarkMode,
                         ),
 
                         // Password requirements checklist
@@ -168,6 +173,7 @@ class _ChangePassState extends State<ChangePass> {
                           showValidationIcon: true,
                           isValid: _doPasswordsMatch,
                           onVisibilityChanged: (_) {},
+                          isDarkMode: isDarkMode,
                         ),
 
                         // Password match hint
@@ -202,6 +208,8 @@ class _ChangePassState extends State<ChangePass> {
 
   // Title section with icon
   Widget _buildTitleSection() {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return Row(
       children: [
         Icon(
@@ -216,7 +224,7 @@ class _ChangePassState extends State<ChangePass> {
             fontFamily: 'DM Sans',
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
-            color: Colors.black,
+            color: textColor,
           ),
         ),
       ],
@@ -224,13 +232,25 @@ class _ChangePassState extends State<ChangePass> {
   }
 
   // Instructions box
-  Widget _buildInstructionsBox() {
+  Widget _buildInstructionsBox(bool isDarkMode) {
+    final backgroundColor = isDarkMode
+        ? const Color(0xFF0A3A42) // Dark blue-gray for dark theme
+        : const Color(0xFFE8F8FC); // Light blue for light theme
+        
+    final borderColor = isDarkMode
+        ? const Color(0xFF085F6B) // Darker blue-gray for border
+        : const Color(0xFFCCEEF5); // Light blue for border
+    
+    final textColor = isDarkMode
+        ? Colors.grey[300]
+        : Colors.grey[700];
+    
     return Container(
       padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8F8FC),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: const Color(0xFFCCEEF5)),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,7 +268,7 @@ class _ChangePassState extends State<ChangePass> {
                 fontFamily: 'DM Sans',
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w400,
-                color: Colors.grey[700],
+                color: textColor,
               ),
             ),
           ),

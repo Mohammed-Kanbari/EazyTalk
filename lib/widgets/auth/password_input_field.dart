@@ -9,6 +9,7 @@ class PasswordInputField extends StatefulWidget {
   final bool showValidationIcon;
   final bool isValid;
   final Function(bool) onVisibilityChanged;
+  final bool isDarkMode;
 
   const PasswordInputField({
     Key? key,
@@ -18,6 +19,7 @@ class PasswordInputField extends StatefulWidget {
     this.showValidationIcon = false,
     this.isValid = false,
     required this.onVisibilityChanged,
+    required this.isDarkMode,
   }) : super(key: key);
 
   @override
@@ -29,6 +31,25 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
 
   @override
   Widget build(BuildContext context) {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final hintColor = widget.isDarkMode 
+        ? Colors.grey[600]
+        : AppColors.iconGrey;
+    
+    // Define colors based on validation status
+    final Color enabledBorderColor = widget.controller.text.isEmpty
+        ? (widget.isDarkMode ? const Color(0xFF3A3A3A) : AppColors.iconGrey)
+        : (widget.showValidationIcon
+            ? (widget.isValid 
+                ? Colors.green.withOpacity(widget.isDarkMode ? 0.7 : 0.5) 
+                : Colors.red.withOpacity(widget.isDarkMode ? 0.7 : 0.5))
+            : (widget.isDarkMode ? const Color(0xFF3A3A3A) : AppColors.iconGrey));
+    
+    // Background color for the field
+    final Color? fillColor = widget.isDarkMode 
+        ? const Color(0xFF1E1E1E)
+        : null; // null will use default from theme
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -41,7 +62,7 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
                 fontFamily: 'DM Sans',
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
-                color: Colors.black87,
+                color: textColor,
               ),
             ),
             const Spacer(),
@@ -61,7 +82,11 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
           controller: widget.controller,
           obscureText: _obscureText,
           autocorrect: false,
-          style: TextStyle(fontSize: 16.sp, fontFamily: 'DM Sans'),
+          style: TextStyle(
+            fontSize: 16.sp, 
+            fontFamily: 'DM Sans',
+            color: textColor,
+          ),
           decoration: InputDecoration(
             contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             hintText: widget.hintText,
@@ -69,8 +94,10 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
               fontSize: 14.sp,
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.w400,
-              color: AppColors.iconGrey,
+              color: hintColor,
             ),
+            filled: true,
+            fillColor: fillColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
@@ -80,11 +107,7 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
             ),
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: widget.controller.text.isEmpty 
-                    ? AppColors.iconGrey
-                    : (widget.showValidationIcon ? 
-                        (widget.isValid ? Colors.green.withOpacity(0.5) : Colors.red.withOpacity(0.5))
-                        : AppColors.iconGrey),
+                color: enabledBorderColor,
                 width: 1
               ),
               borderRadius: BorderRadius.circular(12.r),
@@ -92,7 +115,7 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
             suffixIcon: IconButton(
               icon: Icon(
                 _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                color: Colors.grey,
+                color: hintColor,
                 size: 20.sp,
               ),
               onPressed: () {

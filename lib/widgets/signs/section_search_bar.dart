@@ -12,6 +12,8 @@ class SectionSearchBar extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20.h),
       child: TextField(
@@ -22,7 +24,7 @@ class SectionSearchBar extends StatelessWidget {
             fontSize: 14.sp,
             fontFamily: 'DM Sans',
             fontWeight: FontWeight.w400,
-            color: AppColors.iconGrey,
+            color: AppColors.getIconGreyColor(context),
           ),
           prefixIcon: Icon(
             Icons.search,
@@ -30,17 +32,14 @@ class SectionSearchBar extends StatelessWidget {
             size: 20.sp,
           ),
           filled: true,
-          fillColor: AppColors.backgroundGrey,
+          fillColor: isDarkMode ? const Color(0xFF2A2A2A) : AppColors.backgroundGrey,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.r),
             borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.r),
-            borderSide: BorderSide(
-              color: AppColors.primary,
-              width: 1.0,
-            ),
+            borderSide: BorderSide(color: AppColors.primary),
           ),
           contentPadding: EdgeInsets.symmetric(
             vertical: 14.h,
@@ -50,7 +49,7 @@ class SectionSearchBar extends StatelessWidget {
         style: TextStyle(
           fontFamily: 'DM Sans',
           fontSize: 14.sp,
-          color: Colors.black87,
+          color: AppColors.getTextPrimaryColor(context),
         ),
       ),
     );

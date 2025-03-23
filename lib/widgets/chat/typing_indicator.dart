@@ -7,10 +7,12 @@ class TypingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
       alignment: Alignment.centerLeft,
-      color: Colors.white,
+      color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
       child: Row(
         children: [
           SizedBox(
@@ -25,7 +27,7 @@ class TypingIndicator extends StatelessWidget {
           Text(
             'AI is thinking...',
             style: TextStyle(
-              color: Colors.grey,
+              color: isDarkMode ? Colors.grey[400] : Colors.grey,
               fontFamily: 'DM Sans',
               fontSize: 12.sp,
               fontStyle: FontStyle.italic,

@@ -49,8 +49,11 @@ class _DeafFriendlyExcursionsState extends State<DeafFriendlyExcursions> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.getBackgroundColor(context),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,15 +75,12 @@ class _DeafFriendlyExcursionsState extends State<DeafFriendlyExcursions> {
                 itemBuilder: (context, index) {
                   if (index == 0) {
                     // First item is the subtitle
-                    return _buildSubtitle();
+                    return _buildSubtitle(isDarkMode);
                   }
                   
                   // Adjust index for destinations after the subtitle
                   final destination = _destinations[index - 1];
-                  return DestinationCard(
-                    destination: destination,
-                    onExplorePressed: () => _handleExplorePressed(destination.url),
-                  );
+                  return _buildDestinationCard(destination, isDarkMode);
                 },
               ),
             ),
@@ -91,7 +91,9 @@ class _DeafFriendlyExcursionsState extends State<DeafFriendlyExcursions> {
   }
 
   // Build subtitle widget
-  Widget _buildSubtitle() {
+  Widget _buildSubtitle(bool isDarkMode) {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return Padding(
       padding: EdgeInsets.only(top: 30.h, bottom: 30.h),
       child: RichText(
@@ -99,7 +101,7 @@ class _DeafFriendlyExcursionsState extends State<DeafFriendlyExcursions> {
           style: TextStyle(
             fontFamily: 'DM Sans',
             fontSize: 16.sp,
-            color: Colors.black,
+            color: textColor,
           ),
           children: [
             const TextSpan(text: 'Discover '),
@@ -113,6 +115,100 @@ class _DeafFriendlyExcursionsState extends State<DeafFriendlyExcursions> {
                 text: ' hideaways where fun knows no boundaries.'),
           ],
         ),
+      ),
+    );
+  }
+  
+  // Build destination card
+  Widget _buildDestinationCard(ExcursionModel destination, bool isDarkMode) {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final descriptionColor = isDarkMode ? Colors.grey[300] : Colors.black87;
+    final cardBgColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+    
+    return Container(
+      margin: EdgeInsets.only(bottom: 20.h),
+      decoration: BoxDecoration(
+        color: cardBgColor,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.2),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: const Offset(0, 0),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Destination Image
+          ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
+            child: Image.asset(
+              destination.image,
+              width: double.infinity,
+              height: 200.h,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: double.infinity,
+                height: 200.h,
+                color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
+                child: Icon(
+                  Icons.image_not_supported,
+                  size: 50.sp,
+                  color: isDarkMode ? Colors.grey[600] : Colors.grey[500],
+                ),
+              ),
+            ),
+          ),
+          
+          // Destination Details
+          Padding(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  destination.title,
+                  style: TextStyle(
+                    fontFamily: 'DM Sans',
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
+                ),
+                SizedBox(height: 10.h),
+                Text(
+                  destination.description,
+                  style: TextStyle(
+                    fontFamily: 'DM Sans',
+                    fontSize: 14.sp,
+                    color: descriptionColor,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                
+                // Explore More Button
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: () => _handleExplorePressed(destination.url),
+                    child: Text(
+                      'Explore more',
+                      style: TextStyle(
+                        fontFamily: 'Sora',
+                        fontSize: 14.sp,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
