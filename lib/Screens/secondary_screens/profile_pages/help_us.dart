@@ -155,9 +155,14 @@ class _HelpUsPageState extends State<HelpUsPage> {
 
   // Show thank you dialog after successful submission
   void _showThankYouDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final secondaryTextColor = isDarkMode ? Colors.grey[300] : Colors.black87;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.getSurfaceColor(context),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
         ),
@@ -185,6 +190,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
                 fontFamily: 'Sora',
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w600,
+                color: textColor,
               ),
             ),
             SizedBox(height: 16.h),
@@ -194,7 +200,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
               style: TextStyle(
                 fontFamily: 'DM Sans',
                 fontSize: 14.sp,
-                color: Colors.black87,
+                color: secondaryTextColor,
               ),
             ),
             SizedBox(height: 20.h),
@@ -225,8 +231,10 @@ class _HelpUsPageState extends State<HelpUsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.getBackgroundColor(context),
       body: SafeArea(
         child: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
@@ -265,6 +273,9 @@ class _HelpUsPageState extends State<HelpUsPage> {
 
   // Build main form content
   Widget _buildFormContent() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 28.w),
       child: Form(
@@ -288,6 +299,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
                 fontFamily: 'Sora',
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
+                color: textColor,
               ),
             ),
             SizedBox(height: 16.h),
@@ -299,6 +311,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
               videoController: _videoController,
               isVideoInitialized: _isVideoInitialized,
               onTap: _showMediaPickerOptions,
+              isDarkMode: isDarkMode,
             ),
 
             // Media action buttons (change/remove)
@@ -314,6 +327,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
                 fontFamily: 'Sora',
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
+                color: textColor,
               ),
             ),
             SizedBox(height: 16.h),
@@ -321,7 +335,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
             // Sign name field
             FormFieldContainer(
               label: 'Sign Name:',
-              child: _buildSignNameField(),
+              child: _buildSignNameField(isDarkMode),
             ),
 
             SizedBox(height: 16.h),
@@ -329,7 +343,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
             // Category dropdown
             FormFieldContainer(
               label: 'Category:',
-              child: _buildCategoryDropdown(),
+              child: _buildCategoryDropdown(isDarkMode),
             ),
 
             SizedBox(height: 16.h),
@@ -337,7 +351,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
             // Description field
             FormFieldContainer(
               label: 'Description (Optional):',
-              child: _buildDescriptionField(),
+              child: _buildDescriptionField(isDarkMode),
             ),
 
             SizedBox(height: 32.h),
@@ -366,6 +380,8 @@ class _HelpUsPageState extends State<HelpUsPage> {
 
   // Build media action buttons (change/remove)
   Widget _buildMediaActionButtons() {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    
     return Padding(
       padding: EdgeInsets.only(top: 8.h),
       child: Row(
@@ -431,18 +447,27 @@ class _HelpUsPageState extends State<HelpUsPage> {
   }
 
   // Build sign name field
-  Widget _buildSignNameField() {
+  Widget _buildSignNameField(bool isDarkMode) {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final backgroundColor = isDarkMode ? const Color(0xFF2A2A2A) : AppColors.backgroundGrey;
+    final hintColor = isDarkMode ? Colors.grey[600] : Colors.black38;
+    
     return TextFormField(
       controller: _signNameController,
+      style: TextStyle(
+        fontFamily: 'DM Sans',
+        fontSize: 14.sp,
+        color: textColor,
+      ),
       decoration: InputDecoration(
         hintText: 'Enter the meaning of this sign',
         hintStyle: TextStyle(
           fontFamily: 'DM Sans',
           fontSize: 14.sp,
-          color: Colors.black38,
+          color: hintColor,
         ),
         filled: true,
-        fillColor: AppColors.backgroundGrey,
+        fillColor: backgroundColor,
         contentPadding: EdgeInsets.symmetric(
           horizontal: 16.w,
           vertical: 14.h,
@@ -462,76 +487,104 @@ class _HelpUsPageState extends State<HelpUsPage> {
   }
 
 // Build category dropdown
- Widget _buildCategoryDropdown() {
-   return Container(
-     decoration: BoxDecoration(
-       color: AppColors.backgroundGrey,
-       borderRadius: BorderRadius.circular(12.r),
-     ),
-     child: DropdownButtonFormField<String>(
-       value: _selectedCategory,
-       decoration: InputDecoration(
-         contentPadding: EdgeInsets.symmetric(
-           horizontal: 16.w,
-           vertical: 14.h,
-         ),
-         border: OutlineInputBorder(
-           borderRadius: BorderRadius.circular(12.r),
-           borderSide: BorderSide.none,
-         ),
-         hintText: 'Select a category',
-         hintStyle: TextStyle(
-           fontFamily: 'DM Sans',
-           fontSize: 14.sp,
-           color: Colors.black38,
-         ),
-       ),
-       items: _categories.map((category) {
-         return DropdownMenuItem<String>(
-           value: category,
-           child: Text(
-             category,
-             style: TextStyle(
-               fontFamily: 'DM Sans',
-               fontSize: 14.sp,
-             ),
-           ),
-         );
-       }).toList(),
-       onChanged: (value) {
-         setState(() {
-           _selectedCategory = value;
-         });
-       },
-       validator: (value) {
-         if (value == null) {
-           return 'Please select a category';
-         }
-         return null;
-       },
-       icon: Icon(
-         Icons.arrow_drop_down,
-         color: Colors.black54,
-       ),
-       dropdownColor: Colors.white,
-     ),
-   );
- }
+Widget _buildCategoryDropdown(bool isDarkMode) {
+  final textColor = AppColors.getTextPrimaryColor(context);
+  final backgroundColor = isDarkMode ? const Color(0xFF2A2A2A) : AppColors.backgroundGrey;
+  final hintColor = isDarkMode ? Colors.grey[600] : Colors.black38;
+  final dropdownIconColor = isDarkMode ? Colors.grey[400] : Colors.black54;
+  
+  return DropdownButtonFormField<String>(
+    value: _selectedCategory,
+    dropdownColor: AppColors.getSurfaceColor(context),
+    decoration: InputDecoration(
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: 16.w,
+        vertical: 14.h,
+      ),
+      filled: true,
+      fillColor: backgroundColor,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: BorderSide(color: AppColors.primary, width: 1),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: BorderSide(color: Colors.red, width: 1),
+      ),
+      hintText: 'Select a category',
+      hintStyle: TextStyle(
+        fontFamily: 'DM Sans',
+        fontSize: 14.sp,
+        color: hintColor,
+      ),
+    ),
+    style: TextStyle(
+      fontFamily: 'DM Sans',
+      fontSize: 14.sp,
+      color: textColor,
+    ),
+    items: _categories.map((category) {
+      return DropdownMenuItem<String>(
+        value: category,
+        child: Text(
+          category,
+          style: TextStyle(
+            fontFamily: 'DM Sans',
+            fontSize: 14.sp,
+            color: textColor,
+          ),
+        ),
+      );
+    }).toList(),
+    onChanged: (value) {
+      setState(() {
+        _selectedCategory = value;
+      });
+    },
+    validator: (value) {
+      if (value == null) {
+        return 'Please select a category';
+      }
+      return null;
+    },
+    icon: Icon(
+      Icons.arrow_drop_down,
+      color: dropdownIconColor,
+    ),
+  );
+}
 
  // Build description field
- Widget _buildDescriptionField() {
+ Widget _buildDescriptionField(bool isDarkMode) {
+   final textColor = AppColors.getTextPrimaryColor(context);
+   final backgroundColor = isDarkMode ? const Color(0xFF2A2A2A) : AppColors.backgroundGrey;
+   final hintColor = isDarkMode ? Colors.grey[600] : Colors.black38;
+   
    return TextFormField(
      controller: _descriptionController,
      maxLines: 3,
+     style: TextStyle(
+       fontFamily: 'DM Sans',
+       fontSize: 14.sp,
+       color: textColor,
+     ),
      decoration: InputDecoration(
        hintText: 'Add any additional information about this sign',
        hintStyle: TextStyle(
          fontFamily: 'DM Sans',
          fontSize: 14.sp,
-         color: Colors.black38,
+         color: hintColor,
        ),
        filled: true,
-       fillColor: AppColors.backgroundGrey,
+       fillColor: backgroundColor,
        contentPadding: EdgeInsets.symmetric(
          horizontal: 16.w,
          vertical: 14.h,

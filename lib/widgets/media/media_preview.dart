@@ -10,6 +10,7 @@ class MediaPreview extends StatelessWidget {
   final VideoPlayerController? videoController;
   final bool isVideoInitialized;
   final VoidCallback onTap;
+  final bool isDarkMode;
   
   const MediaPreview({
     Key? key,
@@ -18,30 +19,48 @@ class MediaPreview extends StatelessWidget {
     this.videoController,
     this.isVideoInitialized = false,
     required this.onTap,
+    required this.isDarkMode,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final backgroundColor = isDarkMode 
+        ? const Color(0xFF2A2A2A) 
+        : AppColors.backgroundGrey;
+    
+    final borderColor = isDarkMode 
+        ? const Color(0xFF3A3A3A)
+        : const Color(0xFFE8E8E8);
+        
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final hintColor = isDarkMode 
+        ? Colors.grey[500]
+        : Colors.black54;
+    
+    final iconColor = isDarkMode
+        ? AppColors.primary
+        : AppColors.primary;
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: double.infinity,
         height: 200.h,
         decoration: BoxDecoration(
-          color: AppColors.backgroundGrey,
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: const Color(0xFFE8E8E8),
+            color: borderColor,
           ),
         ),
-        child: _buildPreviewContent(),
+        child: _buildPreviewContent(textColor, hintColor, iconColor),
       ),
     );
   }
   
-  Widget _buildPreviewContent() {
+  Widget _buildPreviewContent(Color textColor, Color? hintColor, Color iconColor) {
     if (mediaFile == null) {
-      return _buildPlaceholder();
+      return _buildPlaceholder(textColor, hintColor, iconColor);
     } else {
       return ClipRRect(
         borderRadius: BorderRadius.circular(16.r),
@@ -57,13 +76,13 @@ class MediaPreview extends StatelessWidget {
     }
   }
   
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(Color textColor, Color? hintColor, Color iconColor) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(
           Icons.add_a_photo,
-          color: AppColors.primary,
+          color: iconColor,
           size: 40.sp,
         ),
         SizedBox(height: 12.h),
@@ -72,7 +91,7 @@ class MediaPreview extends StatelessWidget {
           style: TextStyle(
             fontFamily: 'DM Sans',
             fontSize: 14.sp,
-            color: Colors.black54,
+            color: textColor,
           ),
         ),
         SizedBox(height: 8.h),
@@ -81,7 +100,7 @@ class MediaPreview extends StatelessWidget {
           style: TextStyle(
             fontFamily: 'DM Sans',
             fontSize: 12.sp,
-            color: Colors.black38,
+            color: hintColor,
           ),
         ),
       ],

@@ -21,6 +21,8 @@ class InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
@@ -48,6 +50,7 @@ class InfoCard extends StatelessWidget {
                     fontFamily: 'Sora',
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
+                    color: Colors.black,
                   ),
                 ),
               ],

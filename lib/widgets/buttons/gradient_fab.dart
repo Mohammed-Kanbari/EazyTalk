@@ -14,7 +14,7 @@ class GradientFloatingActionButton extends StatelessWidget {
     required this.child,
     required this.onPressed,
     this.gradientColors = const [Color(0xFF00D0FF), Color(0xFF0088FF)],
-    this.darkgradientColors = const [Color(0xFF0A3A42), Color(0xFF003F7F)],
+    this.darkgradientColors = const [Color(0xFF007ACC), Color(0xFF003F7F)],
   }) : super(key: key);
 
   @override
