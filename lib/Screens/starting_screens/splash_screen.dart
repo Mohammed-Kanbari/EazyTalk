@@ -1,5 +1,7 @@
+// lib/Screens/starting_screens/splash_screen.dart
 import 'package:eazytalk/Screens/secondary_screens/navigation.dart';
 import 'package:eazytalk/Screens/starting_screens/welcome.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
@@ -10,18 +12,37 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
-    // Navigate to the WelcomePage after 3 seconds
+    // Check authentication status after a delay
     Timer(const Duration(seconds: 3), () {
+      _checkAuthStatus();
+    });
+  }
+  
+  // Check if user is already logged in
+  void _checkAuthStatus() {
+    // Get current user from Firebase Auth
+    final User? user = _auth.currentUser;
+    
+    if (user != null) {
+      // User is logged in, navigate to Navigation widget (starting with Chatting page)
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) =>  Welcome()),
+        MaterialPageRoute(builder: (context) => Navigation()),
       );
-    });
+    } else {
+      // No user logged in, navigate to Welcome screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Welcome()),
+      );
+    }
   }
 
   @override

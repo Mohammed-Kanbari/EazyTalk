@@ -1,3 +1,4 @@
+import 'package:eazytalk/Services/connectivity/connectivity_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
@@ -21,21 +22,40 @@ class _ChatbotState extends State<Chatbot> {
   final ScrollController _scrollController = ScrollController();
   final List<Message> _messages = [];
   final GeminiService _geminiService = GeminiService();
-  
+  final ConnectivityService _connectivityService = ConnectivityService();
+  bool _isOffline = false;
+
   bool _isTyping = false;
   bool _canSendMessage = false;
-  
+
   @override
   void initState() {
     super.initState();
     _initializeChat();
     _messageController.addListener(_updateSendButtonState);
+    _checkInitialConnectivity();
+    _listenToConnectivityChanges();
   }
-  
+
+  Future<void> _checkInitialConnectivity() async {
+    final isOffline = await _connectivityService.checkConnectivity();
+    setState(() {
+      _isOffline = isOffline;
+    });
+  }
+
+  void _listenToConnectivityChanges() {
+    _connectivityService.connectivityStream.listen((isOffline) {
+      setState(() {
+        _isOffline = isOffline;
+      });
+    });
+  }
+
   Future<void> _initializeChat() async {
     // Initialize the Gemini model
     final initialized = await _geminiService.initializeModel();
-    
+
     // Add welcome message
     setState(() {
       _messages.add(
@@ -45,7 +65,7 @@ class _ChatbotState extends State<Chatbot> {
           timestamp: DateTime.now(),
         ),
       );
-      
+
       // If initialization failed, add error message
       if (!initialized) {
         _messages.add(
@@ -58,11 +78,11 @@ class _ChatbotState extends State<Chatbot> {
       }
     });
   }
-  
+
   void _updateSendButtonState() {
     final text = _messageController.text.trim();
     final canSend = text.isNotEmpty;
-    
+
     if (canSend != _canSendMessage) {
       setState(() {
         _canSendMessage = canSend;
@@ -80,7 +100,7 @@ class _ChatbotState extends State<Chatbot> {
 
   void _clearChat() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -121,7 +141,8 @@ class _ChatbotState extends State<Chatbot> {
                 _messages.clear();
                 _messages.add(
                   Message(
-                    text: "Hello! I am your AI assistant.\nFeel free to ask me anything.",
+                    text:
+                        "Hello! I am your AI assistant.\nFeel free to ask me anything.",
                     isUser: false,
                     timestamp: DateTime.now(),
                   ),
@@ -130,7 +151,7 @@ class _ChatbotState extends State<Chatbot> {
               Navigator.pop(context);
             },
             child: Text(
-              'Clear', 
+              'Clear',
               style: TextStyle(
                 color: Colors.red,
                 fontFamily: 'DM Sans',
@@ -145,9 +166,9 @@ class _ChatbotState extends State<Chatbot> {
 
   Future<void> _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
-    
+
     final messageText = _messageController.text.trim();
-    
+
     // Add user message to chat
     setState(() {
       _messages.add(
@@ -161,18 +182,18 @@ class _ChatbotState extends State<Chatbot> {
       _canSendMessage = false;
       _isTyping = true;
     });
-    
+
     _scrollToBottom();
-    
+
     // Get response from Gemini
     final response = await _geminiService.sendMessage(messageText);
-    
+
     // Add AI response to chat
     setState(() {
       _messages.add(response);
       _isTyping = false;
     });
-    
+
     _scrollToBottom();
   }
 
@@ -193,7 +214,7 @@ class _ChatbotState extends State<Chatbot> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textPrimaryColor = AppColors.getTextPrimaryColor(context);
     final textSecondaryColor = AppColors.getTextSecondaryColor(context);
-    
+
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
       resizeToAvoidBottomInset: true,
@@ -216,7 +237,7 @@ class _ChatbotState extends State<Chatbot> {
                   ),
                 ),
               ),
-              
+
               // AI Introduction Section
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 30.h),
@@ -270,28 +291,38 @@ class _ChatbotState extends State<Chatbot> {
                         ],
                       ),
                     ),
+                    _isOffline ?
+                    Image.asset(
+                      'assets/images/chatbot_no_network1.png',
+                      width: 85.w,
+                      height: 85.h,
+                    ) : 
                     Image.asset(
                       'assets/icons/chatbot 1.png',
                       width: 85.w,
                       height: 85.h,
-                    )
+                    ),
                   ],
                 ),
               ),
-              
+
               Divider(
-                height: 1, 
-                thickness: 1, 
-                color: isDarkMode ? const Color(0xFF2A2A2A) : Colors.grey.shade200
-              ),
-              
+                  height: 1,
+                  thickness: 1,
+                  color: isDarkMode
+                      ? const Color(0xFF2A2A2A)
+                      : Colors.grey.shade200),
+
               // Chat Messages
               Expanded(
                 child: Container(
-                  color: isDarkMode ? const Color(0xFF121212) : AppColors.backgroundGrey,
+                  color: isDarkMode
+                      ? const Color(0xFF121212)
+                      : AppColors.backgroundGrey,
                   child: ListView.builder(
                     controller: _scrollController,
-                    padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 16.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 28.w, vertical: 16.h),
                     itemCount: _messages.length,
                     itemBuilder: (context, index) {
                       return MessageBubble(message: _messages[index]);
@@ -299,10 +330,10 @@ class _ChatbotState extends State<Chatbot> {
                   ),
                 ),
               ),
-              
+
               // Typing indicator
               if (_isTyping) TypingIndicator(),
-              
+
               // Message input
               ChatInput(
                 controller: _messageController,
