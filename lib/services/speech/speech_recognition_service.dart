@@ -20,6 +20,7 @@ class SpeechRecognitionService {
     required Function(String) onStatus,
     String accumulatedText = '',
     Duration pauseTimeout = const Duration(seconds: 15), // Increased pause timeout to 15 seconds
+    String language = 'en-US', // Added language parameter with English as default
   }) async {
     if (!_isInitialized) {
       await initialize();
@@ -39,6 +40,7 @@ class SpeechRecognitionService {
         onSoundLevelChange: onSoundLevelChange,
         cancelOnError: false,
         listenMode: stt.ListenMode.dictation, // Use dictation mode for continuous speech
+        localeId: language, // Use the specified language
       );
       
       _speech.statusListener = onStatus;
