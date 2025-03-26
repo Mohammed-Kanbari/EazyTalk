@@ -26,6 +26,7 @@ class _ChattingState extends State<Chatting> {
   final ChatService _chatService = ChatService();
   final UserService _userService = UserService();
   String _searchQuery = '';
+  String _newContactSearchQuery = '';
 
   // Stream subscription for better management
   late Stream<List<ConversationModel>> _conversationsStream;
@@ -34,6 +35,10 @@ class _ChattingState extends State<Chatting> {
 
   // Cache for user data to avoid repetitive Firestore queries
   final Map<String, Map<String, dynamic>> _userCache = {};
+  
+  // List of all users for contact search
+  List<Map<String, dynamic>> _allUsers = [];
+  List<Map<String, dynamic>> _filteredUsers = [];
 
   @override
   void initState() {
@@ -41,6 +46,50 @@ class _ChattingState extends State<Chatting> {
     // Initialize a stable stream reference
     _conversationsStream = _chatService.getConversations();
     print('Initialized conversations stream');
+    
+    // Prefetch all users for the contact search
+    _fetchAllUsers();
+  }
+  
+  // Fetch all users for contact search
+  Future<void> _fetchAllUsers() async {
+    try {
+      final users = await _userService.fetchAllUsers();
+      setState(() {
+        _allUsers = users;
+        _filteredUsers = users.where((user) => 
+          user['id'] != _chatService.currentUserId
+        ).toList();
+      });
+    } catch (e) {
+      print('Error fetching users: $e');
+    }
+  }
+  
+  // Filter users based on search query
+  void _filterUsers(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _filteredUsers = _allUsers.where((user) => 
+          user['id'] != _chatService.currentUserId
+        ).toList();
+        _newContactSearchQuery = query;
+      });
+      return;
+    }
+    
+    setState(() {
+      _newContactSearchQuery = query;
+      _filteredUsers = _allUsers.where((user) {
+        // Skip current user
+        if (user['id'] == _chatService.currentUserId) {
+          return false;
+        }
+        
+        final userName = (user['userName'] ?? '').toLowerCase();
+        return userName.contains(query.toLowerCase());
+      }).toList();
+    });
   }
 
   @override
@@ -388,12 +437,21 @@ class _ChattingState extends State<Chatting> {
   // Show modal to select contact for new conversation
   void _showContactsModal() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final hintColor = isDarkMode ? Colors.grey[600] : Colors.grey[400];
+    
+    // Reset filtered users to show all contacts
+    setState(() {
+      _filteredUsers = _allUsers.where((user) => 
+        user['id'] != _chatService.currentUserId
+      ).toList();
+      _newContactSearchQuery = '';
+    });
     
     showModalBottomSheet(
       context: context,
       backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
-      isScrollControlled:
-          true, // Make the modal take up to 90% of screen height
+      isScrollControlled: true, // Make the modal take up to 90% of screen height
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
@@ -407,6 +465,7 @@ class _ChattingState extends State<Chatting> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Drag handle
               Container(
                 width: 40.w,
                 height: 4.h,
@@ -418,125 +477,134 @@ class _ChattingState extends State<Chatting> {
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
+              
+              // Header
               Text(
                 'New Conversation',
                 style: TextStyle(
                   fontFamily: 'Sora',
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.getTextPrimaryColor(context),
+                  color: textColor,
                 ),
               ),
               SizedBox(height: 20.h),
-              Expanded(
-                child: FutureBuilder<List<Map<String, dynamic>>>(
-                  future: _userService.fetchAllUsers(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      );
-                    }
-
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              color: Colors.red,
-                              size: 40.sp,
-                            ),
-                            SizedBox(height: 10.h),
-                            Text(
-                              'Error loading users',
-                              style: TextStyle(
-                                fontFamily: 'DM Sans',
-                                fontSize: 14.sp,
-                                color: AppColors.getTextPrimaryColor(context),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    final users = snapshot.data ?? [];
-
-                    if (users.isEmpty ||
-                        (users.length == 1 &&
-                            users[0]['id'] == _chatService.currentUserId)) {
-                      return Center(
-                        child: Text(
-                          'No other users found',
-                          style: TextStyle(
-                            fontFamily: 'DM Sans',
-                            fontSize: 14.sp,
-                            color: AppColors.getTextPrimaryColor(context),
-                          ),
-                        ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      controller: scrollController,
-                      itemCount: users.length,
-                      itemBuilder: (context, index) {
-                        final user = users[index];
-                        // Skip current user
-                        if (user['id'] == _chatService.currentUserId) {
-                          return const SizedBox.shrink();
-                        }
-
-                        return ListTile(
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 8.h, horizontal: 12.w),
-                          leading: CircleAvatar(
-                            radius: 25.r,
-                            backgroundColor: isDarkMode 
-                                ? const Color(0xFF2A2A2A)
-                                : AppColors.backgroundGrey,
-                            backgroundImage: user['profileImageBase64'] != null
-                                ? MemoryImage(
-                                    base64Decode(user['profileImageBase64']),
-                                  )
-                                : null,
-                            child: user['profileImageBase64'] == null
-                                ? Text(
-                                    (user['userName'] ?? 'User')
-                                        .substring(0, 1)
-                                        .toUpperCase(),
-                                    style: TextStyle(
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                                    ),
-                                  )
-                                : null,
-                          ),
-                          title: Text(
-                            user['userName'] ?? 'User',
-                            style: TextStyle(
-                              fontFamily: 'DM Sans',
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.getTextPrimaryColor(context),
-                            ),
-                          ),
-                          onTap: () => _createAndNavigateToConversation(user),
-                        );
-                      },
-                    );
-                  },
+              
+              // Search bar for contacts
+              Container(
+                decoration: BoxDecoration(
+                  color: isDarkMode ? const Color(0xFF2A2A2A) : AppColors.backgroundGrey,
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
+                child: TextField(
+                  style: TextStyle(
+                    fontFamily: 'DM Sans',
+                    color: textColor,
+                    fontSize: 14.sp,
+                  ),
+                  onChanged: _filterUsers,
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(horizontal: 14.w),
+                    prefixIcon: Icon(Icons.search, color: AppColors.iconGrey),
+                    hintText: 'Search contacts',
+                    hintStyle: TextStyle(
+                      fontFamily: 'DM Sans',
+                      color: hintColor,
+                      fontSize: 14.sp,
+                    ),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20.h),
+              
+              // Contacts list
+              Expanded(
+                child: _buildContactsList(scrollController, isDarkMode, textColor),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  // Build contacts list with search functionality
+  Widget _buildContactsList(ScrollController scrollController, bool isDarkMode, Color textColor) {
+    if (_filteredUsers.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              _newContactSearchQuery.isEmpty ? Icons.people : Icons.search_off,
+              size: 48.sp,
+              color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              _newContactSearchQuery.isEmpty
+                  ? 'No contacts available'
+                  : 'No contacts matching "$_newContactSearchQuery"',
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontSize: 16.sp,
+                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      controller: scrollController,
+      itemCount: _filteredUsers.length,
+      itemBuilder: (context, index) {
+        final user = _filteredUsers[index];
+        
+        return ListTile(
+          contentPadding: EdgeInsets.symmetric(
+              vertical: 8.h, horizontal: 12.w),
+          leading: CircleAvatar(
+            radius: 25.r,
+            backgroundColor: isDarkMode 
+                ? const Color(0xFF2A2A2A)
+                : AppColors.backgroundGrey,
+            backgroundImage: user['profileImageBase64'] != null
+                ? MemoryImage(
+                    base64Decode(user['profileImageBase64']),
+                  )
+                : null,
+            child: user['profileImageBase64'] == null
+                ? Text(
+                    (user['userName'] ?? 'User')
+                        .substring(0, 1)
+                        .toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                    ),
+                  )
+                : null,
+          ),
+          title: Text(
+            user['userName'] ?? 'User',
+            style: TextStyle(
+              fontFamily: 'DM Sans',
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+              color: textColor,
+            ),
+          ),
+          onTap: () => _createAndNavigateToConversation(user),
+        );
+      },
     );
   }
 
