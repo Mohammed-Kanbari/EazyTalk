@@ -14,6 +14,7 @@ import 'package:eazytalk/widgets/inputs/search_bar.dart';
 import 'package:eazytalk/widgets/signs/section_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:eazytalk/Screens/secondary_screens/video_call/call_history_screen.dart';
 
 class Chatting extends StatefulWidget {
   const Chatting({super.key});
@@ -35,7 +36,7 @@ class _ChattingState extends State<Chatting> {
 
   // Cache for user data to avoid repetitive Firestore queries
   final Map<String, Map<String, dynamic>> _userCache = {};
-  
+
   // List of all users for contact search
   List<Map<String, dynamic>> _allUsers = [];
   List<Map<String, dynamic>> _filteredUsers = [];
@@ -46,38 +47,38 @@ class _ChattingState extends State<Chatting> {
     // Initialize a stable stream reference
     _conversationsStream = _chatService.getConversations();
     print('Initialized conversations stream');
-    
+
     // Prefetch all users for the contact search
     _fetchAllUsers();
   }
-  
+
   // Fetch all users for contact search
   Future<void> _fetchAllUsers() async {
     try {
       final users = await _userService.fetchAllUsers();
       setState(() {
         _allUsers = users;
-        _filteredUsers = users.where((user) => 
-          user['id'] != _chatService.currentUserId
-        ).toList();
+        _filteredUsers = users
+            .where((user) => user['id'] != _chatService.currentUserId)
+            .toList();
       });
     } catch (e) {
       print('Error fetching users: $e');
     }
   }
-  
+
   // Filter users based on search query
   void _filterUsers(String query) {
     if (query.isEmpty) {
       setState(() {
-        _filteredUsers = _allUsers.where((user) => 
-          user['id'] != _chatService.currentUserId
-        ).toList();
+        _filteredUsers = _allUsers
+            .where((user) => user['id'] != _chatService.currentUserId)
+            .toList();
         _newContactSearchQuery = query;
       });
       return;
     }
-    
+
     setState(() {
       _newContactSearchQuery = query;
       _filteredUsers = _allUsers.where((user) {
@@ -85,7 +86,7 @@ class _ChattingState extends State<Chatting> {
         if (user['id'] == _chatService.currentUserId) {
           return false;
         }
-        
+
         final userName = (user['userName'] ?? '').toLowerCase();
         return userName.contains(query.toLowerCase());
       }).toList();
@@ -95,7 +96,7 @@ class _ChattingState extends State<Chatting> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
       body: SafeArea(
@@ -126,6 +127,30 @@ class _ChattingState extends State<Chatting> {
                             _searchQuery = value;
                           });
                         },
+                      ),
+                    ),
+                    SizedBox(width: 15.w),
+                    // Call history button
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const CallHistoryScreen()),
+                        );
+                      },
+                      child: Container(
+                        width: 55.w,
+                        height: 55.h,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.r),
+                          color: AppColors.primary.withOpacity(0.1),
+                        ),
+                        child: Icon(
+                          Icons.call,
+                          color: AppColors.primary,
+                          size: 30.sp,
+                        ),
                       ),
                     ),
                     SizedBox(width: 15.w),
@@ -228,7 +253,9 @@ class _ChattingState extends State<Chatting> {
                             Icon(
                               Icons.chat_bubble_outline,
                               size: 60.sp,
-                              color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+                              color: isDarkMode
+                                  ? Colors.grey[600]
+                                  : Colors.grey[400],
                             ),
                             SizedBox(height: 16.h),
                             Text(
@@ -236,7 +263,9 @@ class _ChattingState extends State<Chatting> {
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 16.sp,
-                                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                                color: isDarkMode
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
                               ),
                             ),
                             SizedBox(height: 8.h),
@@ -245,7 +274,9 @@ class _ChattingState extends State<Chatting> {
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 14.sp,
-                                color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+                                color: isDarkMode
+                                    ? Colors.grey[600]
+                                    : Colors.grey[400],
                               ),
                             ),
                           ],
@@ -265,7 +296,9 @@ class _ChattingState extends State<Chatting> {
                             Icon(
                               Icons.search_off,
                               size: 48.sp,
-                              color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+                              color: isDarkMode
+                                  ? Colors.grey[600]
+                                  : Colors.grey[400],
                             ),
                             SizedBox(height: 16.h),
                             Text(
@@ -273,7 +306,9 @@ class _ChattingState extends State<Chatting> {
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 16.sp,
-                                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                                color: isDarkMode
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -298,7 +333,7 @@ class _ChattingState extends State<Chatting> {
                                 child: Container(
                                   height: 70.h,
                                   decoration: BoxDecoration(
-                                    color: isDarkMode 
+                                    color: isDarkMode
                                         ? Colors.grey[800]
                                         : Colors.grey[100],
                                     borderRadius: BorderRadius.circular(12),
@@ -365,17 +400,18 @@ class _ChattingState extends State<Chatting> {
   }
 
   // Filter conversations based on search query
-  List<ConversationModel> _filterConversations(List<ConversationModel> conversations) {
+  List<ConversationModel> _filterConversations(
+      List<ConversationModel> conversations) {
     if (_searchQuery.isEmpty) {
       return conversations;
     }
-    
+
     return conversations.where((conv) {
       // Search in message content
       if (conv.lastMessage.toLowerCase().contains(_searchQuery.toLowerCase())) {
         return true;
       }
-      
+
       // Search in user names
       final otherUserId = _getOtherParticipantId(conv);
       if (_userCache.containsKey(otherUserId)) {
@@ -384,7 +420,7 @@ class _ChattingState extends State<Chatting> {
           return true;
         }
       }
-      
+
       return false;
     }).toList();
   }
@@ -439,19 +475,20 @@ class _ChattingState extends State<Chatting> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
     final hintColor = isDarkMode ? Colors.grey[600] : Colors.grey[400];
-    
+
     // Reset filtered users to show all contacts
     setState(() {
-      _filteredUsers = _allUsers.where((user) => 
-        user['id'] != _chatService.currentUserId
-      ).toList();
+      _filteredUsers = _allUsers
+          .where((user) => user['id'] != _chatService.currentUserId)
+          .toList();
       _newContactSearchQuery = '';
     });
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
-      isScrollControlled: true, // Make the modal take up to 90% of screen height
+      isScrollControlled:
+          true, // Make the modal take up to 90% of screen height
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
@@ -477,7 +514,7 @@ class _ChattingState extends State<Chatting> {
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
-              
+
               // Header
               Text(
                 'New Conversation',
@@ -489,11 +526,13 @@ class _ChattingState extends State<Chatting> {
                 ),
               ),
               SizedBox(height: 20.h),
-              
+
               // Search bar for contacts
               Container(
                 decoration: BoxDecoration(
-                  color: isDarkMode ? const Color(0xFF2A2A2A) : AppColors.backgroundGrey,
+                  color: isDarkMode
+                      ? const Color(0xFF2A2A2A)
+                      : AppColors.backgroundGrey,
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: TextField(
@@ -520,10 +559,11 @@ class _ChattingState extends State<Chatting> {
                 ),
               ),
               SizedBox(height: 20.h),
-              
+
               // Contacts list
               Expanded(
-                child: _buildContactsList(scrollController, isDarkMode, textColor),
+                child:
+                    _buildContactsList(scrollController, isDarkMode, textColor),
               ),
             ],
           ),
@@ -533,7 +573,8 @@ class _ChattingState extends State<Chatting> {
   }
 
   // Build contacts list with search functionality
-  Widget _buildContactsList(ScrollController scrollController, bool isDarkMode, Color textColor) {
+  Widget _buildContactsList(
+      ScrollController scrollController, bool isDarkMode, Color textColor) {
     if (_filteredUsers.isEmpty) {
       return Center(
         child: Column(
@@ -566,15 +607,13 @@ class _ChattingState extends State<Chatting> {
       itemCount: _filteredUsers.length,
       itemBuilder: (context, index) {
         final user = _filteredUsers[index];
-        
+
         return ListTile(
-          contentPadding: EdgeInsets.symmetric(
-              vertical: 8.h, horizontal: 12.w),
+          contentPadding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
           leading: CircleAvatar(
             radius: 25.r,
-            backgroundColor: isDarkMode 
-                ? const Color(0xFF2A2A2A)
-                : AppColors.backgroundGrey,
+            backgroundColor:
+                isDarkMode ? const Color(0xFF2A2A2A) : AppColors.backgroundGrey,
             backgroundImage: user['profileImageBase64'] != null
                 ? MemoryImage(
                     base64Decode(user['profileImageBase64']),
@@ -582,9 +621,7 @@ class _ChattingState extends State<Chatting> {
                 : null,
             child: user['profileImageBase64'] == null
                 ? Text(
-                    (user['userName'] ?? 'User')
-                        .substring(0, 1)
-                        .toUpperCase(),
+                    (user['userName'] ?? 'User').substring(0, 1).toUpperCase(),
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,

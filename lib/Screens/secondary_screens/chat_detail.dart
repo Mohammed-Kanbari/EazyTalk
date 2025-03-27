@@ -9,6 +9,8 @@ import 'package:eazytalk/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:convert';
+import 'package:eazytalk/services/video_call/call_service.dart';
+import 'package:eazytalk/Screens/secondary_screens/video_call/video_call_screen.dart';
 
 class ChatDetail extends StatefulWidget {
   final ConversationModel conversation;
@@ -27,6 +29,8 @@ class _ChatDetailState extends State<ChatDetail> {
   final ScrollController _scrollController = ScrollController();
   final ChatService _chatService = ChatService();
   final UserService _userService = UserService();
+  final CallService _callService = CallService();
+
 
   bool _canSendMessage = false;
   String _otherUserName = 'User';
@@ -119,6 +123,75 @@ class _ChatDetailState extends State<ChatDetail> {
       }
     });
   }
+
+
+  // Helper method to get the other participant's ID
+  String _getOtherParticipantId(ConversationModel conversation) {
+    return conversation.participants
+        .firstWhere((id) => id != _chatService.currentUserId, orElse: () => '');
+  }
+
+  // Now add this new method to handle video call initiation
+Future<void> _initiateVideoCall() async {
+  try {
+    // Get the other user's ID
+    final otherUserId = _getOtherParticipantId(widget.conversation);
+    
+    if (otherUserId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot find the recipient')),
+      );
+      return;
+    }
+    
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    
+    // Fetch user data for the other participant
+    final userData = await _userService.fetchUserProfileById(otherUserId);
+
+    // Make a call
+    final call = await _callService.makeCall(
+      receiverId: otherUserId,
+      receiverName: userData['userName'] ?? 'User',
+      receiverProfileImageBase64: userData['profileImageBase64'],
+      isVideoEnabled: true,
+    );
+    
+    // Hide loading indicator
+    Navigator.pop(context);
+    
+    if (call != null && mounted) {
+      // Navigate to video call screen
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VideoCallScreen(call: call),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to start video call')),
+      );
+    }
+  } catch (e) {
+    // Hide loading indicator if showing
+    if (mounted) {
+      Navigator.pop(context);
+    }
+    
+    // Show error
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error starting video call: $e')),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -292,17 +365,14 @@ class _ChatDetailState extends State<ChatDetail> {
 
           // Call button (could be implemented later)
           GestureDetector(
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Video call feature coming soon')),);
-              
-            },
+            onTap: _initiateVideoCall,
               child: Image.asset(
             'assets/icons/camera.png',
             width: 28.w,
             height: 28.h,
             color: isDarkMode ? Colors.white : null,
           )),
+          
          
         ],
       ),

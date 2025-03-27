@@ -10,6 +10,7 @@ import 'package:eazytalk/services/voice_navigation/voice_navigation_service.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eazytalk/services/voice_navigation/voice_command_helper.dart';
+import 'package:eazytalk/services/video_call/call_listener_service.dart';
 
 class Navigation extends StatefulWidget {
   const Navigation({super.key});
@@ -63,6 +64,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     ),
   ];
 
+  late CallListenerService _callListenerService;
+
   @override
   void initState() {
     super.initState();
@@ -78,6 +81,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }
       },
     );
+
+    // Initialize call listener service
+    _callListenerService = CallListenerService();
+
+    // Start listening for incoming calls
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _callListenerService.startListening(context);
+    });
 
     // Initialize animation controllers for each tab
     _animationControllers = List.generate(
@@ -106,14 +117,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     VoiceCommandHelper.navigateToVoiceCommandGuide(context);
   }
 
-  @override
-  void dispose() {
-    // Dispose all animation controllers
-    for (final controller in _animationControllers) {
-      controller.dispose();
-    }
-    super.dispose();
+@override
+void dispose() {
+  // Stop listening for incoming calls
+  _callListenerService.stopListening();
+  
+  // Dispose all animation controllers
+  for (final controller in _animationControllers) {
+    controller.dispose();
   }
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -140,9 +154,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         ),
       ),
       floatingActionButton: VoiceCommandButton(
-        onLongPress: _showVoiceCommandHelp,
-        navigationService: _voiceNavigationService
-        ),
+          onLongPress: _showVoiceCommandHelp,
+          navigationService: _voiceNavigationService),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -227,7 +240,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       label: item.label,
     );
   }
-
 }
 
 // Helper class to store navigation item data

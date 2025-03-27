@@ -1,4 +1,3 @@
-import 'package:eazytalk/Screens/secondary_screens/navigation.dart';
 import 'package:eazytalk/Screens/starting_screens/splash_screen.dart';
 import 'package:eazytalk/core/theme/app_theme.dart';
 import 'package:eazytalk/services/theme/theme_service.dart';
@@ -6,7 +5,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:device_preview/device_preview.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
