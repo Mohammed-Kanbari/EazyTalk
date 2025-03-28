@@ -1,6 +1,6 @@
 // This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=C:\Users\Mohammed Abdulkader\OneDrive\Documents\flutter
-FLUTTER_APPLICATION_PATH=C:\Users\Mohammed Abdulkader\Desktop\DandF\EazyTalk
+FLUTTER_ROOT=/Users/mvp/Documents/Software/flutter
+FLUTTER_APPLICATION_PATH=/Users/mvp/Documents/internship/EazyTalk
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_BUILD_DIR=build
 FLUTTER_BUILD_NAME=1.0.0

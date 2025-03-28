@@ -65,4 +65,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'eazytalk-5ed0d.firebasestorage.app',
     iosBundleId: 'com.example.eazytalksplash',
   );
+
 }
