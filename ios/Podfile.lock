@@ -1510,13 +1510,20 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   abseil: d121da9ef7e2ff4cab7666e76c5a3e0915ae08c3
+<<<<<<< HEAD
   agora_rtc_engine: 084c652232214b8ec39084127295e0e3856a7cb4
   agora_rtm: 51b5cef21d9d664563b9a420f2c59531b1ad3e4c
   agora_uikit: ca47b21e2af19474ddd8ec153670c2dc8cf3a9e8
+=======
+  agora_rtc_engine: 7434787c0b5284d803c31c726562b8399b8c1744
+  agora_rtm: 186e57f84720f1c31572b2bcad048cda38873d43
+  agora_uikit: 118d15f7a97e84a4dcae0309ab2128044f5ccd52
+>>>>>>> d86abe9 (first commit)
   AgoraInfra_iOS: 65e11a2183ab7836258768868d06058c22701b13
   AgoraIrisRTC_iOS: dd3d957c25be6bd2b2a5d03fe706ebe8a46909f0
   AgoraRtcEngine_iOS: 5092a058c7b2842db39d8ca614d451af6f84969a
   AgoraRtm_iOS: 595a9fa33a409831e6183396ea8f8bc563918403
+<<<<<<< HEAD
   app_links: f3e17e4ee5e357b39d8b95290a9b2c299fca71c6
   BoringSSL-GRPC: ca6a8e5d04812fce8ffd6437810c2d46f925eaeb
   cloud_firestore: 56e7bb3888f09698dc061d38d02d87d4fd80e2cb
@@ -1524,6 +1531,15 @@ SPEC CHECKSUMS:
   Firebase: d80354ed7f6df5f9aca55e9eb47cc4b634735eaf
   firebase_auth: 3d848b9b866b201e5c8e0c06d8b2cec272fd8825
   firebase_core: ac395f994af4e28f6a38b59e05a88ca57abeb874
+=======
+  app_links: 76b66b60cc809390ca1ad69bfd66b998d2387ac7
+  BoringSSL-GRPC: ca6a8e5d04812fce8ffd6437810c2d46f925eaeb
+  cloud_firestore: e61acbf808607d2c88ee32b00cd3aec027b38b3c
+  connectivity_plus: 481668c94744c30c53b8895afb39159d1e619bdf
+  Firebase: d80354ed7f6df5f9aca55e9eb47cc4b634735eaf
+  firebase_auth: 9ebbd83276bf977dea1c74dfc199acf9d2a2f42f
+  firebase_core: 8d552814f6c01ccde5d88939fced4ec26f2f5510
+>>>>>>> d86abe9 (first commit)
   FirebaseAppCheckInterop: 9664c858489710f682766ef54e2b6741d3b62070
   FirebaseAuth: ad59a1a7b161e75f74c39f70179d2482d40e2737
   FirebaseAuthInterop: 01a804fb074424fd58b92dd50dd0272277199356
@@ -1534,12 +1550,17 @@ SPEC CHECKSUMS:
   FirebaseFirestoreInternal: 8c5921c360a70e447bfeefb245f450e8b50e750b
   FirebaseSharedSwift: 1baacae75939499b5def867cbe34129464536a38
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+<<<<<<< HEAD
   flutter_sound: 39446c16b0111b4926ff261c5c4d601bc1d5d661
+=======
+  flutter_sound: 52bc351d9035fede9085cbf99c296c62897ceadd
+>>>>>>> d86abe9 (first commit)
   flutter_sound_core: 938c91404747d79bf14a0c85b90a5d95ed7ed5c4
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
   "gRPC-C++": 2fa52b3141e7789a28a737f251e0c45b4cb20a87
   gRPC-Core: a27c294d6149e1c39a7d173527119cfbc3375ce4
   GTMSessionFetcher: 75b671f9e551e4c49153d4c4f8659ef4f559b970
+<<<<<<< HEAD
   image_picker_ios: c560581cceedb403a6ff17f2f816d7fea1421fc1
   iris_method_channel: 0617c689164d8154c020c50f63ca79f92b8a7b9d
   leveldb-library: cc8b8f8e013647a295ad3f8cd2ddf49a6f19be19
@@ -1556,5 +1577,23 @@ SPEC CHECKSUMS:
   video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
 
 PODFILE CHECKSUM: 4184d029e069df1293049a02a231a14d7dab6af5
+=======
+  image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
+  iris_method_channel: b9db2053dac3dc84e256c8792eff6f11323a53bd
+  leveldb-library: cc8b8f8e013647a295ad3f8cd2ddf49a6f19be19
+  nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  ReachabilitySwift: 32793e867593cfc1177f5d16491e3a197d2fccda
+  RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
+  shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
+  speech_to_text: 9dc43a5df3cbc2813f8c7cc9bd0fbf94268ed7ac
+  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
+  Try: 5ef669ae832617b3cee58cb2c6f99fb767a4ff96
+  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
+  video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
+
+PODFILE CHECKSUM: 6adebba5539c498fc23c82bfbcdcc4a0b8a00f69
+>>>>>>> d86abe9 (first commit)
 
 COCOAPODS: 1.16.2

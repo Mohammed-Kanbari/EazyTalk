@@ -50,7 +50,12 @@ class _SignupState extends State<Signup> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
+<<<<<<< HEAD
                 content: Text('A verification email has been sent. Please check your inbox.'),
+=======
+                content: Text(
+                    'A verification email has been sent. Please check your inbox.'),
+>>>>>>> d86abe9 (first commit)
               ),
             );
           }
@@ -61,7 +66,13 @@ class _SignupState extends State<Signup> {
             // If not verified (e.g., user closed dialog or app), delete the user
             await user.delete();
             ScaffoldMessenger.of(context).showSnackBar(
+<<<<<<< HEAD
               const SnackBar(content: Text('Signup canceled. Please verify your email to complete registration.')),
+=======
+              const SnackBar(
+                  content: Text(
+                      'Signup canceled. Please verify your email to complete registration.')),
+>>>>>>> d86abe9 (first commit)
             );
             return;
           }
@@ -151,7 +162,13 @@ class _SignupState extends State<Signup> {
                 Navigator.pop(context); // Close dialog
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
+<<<<<<< HEAD
                   const SnackBar(content: Text('Email not verified yet. Please check your inbox.')),
+=======
+                  const SnackBar(
+                      content: Text(
+                          'Email not verified yet. Please check your inbox.')),
+>>>>>>> d86abe9 (first commit)
                 );
               }
             },
@@ -209,6 +226,7 @@ class _SignupState extends State<Signup> {
     // Theme-appropriate colors
     final backgroundColor = AppColors.getBackgroundColor(context);
     final textColor = AppColors.getTextPrimaryColor(context);
+<<<<<<< HEAD
     
     // Input field styling
     final borderColor = isDarkMode 
@@ -222,6 +240,17 @@ class _SignupState extends State<Signup> {
     final inputFillColor = isDarkMode 
         ? const Color(0xFF1E1E1E) 
         : null;
+=======
+
+    // Input field styling
+    final borderColor =
+        isDarkMode ? const Color(0xFF3A3A3A) : const Color(0xFFC7C7C7);
+
+    final hintColor =
+        isDarkMode ? const Color(0xFF7A7A7A) : const Color(0xFFC7C7C7);
+
+    final inputFillColor = isDarkMode ? const Color(0xFF1E1E1E) : null;
+>>>>>>> d86abe9 (first commit)
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -244,9 +273,17 @@ class _SignupState extends State<Signup> {
                         padding: EdgeInsets.only(top: screenHeight * 0.087),
                         child: Align(
                           alignment: Alignment.center,
+<<<<<<< HEAD
                           child: Image.asset(
                             'assets/images/logo.png',
                             width: screenWidth * 0.24,
+=======
+                          child: Container(
+                            child: Image.asset(
+                              'assets/images/appIcon1.png',
+                              width: screenWidth * 0.24,
+                            ),
+>>>>>>> d86abe9 (first commit)
                           ),
                         ),
                       ),
@@ -302,9 +339,19 @@ class _SignupState extends State<Signup> {
                       SizedBox(height: 9.h),
                       TextFormField(
                         controller: _usernameController,
+<<<<<<< HEAD
                         style: TextStyle(fontSize: 16.sp, fontFamily: 'DM Sans', color: textColor),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+=======
+                        style: TextStyle(
+                            fontSize: 16.sp,
+                            fontFamily: 'DM Sans',
+                            color: textColor),
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+>>>>>>> d86abe9 (first commit)
                           hintText: 'Enter your name',
                           hintStyle: TextStyle(
                             fontSize: 14.sp,
@@ -314,6 +361,7 @@ class _SignupState extends State<Signup> {
                           ),
                           filled: true,
                           fillColor: inputFillColor,
+<<<<<<< HEAD
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           focusedBorder: OutlineInputBorder(
                             borderSide: const BorderSide(color: Color(0xFF00D0FF), width: 1),
@@ -321,6 +369,18 @@ class _SignupState extends State<Signup> {
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: borderColor, width: 1),
+=======
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Color(0xFF00D0FF), width: 1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: borderColor, width: 1),
+>>>>>>> d86abe9 (first commit)
                             borderRadius: BorderRadius.circular(12),
                           ),
                           errorMaxLines: 2,
@@ -349,9 +409,19 @@ class _SignupState extends State<Signup> {
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
+<<<<<<< HEAD
                         style: TextStyle(fontSize: 16.sp, fontFamily: 'DM Sans', color: textColor),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+=======
+                        style: TextStyle(
+                            fontSize: 16.sp,
+                            fontFamily: 'DM Sans',
+                            color: textColor),
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+>>>>>>> d86abe9 (first commit)
                           hintText: 'Enter your email',
                           hintStyle: TextStyle(
                             fontSize: 14.sp,
@@ -361,6 +431,7 @@ class _SignupState extends State<Signup> {
                           ),
                           filled: true,
                           fillColor: inputFillColor,
+<<<<<<< HEAD
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           focusedBorder: OutlineInputBorder(
                             borderSide: const BorderSide(color: Color(0xFF00D0FF), width: 1),
@@ -368,6 +439,18 @@ class _SignupState extends State<Signup> {
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: borderColor, width: 1),
+=======
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Color(0xFF00D0FF), width: 1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: borderColor, width: 1),
+>>>>>>> d86abe9 (first commit)
                             borderRadius: BorderRadius.circular(12),
                           ),
                           errorMaxLines: 2,
@@ -397,9 +480,19 @@ class _SignupState extends State<Signup> {
                         controller: _passwordController,
                         autocorrect: false,
                         obscureText: _obsecurePassword,
+<<<<<<< HEAD
                         style: TextStyle(fontSize: 16.sp, fontFamily: 'DM Sans', color: textColor),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+=======
+                        style: TextStyle(
+                            fontSize: 16.sp,
+                            fontFamily: 'DM Sans',
+                            color: textColor),
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+>>>>>>> d86abe9 (first commit)
                           hintText: 'Enter your password',
                           hintStyle: TextStyle(
                             fontSize: 14.sp,
@@ -409,6 +502,7 @@ class _SignupState extends State<Signup> {
                           ),
                           filled: true,
                           fillColor: inputFillColor,
+<<<<<<< HEAD
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           focusedBorder: OutlineInputBorder(
                             borderSide: const BorderSide(color: Color(0xFF00D0FF), width: 1),
@@ -416,6 +510,18 @@ class _SignupState extends State<Signup> {
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: borderColor, width: 1),
+=======
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Color(0xFF00D0FF), width: 1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: borderColor, width: 1),
+>>>>>>> d86abe9 (first commit)
                             borderRadius: BorderRadius.circular(12),
                           ),
                           suffixIcon: IconButton(
@@ -426,7 +532,13 @@ class _SignupState extends State<Signup> {
                             },
                             icon: Icon(
                               color: hintColor,
+<<<<<<< HEAD
                               _obsecurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+=======
+                              _obsecurePassword
+                                  ? Icons.visibility_off_rounded
+                                  : Icons.visibility_rounded,
+>>>>>>> d86abe9 (first commit)
                             ),
                           ),
                           errorMaxLines: 2,
@@ -459,14 +571,25 @@ class _SignupState extends State<Signup> {
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontFamily: 'DM Sans',
+<<<<<<< HEAD
                               color: isDarkMode ? Colors.grey[400] : const Color(0xFF757575),
+=======
+                              color: isDarkMode
+                                  ? Colors.grey[400]
+                                  : const Color(0xFF757575),
+>>>>>>> d86abe9 (first commit)
                             ),
                           ),
                           InkWell(
                             onTap: () {
                               Navigator.pushReplacement(
                                 context,
+<<<<<<< HEAD
                                 MaterialPageRoute(builder: (context) => const Login()),
+=======
+                                MaterialPageRoute(
+                                    builder: (context) => const Login()),
+>>>>>>> d86abe9 (first commit)
                               );
                             },
                             child: Text(
@@ -491,4 +614,8 @@ class _SignupState extends State<Signup> {
       ),
     );
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> d86abe9 (first commit)
