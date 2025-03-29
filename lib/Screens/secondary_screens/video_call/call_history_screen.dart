@@ -184,7 +184,7 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> with SingleTicker
           children: [
             // Header with back button and title
             SecondaryHeader(
-              title: 'Call History',
+              title: '       Call History',
               onBackPressed: () => Navigator.pop(context),
               actionWidget: IconButton(
                 icon: Icon(
