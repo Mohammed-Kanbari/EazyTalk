@@ -1,12 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-<<<<<<< HEAD
-export "FLUTTER_ROOT=/Users/mvp/Documents/Software/flutter"
-export "FLUTTER_APPLICATION_PATH=/Users/mvp/Documents/internship/EazyTalk"
-=======
-export "FLUTTER_ROOT=/Users/ahmadkanbari/development/flutter"
-export "FLUTTER_APPLICATION_PATH=/Users/ahmadkanbari/Desktop/Mohammed Kanbari/EazyTalk-testForIOS"
->>>>>>> d86abe9 (first commit)
+export "FLUTTER_ROOT=C:\Users\Mohammed Abdulkader\OneDrive\Documents\flutter"
+export "FLUTTER_APPLICATION_PATH=C:\Users\Mohammed Abdulkader\Desktop\DandF\EazyTalk"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"

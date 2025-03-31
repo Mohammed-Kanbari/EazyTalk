@@ -156,7 +156,8 @@ void dispose() {
       floatingActionButton: VoiceCommandButton(
           onLongPress: _showVoiceCommandHelp,
           navigationService: _voiceNavigationService),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButtonLocation: _selectedIndex == 0 
+      ?  FloatingActionButtonLocation.startFloat : FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: navBarColor,

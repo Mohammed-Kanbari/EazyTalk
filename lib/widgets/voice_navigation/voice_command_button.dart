@@ -116,8 +116,6 @@ class _VoiceCommandButtonState extends State<VoiceCommandButton> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -125,16 +123,20 @@ class _VoiceCommandButtonState extends State<VoiceCommandButton> with SingleTick
           scale: _isListening ? _animation.value : 1.0,
           child: GestureDetector(
             onLongPress: widget.onLongPress,
-            child: FloatingActionButton(
-              heroTag: 'voiceCommandBtn',
-              backgroundColor: _isListening 
-                  ? Colors.red 
-                  : AppColors.primary,
-              onPressed: _toggleListening,
-              child: Icon(
-                _isListening ? Icons.mic : Icons.mic_none,
-                color: Colors.white,
-                size: 24.sp,
+            child: Container(
+              width: 56.w,
+              height: 56.w,
+              decoration: BoxDecoration(
+                color: _isListening ? Colors.red : AppColors.primary,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: Icon(
+                  _isListening ? Icons.mic : Icons.mic_none,
+                  color: Colors.white,
+                  size: 24.sp,
+                ),
+                onPressed: _toggleListening,
               ),
             ),
           ),

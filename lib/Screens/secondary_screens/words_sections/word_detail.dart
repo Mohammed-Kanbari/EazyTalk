@@ -144,9 +144,6 @@ class _WordDetailPageState extends State<WordDetailPage> {
           _isFavorite = !_isFavorite;
         });
         
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update favorites')),
-        );
       }
     } catch (e) {
       // Revert and show error

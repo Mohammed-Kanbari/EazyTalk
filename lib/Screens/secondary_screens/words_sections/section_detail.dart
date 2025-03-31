@@ -290,6 +290,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
             children: [
               // Search bar
               SectionSearchBar(
+                hintText: 'Search words',
                 onChanged: (value) {
                   setState(() {
                     _searchQuery = value;

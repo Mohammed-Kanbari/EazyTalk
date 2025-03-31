@@ -4,10 +4,12 @@ import 'package:eazytalk/core/theme/app_colors.dart';
 
 class SectionSearchBar extends StatelessWidget {
   final ValueChanged<String> onChanged;
+  final String hintText;
   
   const SectionSearchBar({
     Key? key,
     required this.onChanged,
+    this.hintText = ''
   }) : super(key: key);
   
   @override
@@ -17,9 +19,10 @@ class SectionSearchBar extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20.h),
       child: TextField(
+        autofocus: false,
         onChanged: onChanged,
         decoration: InputDecoration(
-          hintText: 'Search words...',
+          hintText: hintText,
           hintStyle: TextStyle(
             fontSize: 14.sp,
             fontFamily: 'DM Sans',

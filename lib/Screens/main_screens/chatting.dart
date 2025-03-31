@@ -122,6 +122,7 @@ class _ChattingState extends State<Chatting> {
                   children: [
                     Expanded(
                       child: SectionSearchBar(
+                        hintText: 'Search contacts',
                         onChanged: (value) {
                           setState(() {
                             _searchQuery = value;
