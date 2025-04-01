@@ -5,6 +5,8 @@ import 'package:eazytalk/core/theme/text_styles.dart';
 import 'package:eazytalk/services/auth/auth_service.dart';
 import 'package:eazytalk/services/theme/theme_service.dart';
 import 'package:eazytalk/services/user/user_service.dart';
+import 'package:eazytalk/services/language/language_service.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:eazytalk/widgets/common/screen_header.dart';
 import 'package:eazytalk/widgets/profile/profile_header.dart';
 import 'package:eazytalk/widgets/profile/menu_item.dart';
@@ -112,6 +114,122 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  // Handle language selection
+  void _handleLanguage() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final backgroundColor = AppColors.getSurfaceColor(context);
+    
+    // Get current language code
+    final currentLanguage = LanguageService.getCurrentLanguage();
+    
+    // Show dialog with language options
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: backgroundColor,
+        title: Text(
+          AppLocalizations.of(context).translate('language'),
+          style: TextStyle(
+            fontFamily: 'Sora',
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+            color: textColor,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // English option
+            _buildLanguageOption(
+              'en',
+              'English',
+              currentLanguage == 'en',
+              isDarkMode,
+            ),
+            
+            SizedBox(height: 8.h),
+            
+            // Arabic option
+            _buildLanguageOption(
+              'ar',
+              'العربية',
+              currentLanguage == 'ar',
+              isDarkMode,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              AppLocalizations.of(context).translate('cancel'),
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontSize: 14.sp,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper method to build a language option in the dialog
+  Widget _buildLanguageOption(
+    String languageCode,
+    String languageName,
+    bool isSelected,
+    bool isDarkMode,
+  ) {
+    return InkWell(
+      onTap: () async {
+        // Close the dialog
+        Navigator.pop(context);
+        
+        // Change language
+        await LanguageService.setLanguage(languageCode);
+        
+        // Update UI (will trigger app rebuild via locale notifier)
+        setState(() {});
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? (isDarkMode ? AppColors.primary.withOpacity(0.2) : AppColors.primary.withOpacity(0.1))
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                languageName,
+                style: TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 14.sp,
+                  color: isSelected ? AppColors.primary : AppColors.getTextPrimaryColor(context),
+                ),
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: AppColors.primary,
+                size: 20.sp,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -126,7 +244,7 @@ class _ProfileState extends State<Profile> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ScreenHeader(
-                  title: 'Profile',
+                  title: AppLocalizations.of(context).translate('profile'),
                   textColor: AppColors.getTextPrimaryColor(context),
                 ),
                 GestureDetector(
@@ -213,48 +331,55 @@ class _ProfileState extends State<Profile> {
 
   // Build the menu list
   Widget _buildMenuList() {
+    // Check if we're in dark mode
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Theme-appropriate colors
+    final unselectedColor =
+        isDarkMode ? Colors.grey[600] : Colors.black.withOpacity(0.62);
+
     return ListView(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       children: [
         ProfileMenuItem(
           icon: Icons.lock,
-          text: 'Change Password',
+          text: AppLocalizations.of(context).translate('change_password'),
           iconColor: AppColors.primary,
           onTap: () => _navigateTo(const ChangePass()),
         ),
         ProfileMenuItem(
           icon: Icons.info,
-          text: 'More On Deaf People',
+          text: AppLocalizations.of(context).translate('more_on_deaf'),
           iconColor: AppColors.primary,
           onTap: () => _navigateTo(const MoreOnDeaf()),
         ),
         ProfileMenuItem(
           icon: Icons.location_on,
-          text: 'Deaf-Friendly Excursions',
+          text: AppLocalizations.of(context).translate('deaf_excursions'),
           iconColor: AppColors.primary,
           onTap: () => _navigateTo(const DeafFriendlyExcursions()),
         ),
         ProfileMenuItem(
           icon: Icons.help,
-          text: 'Help Us',
+          text: AppLocalizations.of(context).translate('help_us'),
           iconColor: AppColors.primary,
           onTap: () => _navigateTo(const HelpUsPage()),
         ),
         ProfileMenuItem(
           icon: Icons.description,
-          text: 'Terms & Services',
+          text: AppLocalizations.of(context).translate('terms_services'),
           iconColor: AppColors.primary,
           onTap: () => _navigateTo(const TermsAndServicesPage()),
         ),
         ProfileMenuItem(
           icon: Icons.language,
-          text: 'Language',
+          text: AppLocalizations.of(context).translate('language'),
           iconColor: AppColors.primary,
           onTap: _handleLanguage,
         ),
         ProfileMenuItem(
           icon: Icons.logout,
-          text: 'Logout',
+          text: AppLocalizations.of(context).translate('logout'),
           iconColor: Colors.red,
           isLogout: true,
           onTap: _handleLogout,
@@ -266,12 +391,6 @@ class _ProfileState extends State<Profile> {
   // Helper method to navigate to a screen
   void _navigateTo(Widget screen) {
     Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
-  }
-
-  // Handle language selection
-  void _handleLanguage() {
-    print('Navigating to Language settings screen');
-    // To be implemented
   }
 
   // Handle logout with confirmation

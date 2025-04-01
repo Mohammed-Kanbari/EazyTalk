@@ -1,8 +1,11 @@
 import 'package:eazytalk/Screens/starting_screens/splash_screen.dart';
 import 'package:eazytalk/core/theme/app_theme.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
+import 'package:eazytalk/services/language/language_service.dart';
 import 'package:eazytalk/services/theme/theme_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -18,6 +21,9 @@ void main() async {
   
   // Initialize theme service
   await ThemeService.init();
+  
+  // Initialize language service
+  await LanguageService.init();
   
   runApp(EazyTalkApp());
 }
@@ -35,6 +41,11 @@ class _EazyTalkAppState extends State<EazyTalkApp> {
     ThemeService.themeNotifier.addListener(() {
       setState(() {});
     });
+    
+    // Listen for language changes
+    LanguageService.localeNotifier.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -49,7 +60,31 @@ class _EazyTalkAppState extends State<EazyTalkApp> {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeService.getThemeMode(),
+          
+          // Localization setup
+          locale: LanguageService.localeNotifier.value,
+          supportedLocales: const [
+            Locale('en', ''), // English
+            Locale('ar', ''), // Arabic
+          ],
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          
           home: SplashScreen(),
+          
+          // Use a builder to set RTL based on language
+          builder: (context, child) {
+            return Directionality(
+              textDirection: LanguageService.isRtl() 
+                  ? TextDirection.rtl 
+                  : TextDirection.ltr,
+              child: child!,
+            );
+          },
         );
       }
     );
