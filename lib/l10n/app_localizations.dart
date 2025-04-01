@@ -32,8 +32,17 @@ class AppLocalizations {
   }
 
   // This method will be called from every widget which needs a localized text
-  String translate(String key) {
-    return _localizedStrings[key] ?? key;
+  String translate(String key, [List<String>? args]) {
+    String text = _localizedStrings[key] ?? key;
+    
+    // If arguments are provided, replace placeholders with actual values
+    if (args != null && args.isNotEmpty) {
+      for (int i = 0; i < args.length; i++) {
+        text = text.replaceFirst('%s', args[i]);
+      }
+    }
+    
+    return text;
   }
 }
 

@@ -14,6 +14,7 @@ import 'package:eazytalk/widgets/words/instruction_step.dart';
 import 'package:eazytalk/widgets/words/tip_item.dart';
 import 'package:eazytalk/widgets/words/empty_tab_content.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class WordDetailPage extends StatefulWidget {
   final int wordId;
@@ -59,8 +60,8 @@ class _WordDetailPageState extends State<WordDetailPage> {
   VideoPlayerController? _videoController;
   bool _isVideoInitialized = false;
   
-  // Tab titles
-  final List<String> _tabTitles = ['وصف', 'تعليمات', 'نصائح للإتقان'];
+  // Tab titles for both English and Arabic
+  late List<String> _tabTitles;
 
   @override
   void initState() {
@@ -143,7 +144,6 @@ class _WordDetailPageState extends State<WordDetailPage> {
         setState(() {
           _isFavorite = !_isFavorite;
         });
-        
       }
     } catch (e) {
       // Revert and show error
@@ -170,6 +170,13 @@ class _WordDetailPageState extends State<WordDetailPage> {
     // Check if dark mode
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
+    
+    // Initialize tab titles
+    _tabTitles = [
+      AppLocalizations.of(context).translate('description'),
+      AppLocalizations.of(context).translate('instructions'),
+      AppLocalizations.of(context).translate('tips'),
+    ];
     
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
@@ -357,57 +364,45 @@ class _WordDetailPageState extends State<WordDetailPage> {
   }
 
   // Instructions tab content
-// Instructions tab content
-Widget _buildInstructionsTab(bool isDarkMode) {
-  
-  if (_instructions.isEmpty) {
-    return EmptyTabContent(
-      message: 'لا توجد تعليمات متاحة لهذه الإشارة',
+  Widget _buildInstructionsTab(bool isDarkMode) {
+    if (_instructions.isEmpty) {
+      return EmptyTabContent(
+        message: AppLocalizations.of(context).translate('no_instructions'),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: _instructions.map((instruction) {
+        return InstructionStep(
+          number: instruction.stepNumber.toString(),
+          description: instruction.instruction,
+        );
+      }).toList(),
     );
   }
 
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: _instructions.map((instruction) {
-      return InstructionStep(
-        number: instruction.stepNumber.toString(),
-        description: instruction.instruction,
+  // Tips tab content
+  Widget _buildTipsTab(bool isDarkMode) {
+    if (_tips.isEmpty) {
+      return EmptyTabContent(
+        message: AppLocalizations.of(context).translate('no_tips'),
       );
-    }).toList(),
-  );
-}
+    }
 
-// Tips tab content
-Widget _buildTipsTab(bool isDarkMode) {
-  
-  if (_tips.isEmpty) {
-    return EmptyTabContent(
-      message: 'لا توجد نصائح متاحة لهذه الإشارة',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: _tips.map((tip) {
+        return TipItem(
+          text: tip.tip,
+        );
+      }).toList(),
     );
   }
-
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: _tips.map((tip) {
-      return TipItem(
-        text: tip.tip,
-      );
-    }).toList(),
-  );
-}
   
   // Helper method to get difficulty text in Arabic
   String _getDifficultyText(String level) {
-    switch (level) {
-      case 'beginner':
-        return 'مبتدئ';
-      case 'intermediate':
-        return 'متوسط';
-      case 'advanced':
-        return 'متقدم';
-      default:
-        return 'مبتدئ';
-    }
+    return AppLocalizations.of(context).translate(level);
   }
 
   // Helper method to get difficulty color with dark mode support

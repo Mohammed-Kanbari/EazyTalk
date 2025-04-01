@@ -11,6 +11,7 @@ import 'package:eazytalk/widgets/signs/section_card.dart';
 import 'package:eazytalk/screens/secondary_screens/words_sections/section_detail.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
 import 'package:eazytalk/core/theme/text_styles.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class LearnSignsPage extends StatefulWidget {
   const LearnSignsPage({super.key});
@@ -72,7 +73,7 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
           children: [
             // Screen header with theme-aware text color
             ScreenHeader(
-              title: 'Learn Sign Language',
+              title: AppLocalizations.of(context).translate('learn_signs'),
               textColor: textColor,
             ),
             SizedBox(height: 30.h),
@@ -148,14 +149,14 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
           color: textColor,
         ),
         children: [
-          const TextSpan(text: 'Master '),
+          TextSpan(text: AppLocalizations.of(context).translate('master_signs').split(' ')[0] + ' '),
           TextSpan(
-            text: 'essential signs',
+            text: AppLocalizations.of(context).translate('master_signs').split(' ')[1],
             style: TextStyle(
               color: AppColors.primary,
             ),
           ),
-          const TextSpan(text: ' for everyday communication.'),
+          TextSpan(text: ' ' + AppLocalizations.of(context).translate('master_signs').split(' ').sublist(2).join(' ')),
         ],
       ),
     );
@@ -170,7 +171,7 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Most Used Words :',
+          AppLocalizations.of(context).translate('most_used_words'),
           style: TextStyle(
             fontFamily: 'Sora',
             fontSize: 18.sp,
@@ -207,7 +208,7 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Sections :',
+          AppLocalizations.of(context).translate('sections'),
           style: TextStyle(
             fontFamily: 'Sora',
             fontSize: 18.sp,
@@ -237,7 +238,7 @@ class _LearnSignsPageState extends State<LearnSignsPage> {
               )
             : Center(
                 child: Text(
-                  'No sections available',
+                  AppLocalizations.of(context).translate('no_sections'),
                   style: TextStyle(
                     fontFamily: 'DM Sans',
                     fontSize: 16.sp,

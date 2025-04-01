@@ -11,6 +11,7 @@ import 'package:eazytalk/widgets/signs/section_search_bar.dart';
 import 'package:eazytalk/widgets/signs/filter_option_item.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
 import 'package:eazytalk/core/theme/text_styles.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class SectionDetailPage extends StatefulWidget {
   final int sectionId;
@@ -116,7 +117,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
             // Sort alphabetically
             FilterOptionItem(
               icon: Icons.sort_by_alpha,
-              title: 'Sort alphabetically',
+              title: AppLocalizations.of(context).translate('sort_alphabetically'),
               isSelected: _sortOption == 'alphabetical',
               onTap: () {
                 Navigator.pop(context);
@@ -129,7 +130,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
             // Sort by difficulty
             FilterOptionItem(
               icon: Icons.trending_up,
-              title: 'Sort by difficulty',
+              title: AppLocalizations.of(context).translate('sort_by_difficulty'),
               isSelected: _sortOption == 'difficulty',
               onTap: () {
                 Navigator.pop(context);
@@ -142,7 +143,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
             // Show favorites only
             FilterOptionItem(
               icon: Icons.favorite_border,
-              title: 'Show favorites only',
+              title: AppLocalizations.of(context).translate('show_favorites'),
               isSelected: _showFavoritesOnly,
               onTap: () {
                 Navigator.pop(context);
@@ -155,7 +156,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
             // Clear filters
             FilterOptionItem(
               icon: Icons.clear_all,
-              title: 'Clear all filters',
+              title: AppLocalizations.of(context).translate('clear_filters'),
               onTap: () {
                 Navigator.pop(context);
                 setState(() {
@@ -239,7 +240,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
             children: [
               // Header
               SecondaryHeader(
-                title: 'Words',
+                title: AppLocalizations.of(context).translate('words'),
                 onBackPressed: () => Navigator.pop(context),
                 actionWidget: GestureDetector(
                   onTap: _showOptionsMenu,
@@ -290,7 +291,7 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
             children: [
               // Search bar
               SectionSearchBar(
-                hintText: 'Search words',
+                hintText: AppLocalizations.of(context).translate('search_words'),
                 onChanged: (value) {
                   setState(() {
                     _searchQuery = value;
@@ -332,14 +333,9 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
             color: textColor,
           ),
           children: [
-            TextSpan(text: 'Common '),
             TextSpan(
-              text: widget.title,
-              style: TextStyle(
-                color: categoryColor,
-              ),
+              text: AppLocalizations.of(context).translate('common_in_sign', [widget.title]),
             ),
-            TextSpan(text: ' In Sign Language'),
           ],
         ),
       ),
@@ -367,10 +363,10 @@ class _SectionDetailPageState extends State<SectionDetailPage> {
               SizedBox(height: 20.h),
               Text(
                 _showFavoritesOnly
-                    ? 'No favorites found'
+                    ? AppLocalizations.of(context).translate('no_favorites')
                     : (_searchQuery.isNotEmpty
-                        ? 'No words matching "$_searchQuery"'
-                        : 'No words available in this section'),
+                        ? AppLocalizations.of(context).translate('no_words_match') + ' "$_searchQuery"'
+                        : AppLocalizations.of(context).translate('no_words')),
                 style: TextStyle(
                   fontFamily: 'DM Sans',
                   fontSize: 16.sp,

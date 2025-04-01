@@ -7,6 +7,7 @@ import 'package:eazytalk/widgets/tools/feature_card.dart';
 import 'package:eazytalk/widgets/tools/instruction_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class SmartToolsScreen extends StatefulWidget {
   const SmartToolsScreen({super.key});
@@ -19,14 +20,8 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
   final ConnectivityService _connectivityService = ConnectivityService();
   bool _isOffline = false;
   
-  // Instructions for using tools
-  final List<String> _instructions = [
-    "Ensure you're online",
-    'Select a tool',
-    'Tap the action button',
-    'Follow instructions',
-    'View or copy text'
-  ];
+  // Instructions for using tools (will be localized in build)
+  late List<String> _instructions;
 
   @override
   void initState() {
@@ -76,6 +71,15 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
+    // Initialize instructions list with translations
+    _instructions = [
+      AppLocalizations.of(context).translate('speak_clearly'),
+      AppLocalizations.of(context).translate('use_exact'),
+      AppLocalizations.of(context).translate('reduce_noise'),
+      AppLocalizations.of(context).translate('voice_work'),
+      AppLocalizations.of(context).translate('tap_mic'),
+    ];
+    
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
       body: SafeArea(
@@ -86,14 +90,14 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ScreenHeader(
-                  title: 'Smart Tools',
+                  title: AppLocalizations.of(context).translate('smart_tools'),
                   textColor: AppColors.getTextPrimaryColor(context),
                 ),
                 if (_isOffline)
                   GestureDetector(
                     onTap: _showConnectivityMessage,
                     child: Padding(
-                      padding:  EdgeInsets.only(right: 28.w, top: 27.h),
+                      padding: EdgeInsets.only(right: 28.w, top: 27.h),
                       child: Image.asset(
                         'assets/icons/exclamation 1.png',
                         color: isDarkMode ? Colors.yellowAccent : null,
@@ -117,10 +121,10 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
                       
                       // Sign Language Translator Card
                       FeatureCard(
-                        title: 'Sign Language Translator',
-                        description: 'record a video to translate sign language instantly.',
+                        title: AppLocalizations.of(context).translate('sign_language'),
+                        description: AppLocalizations.of(context).translate('record_video'),
                         iconPath: 'assets/images/sign.png',
-                        buttonText: 'Start translation',
+                        buttonText: AppLocalizations.of(context).translate('sign_in'),
                         onPressed: () {
                           // Navigate to Sign Language Page
                         },
@@ -129,10 +133,10 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
                       
                       // Speech to Text Card
                       FeatureCard(
-                        title: 'Speech to Text',
-                        description: 'Convert spoken words into text effortlessly.',
+                        title: AppLocalizations.of(context).translate('speech_to_text'),
+                        description: AppLocalizations.of(context).translate('transcribed_text'),
                         iconPath: 'assets/images/speech.png',
-                        buttonText: 'Start translation',
+                        buttonText: AppLocalizations.of(context).translate('sign_in'),
                         onPressed: () {
                           Navigator.push(context, MaterialPageRoute(builder: (context) => const Speech()));
                         },
@@ -140,7 +144,7 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
                       SizedBox(height: 60.h),
                       
                       Text(
-                        'How to use smart tools :',
+                        AppLocalizations.of(context).translate('how_use_voice'),
                         style: AppTextStyles.getSectionTitle(context),
                       ),
                       SizedBox(height: 20.h),
@@ -170,6 +174,21 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
     
+    String introText = AppLocalizations.of(context).translate('master_signs');
+    List<String> words = introText.split(' ');
+    
+    // Ensure we have enough words for the special styling
+    if (words.length < 3) {
+      return Text(
+        introText,
+        style: TextStyle(
+          fontFamily: 'DM Sans',
+          fontSize: 16.sp,
+          color: textColor,
+        ),
+      );
+    }
+    
     return RichText(
       text: TextSpan(
         style: TextStyle(
@@ -178,21 +197,14 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
           color: textColor,
         ),
         children: [
-          const TextSpan(text: 'Enhance communication with '),
+          TextSpan(text: words.take(1).join(' ') + ' '),
           TextSpan(
-            text: 'smart',
+            text: words.skip(1).take(2).join(' '),
             style: TextStyle(
               color: AppColors.primary,
             ),
           ),
-          const TextSpan(text: ', '),
-          TextSpan(
-            text: 'real-time',
-            style: TextStyle(
-              color: AppColors.primary,
-            ),
-          ),
-          const TextSpan(text: ' translation tools.'),
+          TextSpan(text: ' ' + words.skip(3).join(' ')),
         ],
       ),
     );
