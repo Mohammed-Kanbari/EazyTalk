@@ -47,8 +47,8 @@ class VoiceNavigationService {
           _isListening = false;
         }
       },
-      // We'll accept either English or Arabic commands
-      language: 'en-US', // Can be changed to 'ar-SA' for Arabic
+      // We'll accept both English and Arabic commands
+      language: 'en-US,ar-SA', // Support both English and Arabic
     );
   }
 
@@ -98,7 +98,29 @@ class VoiceNavigationService {
       return NavigationDestination.speechToText;
     }
 
-    // Arabic commands could be added similarly
+    // Arabic commands
+    if (text.contains('الذهاب إلى الرئيسية') || text.contains('فتح الرئيسية')) {
+      return NavigationDestination.home;
+    } else if (text.contains('الذهاب إلى المحادثات') ||
+        text.contains('فتح المحادثات') ||
+        text.contains('الرسائل') ||
+        text.contains('المحادثات')) {
+      return NavigationDestination.chat;
+    } else if (text.contains('تعلم الإشارات') || text.contains('لغة الإشارة')) {
+      return NavigationDestination.learnSigns;
+    } else if (text.contains('الأدوات') || text.contains('الأدوات الذكية')) {
+      return NavigationDestination.smartTools;
+    } else if (text.contains('الملف الشخصي') || text.contains('حسابي')) {
+      return NavigationDestination.profile;
+    } else if (text.contains('المساعد الذكي') ||
+        text.contains('المساعد الاصطناعي') ||
+        text.contains('المساعد')) {
+      return NavigationDestination.chatbot;
+    } else if (text.contains('تحويل الكلام إلى نص') ||
+        text.contains('تحويل الصوت إلى نص') ||
+        text.contains('النسخ')) {
+      return NavigationDestination.speechToText;
+    }
 
     return null;
   }
@@ -132,20 +154,17 @@ class VoiceNavigationService {
         break;
 
       case NavigationDestination.chatbot:
-        
-          Navigator.push(
-            navigatorKey.currentContext!,
-            MaterialPageRoute(builder: (context) => const Chatbot()),
-          );
-        
+        Navigator.push(
+          navigatorKey.currentContext!,
+          MaterialPageRoute(builder: (context) => const Chatbot()),
+        );
         break;
 
       case NavigationDestination.speechToText:
-          Navigator.push(
-            navigatorKey.currentContext!,
-            MaterialPageRoute(builder: (context) => const Speech()),
-          );
-        
+        Navigator.push(
+          navigatorKey.currentContext!,
+          MaterialPageRoute(builder: (context) => const Speech()),
+        );
         break;
     }
     stopListening();

@@ -48,7 +48,6 @@ class _WordDetailPageState extends State<WordDetailPage> {
   int _selectedTabIndex = 0;
   String _errorMessage = '';
   String _translation = '';
-  DateTime? _favoritedAt;
   
   // Data from services
   List<InstructionModel> _instructions = [];
@@ -170,6 +169,7 @@ class _WordDetailPageState extends State<WordDetailPage> {
     // Check if dark mode
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     
     // Initialize tab titles
     _tabTitles = [
@@ -190,19 +190,25 @@ class _WordDetailPageState extends State<WordDetailPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Image.asset(
-                      'assets/icons/back-arrow.png',
-                      width: 22.w,
-                      height: 22.h,
-                      color: textColor,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.arrow_back_ios,
-                        color: textColor,
-                        size: 20.sp,
-                      ),
-                    ),
-                  ),
+            onTap: () => Navigator.pop(context),
+            child: Transform(
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.001)
+                ..rotateY(isRTL ? 3.14159 : 0),
+              alignment: Alignment.center,
+              child: Image.asset(
+                'assets/icons/back-arrow.png',
+                width: 22.w,
+                height: 22.h,
+                color: textColor,
+                errorBuilder: (context, error, stackTrace) => Icon(
+                  isRTL ? Icons.arrow_forward_ios : Icons.arrow_back_ios,
+                  size: 20.sp,
+                  color: textColor,
+                ),
+              ),
+            ),
+          ),
                   GestureDetector(
                     onTap: _toggleFavorite,
                     child: Container(

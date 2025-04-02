@@ -1,3 +1,4 @@
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
@@ -86,7 +87,7 @@ class _VoiceCommandButtonState extends State<VoiceCommandButton> with SingleTick
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Listening for voice commands...',
+          AppLocalizations.of(context).translate('listening_commands'),
           style: TextStyle(
             fontFamily: 'DM Sans',
             fontSize: 14.sp,
@@ -102,7 +103,7 @@ class _VoiceCommandButtonState extends State<VoiceCommandButton> with SingleTick
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Voice command listening stopped',
+          AppLocalizations.of(context).translate('listening_stopped'),
           style: TextStyle(
             fontFamily: 'DM Sans',
             fontSize: 14.sp,

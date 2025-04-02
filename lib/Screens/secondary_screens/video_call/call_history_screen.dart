@@ -8,6 +8,7 @@ import 'package:eazytalk/services/video_call/call_service.dart';
 import 'package:eazytalk/widgets/common/secondary_header.dart';
 import 'package:eazytalk/widgets/video_call/call_history_item.dart';
 import 'package:eazytalk/Screens/secondary_screens/video_call/video_call_screen.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class CallHistoryScreen extends StatefulWidget {
   const CallHistoryScreen({Key? key}) : super(key: key);
@@ -111,20 +112,22 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> with SingleTicker
   
   // Clear all call history
   Future<void> _clearAllHistory() async {
+    final localizations = AppLocalizations.of(context);
+    
     // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear Call History'),
-        content: const Text('Are you sure you want to clear all call history? This action cannot be undone.'),
+        title: Text(localizations.translate('clear_all')),
+        content: Text(localizations.translate('clear_confirmation')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(localizations.translate('cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Clear All'),
+            child: Text(localizations.translate('clear_all')),
           ),
         ],
       ),
@@ -142,23 +145,38 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> with SingleTicker
       Navigator.pop(context);
       
       if (!success) {
-        _showError('Failed to clear call history');
+        _showError(localizations.translate('failed_load'));
       }
     } catch (e) {
       // Hide loading indicator
       Navigator.pop(context);
       
-      _showError('Error clearing call history: $e');
+      _showError('${localizations.translate('failed_load')}: $e');
     }
   }
   
   // Show loading dialog
   void _showLoading() {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
+      builder: (context) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            SizedBox(height: 16.h),
+            Text(
+              localizations.translate('loading'),
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontSize: 14.sp,
+                color: AppColors.getTextPrimaryColor(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -176,6 +194,8 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> with SingleTicker
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+    final localizations = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
@@ -184,7 +204,7 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> with SingleTicker
           children: [
             // Header with back button and title
             SecondaryHeader(
-              title: '       Call History',
+              title: localizations.translate('call_history'),
               onBackPressed: () => Navigator.pop(context),
               actionWidget: IconButton(
                 icon: Icon(
@@ -209,9 +229,9 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> with SingleTicker
               ),
               child: TabBar(
                 controller: _tabController,
-                tabs: const [
-                  Tab(text: 'All'),
-                  Tab(text: 'Missed'),
+                tabs: [
+                  Tab(text: localizations.translate('all')),
+                  Tab(text: localizations.translate('missed')),
                 ],
                 labelColor: AppColors.primary,
                 unselectedLabelColor: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -246,19 +266,35 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> with SingleTicker
   
   // Build all calls tab
   Widget _buildAllCallsTab() {
+    final localizations = AppLocalizations.of(context);
+    
     return StreamBuilder<List<CallModel>>(
       stream: _callHistoryService.getCallHistory(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CircularProgressIndicator(),
+                SizedBox(height: 16.h),
+                Text(
+                  localizations.translate('loading'),
+                  style: TextStyle(
+                    fontFamily: 'DM Sans',
+                    fontSize: 14.sp,
+                    color: AppColors.getTextPrimaryColor(context),
+                  ),
+                ),
+              ],
+            ),
           );
         }
         
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'Error loading call history',
+              localizations.translate('error_loading'),
               style: TextStyle(
                 fontFamily: 'DM Sans',
                 fontSize: 16.sp,
@@ -271,7 +307,7 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> with SingleTicker
         final calls = snapshot.data ?? [];
         
         if (calls.isEmpty) {
-          return _buildEmptyState('No call history');
+          return _buildEmptyState(localizations.translate('no_call_history'));
         }
         
         return ListView.builder(
@@ -305,19 +341,35 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> with SingleTicker
   
   // Build missed calls tab
   Widget _buildMissedCallsTab() {
+    final localizations = AppLocalizations.of(context);
+    
     return StreamBuilder<List<CallModel>>(
       stream: _callHistoryService.getMissedCalls(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CircularProgressIndicator(),
+                SizedBox(height: 16.h),
+                Text(
+                  localizations.translate('loading'),
+                  style: TextStyle(
+                    fontFamily: 'DM Sans',
+                    fontSize: 14.sp,
+                    color: AppColors.getTextPrimaryColor(context),
+                  ),
+                ),
+              ],
+            ),
           );
         }
         
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'Error loading missed calls',
+              localizations.translate('error_loading'),
               style: TextStyle(
                 fontFamily: 'DM Sans',
                 fontSize: 16.sp,
@@ -330,7 +382,7 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> with SingleTicker
         final calls = snapshot.data ?? [];
         
         if (calls.isEmpty) {
-          return _buildEmptyState('No missed calls');
+          return _buildEmptyState(localizations.translate('no_missed_calls'));
         }
         
         return ListView.builder(
@@ -374,6 +426,7 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> with SingleTicker
               fontSize: 18.sp,
               color: isDarkMode ? Colors.grey[500] : Colors.grey[600],
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

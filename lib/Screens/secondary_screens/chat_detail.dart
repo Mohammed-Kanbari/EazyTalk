@@ -6,6 +6,7 @@ import 'package:eazytalk/widgets/chat/message_bubble.dart';
 import 'package:eazytalk/widgets/chat/chat_input.dart';
 import 'package:eazytalk/widgets/common/secondary_header.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:convert';
@@ -133,13 +134,15 @@ class _ChatDetailState extends State<ChatDetail> {
 
   // Now add this new method to handle video call initiation
 Future<void> _initiateVideoCall() async {
+  final localizations = AppLocalizations.of(context);
+  
   try {
     // Get the other user's ID
     final otherUserId = _getOtherParticipantId(widget.conversation);
     
     if (otherUserId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot find the recipient')),
+        SnackBar(content: Text(localizations.translate('cannot_find_recipient'))),
       );
       return;
     }
@@ -148,8 +151,22 @@ Future<void> _initiateVideoCall() async {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
+      builder: (context) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            SizedBox(height: 16.h),
+            Text(
+              localizations.translate('connecting_call'),
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontSize: 14.sp,
+                color: AppColors.getTextPrimaryColor(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
     
@@ -177,7 +194,7 @@ Future<void> _initiateVideoCall() async {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to start video call')),
+        SnackBar(content: Text(localizations.translate('call_failed'))),
       );
     }
   } catch (e) {
@@ -188,7 +205,7 @@ Future<void> _initiateVideoCall() async {
     
     // Show error
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error starting video call: $e')),
+      SnackBar(content: Text('${localizations.translate('call_failed')}: $e')),
     );
   }
 }
@@ -196,6 +213,8 @@ Future<void> _initiateVideoCall() async {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+    final localizations = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
@@ -215,13 +234,29 @@ Future<void> _initiateVideoCall() async {
                     stream: _chatService.getMessages(widget.conversation.id),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const CircularProgressIndicator(),
+                              SizedBox(height: 16.h),
+                              Text(
+                                localizations.translate('loading'),
+                                style: TextStyle(
+                                  fontFamily: 'DM Sans',
+                                  fontSize: 14.sp,
+                                  color: AppColors.getTextPrimaryColor(context),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       }
 
                       if (snapshot.hasError) {
                         return Center(
                           child: Text(
-                            'Error loading messages',
+                            localizations.translate('error_loading'),
                             style: TextStyle(
                               fontFamily: 'DM Sans',
                               fontSize: 16.sp,
@@ -238,12 +273,13 @@ Future<void> _initiateVideoCall() async {
                           child: Padding(
                             padding: EdgeInsets.all(20.r),
                             child: Text(
-                              'No messages yet. Say hello!',
+                              localizations.translate('no_messages'),
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 16.sp,
                                 color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                               ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
                         );
@@ -281,6 +317,7 @@ Future<void> _initiateVideoCall() async {
   Widget _buildHeader() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     
     return Container(
       padding:
@@ -296,19 +333,26 @@ Future<void> _initiateVideoCall() async {
         ],
       ),
       child: Row(
+        textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
         children: [
           // Back button
           GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: Image.asset(
-              'assets/icons/back-arrow.png',
-              width: 22.w,
-              height: 22.h,
-              color: textColor,
-              errorBuilder: (context, error, stackTrace) => Icon(
-                Icons.arrow_back_ios,
-                size: 20.sp,
+            child: Transform(
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.001)
+                ..rotateY(isRTL ? 3.14159 : 0),
+              alignment: Alignment.center,
+              child: Image.asset(
+                'assets/icons/back-arrow.png',
+                width: 22.w,
+                height: 22.h,
                 color: textColor,
+                errorBuilder: (context, error, stackTrace) => Icon(
+                  isRTL ? Icons.arrow_forward_ios : Icons.arrow_back_ios,
+                  size: 20.sp,
+                  color: textColor,
+                ),
               ),
             ),
           ),
@@ -358,6 +402,7 @@ Future<void> _initiateVideoCall() async {
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  textAlign: isRTL ? TextAlign.right : TextAlign.left,
                 ),
               ],
             ),
@@ -372,7 +417,6 @@ Future<void> _initiateVideoCall() async {
             height: 28.h,
             color: isDarkMode ? Colors.white : null,
           )),
-          
          
         ],
       ),

@@ -1,3 +1,4 @@
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
@@ -166,14 +167,14 @@ class AuthService {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Confirm Logout',
+          AppLocalizations.of(context).translate('confirm_logout'),
           style: TextStyle(
             fontFamily: 'Sora',
             fontWeight: FontWeight.w600,
           ),
         ),
         content: Text(
-          'Are you sure you want to logout?',
+          AppLocalizations.of(context).translate('logout_confirm'),
           style: TextStyle(
             fontFamily: 'DM Sans',
           ),
@@ -182,7 +183,7 @@ class AuthService {
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(
-              'Cancel',
+               AppLocalizations.of(context).translate('cancel'),
               style: TextStyle(
                 color: primaryColor,
                 fontFamily: 'DM Sans',
@@ -195,7 +196,7 @@ class AuthService {
               backgroundColor: primaryColor,
             ),
             child: Text(
-              'Logout',
+               AppLocalizations.of(context).translate('logout'),
               style: TextStyle(
                 color: Colors.white,
                 fontFamily: 'Sora',

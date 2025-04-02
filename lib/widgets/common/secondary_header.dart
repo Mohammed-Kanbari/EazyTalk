@@ -18,6 +18,7 @@ class SecondaryHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textColor = AppColors.getTextPrimaryColor(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     
     return Padding(
       padding: EdgeInsets.only(top: 27.h, left: 28.w, right: 28.w),
@@ -27,15 +28,21 @@ class SecondaryHeader extends StatelessWidget {
           onBackPressed != null
               ? GestureDetector(
                   onTap: onBackPressed,
-                  child: Image.asset(
-                    'assets/icons/back-arrow.png',
-                    width: 22.w,
-                    height: 22.h,
-                    color: textColor,
-                    errorBuilder: (context, error, stackTrace) => Icon(
-                      Icons.arrow_back_ios,
+                  child: Transform(
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(isRTL ? 3.14159 : 0),
+                    alignment: Alignment.center,
+                    child: Image.asset(
+                      'assets/icons/back-arrow.png',
+                      width: 22.w,
+                      height: 22.h,
                       color: textColor,
-                      size: 20.sp,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        isRTL ? Icons.arrow_forward_ios : Icons.arrow_back_ios,
+                        color: textColor,
+                        size: 20.sp,
+                      ),
                     ),
                   ),
                 )

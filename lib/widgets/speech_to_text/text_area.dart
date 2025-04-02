@@ -1,3 +1,4 @@
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -22,6 +23,9 @@ class TranscriptionTextArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+    final localizations = AppLocalizations.of(context);
+    
     final backgroundColor = isDarkMode 
         ? AppColors.primary.withOpacity(0.15)
         : AppColors.primary.withOpacity(0.11);
@@ -60,7 +64,7 @@ class TranscriptionTextArea extends StatelessWidget {
                 decoration: InputDecoration(
                   fillColor: const Color.fromARGB(0, 255, 255, 255),
                   border: InputBorder.none,
-                  hintText: 'Your transcribed text will appear here.',
+                  hintText: localizations.translate('transcribed_text'),
                   hintStyle: TextStyle(
                     fontSize: 14.sp,
                     fontFamily: 'DM Sans',

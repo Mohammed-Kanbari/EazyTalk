@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class ChatInput extends StatelessWidget {
   final TextEditingController controller;
@@ -17,6 +18,8 @@ class ChatInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+    final localizations = AppLocalizations.of(context);
     
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -27,23 +30,30 @@ class ChatInput extends StatelessWidget {
             color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.05),
             spreadRadius: 1,
             blurRadius: 4,
-            offset: Offset(0, -1),
+            offset: const Offset(0, -1),
           ),
         ],
       ),
       child: Row(
+        textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
         children: [
           Expanded(
             child: TextField(
               controller: controller,
+              textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+              textAlign: isRTL ? TextAlign.right : TextAlign.left,
               decoration: InputDecoration(
-                hintText: 'Ask me anything...',
+                hintText: localizations.translate('type_message'),
                 hintStyle: TextStyle(
                   color: isDarkMode ? Colors.grey[600] : Colors.grey,
                   fontFamily: 'DM Sans',
                   fontSize: 14.sp,
                 ),
                 border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 8.w,
+                  vertical: 8.h,
+                ),
               ),
               style: TextStyle(
                 fontFamily: 'DM Sans',
@@ -55,6 +65,7 @@ class ChatInput extends StatelessWidget {
               onSubmitted: (_) => canSend ? onSend() : null,
             ),
           ),
+          SizedBox(width: 8.w),
           Container(
             height: 38.h,
             width: 38.w,

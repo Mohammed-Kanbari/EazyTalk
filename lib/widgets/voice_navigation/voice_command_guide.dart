@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class CommandExample {
   final String command;
@@ -17,12 +18,14 @@ class VoiceCommandGuide extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
     final cardColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+    final localizations = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
       appBar: AppBar(
+        centerTitle: true,
         title: Text(
-          'Voice Commands',
+          localizations.translate('voice_commands'),
           style: TextStyle(
             fontFamily: 'Sora',
             fontSize: 20.sp,
@@ -44,7 +47,7 @@ class VoiceCommandGuide extends StatelessWidget {
           children: [
             // Introduction
             Text(
-              'How to use voice commands',
+              localizations.translate('how_to_use'),
               style: TextStyle(
                 fontFamily: 'Sora',
                 fontSize: 22.sp,
@@ -54,7 +57,7 @@ class VoiceCommandGuide extends StatelessWidget {
             ),
             SizedBox(height: 16.h),
             Text(
-              'Tap the microphone button at the bottom right of the screen to start voice command mode. Speak clearly and try one of the following commands:',
+              localizations.translate('voice_intro'),
               style: TextStyle(
                 fontFamily: 'DM Sans',
                 fontSize: 16.sp,
@@ -65,7 +68,7 @@ class VoiceCommandGuide extends StatelessWidget {
             
             // Available commands
             Text(
-              'Available commands',
+              localizations.translate('available_commands'),
               style: TextStyle(
                 fontFamily: 'Sora',
                 fontSize: 18.sp,
@@ -78,12 +81,24 @@ class VoiceCommandGuide extends StatelessWidget {
             // Main navigation commands
             _buildCommandCategory(
               context,
-              'Main Navigation',
+              localizations.translate('main_navigation'),
               [
-                CommandExample('Go to home', 'Navigate to the home screen'),
-                CommandExample('sign language', 'Navigate to the learn signs screen'),
-                CommandExample('Smart tools', 'Navigate to the smart tools screen'),
-                CommandExample('Open profile', 'Navigate to the profile screen'),
+                CommandExample(
+                  localizations.translate('go_to_home'),
+                  localizations.translate('navigate_home'),
+                ),
+                CommandExample(
+                  localizations.translate('learn_signs'),
+                  localizations.translate('navigate_signs'),
+                ),
+                CommandExample(
+                  localizations.translate('smart_tools'),
+                  localizations.translate('navigate_tools'),
+                ),
+                CommandExample(
+                  localizations.translate('open_profile'),
+                  localizations.translate('navigate_profile'),
+                ),
               ],
               cardColor,
               textColor,
@@ -93,10 +108,16 @@ class VoiceCommandGuide extends StatelessWidget {
             // Feature navigation commands
             _buildCommandCategory(
               context,
-              'Feature Navigation',
+              localizations.translate('feature_navigation'),
               [
-                CommandExample('ai chat', 'Navigate to the AI chatbot'),
-                CommandExample('Speech to text', 'Open the speech to text tool'),
+                CommandExample(
+                  localizations.translate('ai_chat'),
+                  localizations.translate('navigate_chatbot'),
+                ),
+                CommandExample(
+                  localizations.translate('speech_to_text'),
+                  localizations.translate('navigate_speech'),
+                ),
               ],
               cardColor,
               textColor,
@@ -105,7 +126,7 @@ class VoiceCommandGuide extends StatelessWidget {
             
             // Tips for best results
             Text(
-              'Tips for best results',
+              localizations.translate('tips_best'),
               style: TextStyle(
                 fontFamily: 'Sora',
                 fontSize: 18.sp,
@@ -117,7 +138,7 @@ class VoiceCommandGuide extends StatelessWidget {
             
             _buildTipCard(
               context,
-              'Speak clearly and at a normal pace',
+              localizations.translate('speak_clear'),
               Icons.record_voice_over,
               cardColor,
               textColor,
@@ -126,7 +147,7 @@ class VoiceCommandGuide extends StatelessWidget {
             
             _buildTipCard(
               context,
-              'Use the exact phrases shown above for best results',
+              localizations.translate('use_phrases'),
               Icons.format_quote,
               cardColor,
               textColor,
@@ -135,7 +156,7 @@ class VoiceCommandGuide extends StatelessWidget {
             
             _buildTipCard(
               context,
-              'Reduce background noise when using voice commands',
+              localizations.translate('reduce_bg'),
               Icons.volume_off,
               cardColor,
               textColor,
@@ -144,7 +165,7 @@ class VoiceCommandGuide extends StatelessWidget {
             
             _buildTipCard(
               context,
-              'Voice commands work in both English and Arabic',
+              localizations.translate('voice_both'),
               Icons.language,
               cardColor,
               textColor,

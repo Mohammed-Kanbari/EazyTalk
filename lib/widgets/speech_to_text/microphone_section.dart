@@ -1,3 +1,4 @@
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
@@ -24,6 +25,8 @@ class MicrophoneSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     final textColor = AppColors.getTextPrimaryColor(context);
     final textSecondaryColor = isDarkMode 
         ? Colors.grey[400]
@@ -37,7 +40,7 @@ class MicrophoneSection extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Text(
-            "Tap the mic and start talking — we'll do the typing!",
+            localizations.translate('tap_mic'),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'DM Sans',
@@ -125,7 +128,7 @@ class MicrophoneSection extends StatelessWidget {
             ],
           ),
           Text(
-            isListening ? 'Listening' : '',
+            isListening ? localizations.translate('listening') : '',
             style: TextStyle(
               fontFamily: 'DM Sans',
               fontSize: 20.sp,

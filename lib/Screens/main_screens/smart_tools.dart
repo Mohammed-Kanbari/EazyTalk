@@ -73,11 +73,11 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
     
     // Initialize instructions list with translations
     _instructions = [
-      AppLocalizations.of(context).translate('speak_clearly'),
-      AppLocalizations.of(context).translate('use_exact'),
-      AppLocalizations.of(context).translate('reduce_noise'),
-      AppLocalizations.of(context).translate('voice_work'),
-      AppLocalizations.of(context).translate('tap_mic'),
+      AppLocalizations.of(context).translate('ensure_online'),
+      AppLocalizations.of(context).translate('select_tool'),
+      AppLocalizations.of(context).translate('tap_action'),
+      AppLocalizations.of(context).translate('follow_instructions'),
+      AppLocalizations.of(context).translate('view_results'),
     ];
     
     return Scaffold(
@@ -124,7 +124,7 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
                         title: AppLocalizations.of(context).translate('sign_language'),
                         description: AppLocalizations.of(context).translate('record_video'),
                         iconPath: 'assets/images/sign.png',
-                        buttonText: AppLocalizations.of(context).translate('sign_in'),
+                        buttonText: AppLocalizations.of(context).translate('tool_button'),
                         onPressed: () {
                           // Navigate to Sign Language Page
                         },
@@ -134,9 +134,9 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
                       // Speech to Text Card
                       FeatureCard(
                         title: AppLocalizations.of(context).translate('speech_to_text'),
-                        description: AppLocalizations.of(context).translate('transcribed_text'),
+                        description: AppLocalizations.of(context).translate('speech_desc'),
                         iconPath: 'assets/images/speech.png',
-                        buttonText: AppLocalizations.of(context).translate('sign_in'),
+                        buttonText: AppLocalizations.of(context).translate('tool_button'),
                         onPressed: () {
                           Navigator.push(context, MaterialPageRoute(builder: (context) => const Speech()));
                         },
@@ -144,7 +144,7 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
                       SizedBox(height: 60.h),
                       
                       Text(
-                        AppLocalizations.of(context).translate('how_use_voice'),
+                        AppLocalizations.of(context).translate('how_use_tools'),
                         style: AppTextStyles.getSectionTitle(context),
                       ),
                       SizedBox(height: 20.h),
@@ -174,7 +174,7 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
     
-    String introText = AppLocalizations.of(context).translate('master_signs');
+    String introText = AppLocalizations.of(context).translate('smart_tools_desc');
     List<String> words = introText.split(' ');
     
     // Ensure we have enough words for the special styling
@@ -197,14 +197,14 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
           color: textColor,
         ),
         children: [
-          TextSpan(text: words.take(1).join(' ') + ' '),
+          TextSpan(text: words.take(3).join(' ') + ' '),
           TextSpan(
-            text: words.skip(1).take(2).join(' '),
+            text: words.skip(3).take(2).join(' '),
             style: TextStyle(
               color: AppColors.primary,
             ),
           ),
-          TextSpan(text: ' ' + words.skip(3).join(' ')),
+          TextSpan(text: ' ' + words.skip(5).join(' ')),
         ],
       ),
     );

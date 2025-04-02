@@ -42,17 +42,21 @@ class _InstructionCardState extends State<InstructionCard> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     
     return Row(
+      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
       children: [
         Container(
           width: 95.w,
           height: 154.h,
           decoration: BoxDecoration(
             color: widget.numberBackgroundColor,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(10),
-              bottomLeft: Radius.circular(10),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(isRTL ? 0 : 10),
+              bottomLeft: Radius.circular(isRTL ? 0 : 10),
+              topRight: Radius.circular(isRTL ? 10 : 0),
+              bottomRight: Radius.circular(isRTL ? 10 : 0),
             ),
           ),
           child: Center(
@@ -72,17 +76,20 @@ class _InstructionCardState extends State<InstructionCard> {
             height: 154.h,
             decoration: BoxDecoration(
               color: widget.cardBackgroundColor,
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(10),
-                bottomRight: Radius.circular(10),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(isRTL ? 10 : 0),
+                bottomLeft: Radius.circular(isRTL ? 10 : 0),
+                topRight: Radius.circular(isRTL ? 0 : 10),
+                bottomRight: Radius.circular(isRTL ? 0 : 10),
               ),
             ),
             child: Row(
+              textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
               children: [
                 if (currentIndex > 0)
                   IconButton(
                     icon: Image.asset(
-                      'assets/icons/arrow-left.png',
+                      isRTL ? 'assets/icons/arrow-right 1.png' : 'assets/icons/arrow-left.png',
                       width: 25.w,
                       height: 25.h,
                       color: isDarkMode ? Colors.white70 : null,
@@ -106,7 +113,7 @@ class _InstructionCardState extends State<InstructionCard> {
                 if (currentIndex < widget.instructions.length - 1)
                   IconButton(
                     icon: Image.asset(
-                      'assets/icons/arrow-right 1.png',
+                      isRTL ? 'assets/icons/arrow-left.png' : 'assets/icons/arrow-right 1.png',
                       width: 25.w,
                       height: 25.h,
                       color: isDarkMode ? Colors.white70 : null,

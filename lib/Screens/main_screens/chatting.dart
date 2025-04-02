@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eazytalk/Screens/secondary_screens/chat_detail.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:eazytalk/models/conversation_model.dart';
 import 'package:eazytalk/screens/secondary_screens/chatbot.dart';
 import 'package:eazytalk/services/chat/chat_service.dart';
@@ -96,6 +97,8 @@ class _ChattingState extends State<Chatting> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+    final localizations = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
@@ -110,7 +113,7 @@ class _ChattingState extends State<Chatting> {
             children: [
               // Screen title
               ScreenHeader(
-                title: 'EazyTalk',
+                title: localizations.translate('app_name'),
                 textColor: AppColors.getTextPrimaryColor(context),
               ),
               SizedBox(height: 30.h),
@@ -122,7 +125,7 @@ class _ChattingState extends State<Chatting> {
                   children: [
                     Expanded(
                       child: SectionSearchBar(
-                        hintText: 'Search contacts',
+                        hintText: localizations.translate('search_conversation'),
                         onChanged: (value) {
                           setState(() {
                             _searchQuery = value;
@@ -212,7 +215,7 @@ class _ChattingState extends State<Chatting> {
                             Text(
                               _errorMessage.isNotEmpty
                                   ? _errorMessage
-                                  : 'Error loading conversations',
+                                  : localizations.translate('error_loading'),
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 16.sp,
@@ -231,7 +234,7 @@ class _ChattingState extends State<Chatting> {
                                 ),
                               ),
                               child: Text(
-                                'Retry',
+                                localizations.translate('retry'),
                                 style: TextStyle(
                                   fontFamily: 'DM Sans',
                                   fontSize: 14.sp,
@@ -260,7 +263,7 @@ class _ChattingState extends State<Chatting> {
                             ),
                             SizedBox(height: 16.h),
                             Text(
-                              'No conversations yet',
+                              localizations.translate('no_conversations'),
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 16.sp,
@@ -271,7 +274,7 @@ class _ChattingState extends State<Chatting> {
                             ),
                             SizedBox(height: 8.h),
                             Text(
-                              'Tap + to start chatting',
+                              localizations.translate('tap_to_start'),
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 14.sp,
@@ -303,7 +306,7 @@ class _ChattingState extends State<Chatting> {
                             ),
                             SizedBox(height: 16.h),
                             Text(
-                              'No conversations match "$_searchQuery"',
+                              '${localizations.translate('no_match')} "$_searchQuery"',
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontSize: 16.sp,
@@ -476,6 +479,8 @@ class _ChattingState extends State<Chatting> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
     final hintColor = isDarkMode ? Colors.grey[600] : Colors.grey[400];
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+    final localizations = AppLocalizations.of(context);
 
     // Reset filtered users to show all contacts
     setState(() {
@@ -509,7 +514,8 @@ class _ChattingState extends State<Chatting> {
                 height: 4.h,
                 margin: EdgeInsets.only(
                     bottom: 20.h,
-                    left: MediaQuery.of(context).size.width * 0.4),
+                    left: isRTL ? 0 : MediaQuery.of(context).size.width * 0.4,
+                    right: isRTL ? MediaQuery.of(context).size.width * 0.4 : 0),
                 decoration: BoxDecoration(
                   color: isDarkMode ? Colors.grey[700] : Colors.grey[300],
                   borderRadius: BorderRadius.circular(2.r),
@@ -518,7 +524,7 @@ class _ChattingState extends State<Chatting> {
 
               // Header
               Text(
-                'New Conversation',
+                localizations.translate('new_conversation'),
                 style: TextStyle(
                   fontFamily: 'Sora',
                   fontSize: 18.sp,
@@ -543,10 +549,11 @@ class _ChattingState extends State<Chatting> {
                     fontSize: 14.sp,
                   ),
                   onChanged: _filterUsers,
+                  textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.symmetric(horizontal: 14.w),
                     prefixIcon: Icon(Icons.search, color: AppColors.iconGrey),
-                    hintText: 'Search contacts',
+                    hintText: localizations.translate('search_contacts'),
                     hintStyle: TextStyle(
                       fontFamily: 'DM Sans',
                       color: hintColor,
@@ -564,7 +571,7 @@ class _ChattingState extends State<Chatting> {
               // Contacts list
               Expanded(
                 child:
-                    _buildContactsList(scrollController, isDarkMode, textColor),
+                    _buildContactsList(scrollController, isDarkMode, textColor, isRTL),
               ),
             ],
           ),
@@ -575,7 +582,9 @@ class _ChattingState extends State<Chatting> {
 
   // Build contacts list with search functionality
   Widget _buildContactsList(
-      ScrollController scrollController, bool isDarkMode, Color textColor) {
+      ScrollController scrollController, bool isDarkMode, Color textColor, bool isRTL) {
+    final localizations = AppLocalizations.of(context);
+    
     if (_filteredUsers.isEmpty) {
       return Center(
         child: Column(
@@ -589,8 +598,8 @@ class _ChattingState extends State<Chatting> {
             SizedBox(height: 16.h),
             Text(
               _newContactSearchQuery.isEmpty
-                  ? 'No contacts available'
-                  : 'No contacts matching "$_newContactSearchQuery"',
+                  ? localizations.translate('no_contacts')
+                  : '${localizations.translate('no_contacts_match')} "$_newContactSearchQuery"',
               style: TextStyle(
                 fontFamily: 'DM Sans',
                 fontSize: 16.sp,
@@ -639,6 +648,7 @@ class _ChattingState extends State<Chatting> {
               fontWeight: FontWeight.w500,
               color: textColor,
             ),
+            textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
           ),
           onTap: () => _createAndNavigateToConversation(user),
         );

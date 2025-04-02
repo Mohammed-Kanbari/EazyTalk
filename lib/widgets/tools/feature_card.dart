@@ -84,7 +84,7 @@ class FeatureCard extends StatelessWidget {
             ),
           ),
           Container(
-            margin: EdgeInsets.only(right: 17.w, bottom: 10.h),
+            margin: EdgeInsets.only(right: 17.w, bottom: 10.h, left: 17.w),
             height: 35.h,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),

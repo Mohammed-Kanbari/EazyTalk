@@ -5,6 +5,7 @@ import 'package:eazytalk/widgets/buttons/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -14,7 +15,7 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  bool _obsecurePassword = true;
+  bool _obscurePassword = true;
   bool _isLoading = false; // Added for loading state
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
@@ -50,16 +51,16 @@ class _LoginState extends State<Login> {
         String errorMessage;
         switch (e.code) {
           case 'user-not-found':
-            errorMessage = 'No account found with this email.';
+            errorMessage = AppLocalizations.of(context).translate('no_account_email');
             break;
           case 'wrong-password':
-            errorMessage = 'Incorrect password.';
+            errorMessage = AppLocalizations.of(context).translate('wrong_credentials');
             break;
           case 'invalid-email':
-            errorMessage = 'Please enter a valid email.';
+            errorMessage = AppLocalizations.of(context).translate('valid_email');
             break;
           default:
-            errorMessage = 'An error occurred: ${e.message}';
+            errorMessage = '${AppLocalizations.of(context).translate('login_failed')}: ${e.message}';
         }
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -70,7 +71,7 @@ class _LoginState extends State<Login> {
         // Catch any unexpected errors
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('An unexpected error occurred: $e')),
+            SnackBar(content: Text('${AppLocalizations.of(context).translate('login_failed')}: $e')),
           );
         }
       } finally {
@@ -79,22 +80,27 @@ class _LoginState extends State<Login> {
     }
   }
 
-  Future <void> _resetPassword() async {
-    if(_emailController.text.trim().isEmpty) {
+  Future<void> _resetPassword() async {
+    if (_emailController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email')),
-      );  
+        SnackBar(content: Text(AppLocalizations.of(context).translate('email_required'))),
+      );
       return;
     }
+    
     try {
       await _auth.sendPasswordResetEmail(email: _emailController.text.trim());
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password reset email sent. Check your inbox.')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context).translate('reset_email_sent'))),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send password reset email: $e')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context).translate('failed_send_reset'))),
+        );
+      }
     }
   }
 
@@ -149,7 +155,7 @@ class _LoginState extends State<Login> {
                       ),
                       SizedBox(height: 38.h),
                       Text(
-                        'Login',
+                        AppLocalizations.of(context).translate('login'),
                         style: TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 28.sp,
@@ -159,7 +165,7 @@ class _LoginState extends State<Login> {
                       ),
                       SizedBox(height: 14.h),
                       Text(
-                        'Hi there, sign in to continue',
+                        AppLocalizations.of(context).translate('hi_there'),
                         style: TextStyle(
                           fontFamily: 'DM Sans',
                           fontSize: 16.sp,
@@ -169,7 +175,7 @@ class _LoginState extends State<Login> {
                       ),
                       SizedBox(height: 31.h),
                       Text(
-                        'Email :',
+                        AppLocalizations.of(context).translate('email'),
                         style: TextStyle(
                           fontFamily: 'DM Sans',
                           fontSize: 14.sp,
@@ -186,9 +192,10 @@ class _LoginState extends State<Login> {
                           fontFamily: 'DM Sans',
                           color: textColor,
                         ),
+                        textDirection: TextDirection.ltr, // Always LTR for email addresses
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          hintText: 'Enter your email',
+                          hintText: AppLocalizations.of(context).translate('enter_email'),
                           hintStyle: TextStyle(
                             fontSize: 14.sp,
                             fontFamily: 'DM Sans',
@@ -199,7 +206,7 @@ class _LoginState extends State<Login> {
                           fillColor: isDarkMode ? const Color(0xFF1E1E1E) : null,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Color(0xFF00D0FF), width: 1),
+                            borderSide: BorderSide(color: Color(0xFF00D0FF), width: 1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           enabledBorder: OutlineInputBorder(
@@ -210,17 +217,17 @@ class _LoginState extends State<Login> {
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your email';
+                            return AppLocalizations.of(context).translate('email_required');
                           }
                           if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                            return 'Please enter a valid email';
+                            return AppLocalizations.of(context).translate('valid_email');
                           }
                           return null;
                         },
                       ),
                       SizedBox(height: 28.h),
                       Text(
-                        'Password :',
+                        AppLocalizations.of(context).translate('password'),
                         style: TextStyle(
                           fontFamily: 'DM Sans',
                           fontSize: 14.sp,
@@ -232,7 +239,7 @@ class _LoginState extends State<Login> {
                       TextFormField(
                         controller: _passwordController,
                         autocorrect: false,
-                        obscureText: _obsecurePassword,
+                        obscureText: _obscurePassword,
                         style: TextStyle(
                           fontSize: 16.sp, 
                           fontFamily: 'DM Sans',
@@ -240,7 +247,7 @@ class _LoginState extends State<Login> {
                         ),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          hintText: 'Enter your password',
+                          hintText: AppLocalizations.of(context).translate('enter_password'),
                           hintStyle: TextStyle(
                             fontSize: 14.sp,
                             fontFamily: 'DM Sans',
@@ -251,7 +258,7 @@ class _LoginState extends State<Login> {
                           fillColor: isDarkMode ? const Color(0xFF1E1E1E) : null,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Color(0xFF00D0FF), width: 1),
+                            borderSide: BorderSide(color: Color(0xFF00D0FF), width: 1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           enabledBorder: OutlineInputBorder(
@@ -261,19 +268,19 @@ class _LoginState extends State<Login> {
                           suffixIcon: IconButton(
                             onPressed: () {
                               setState(() {
-                                _obsecurePassword = !_obsecurePassword;
+                                _obscurePassword = !_obscurePassword;
                               });
                             },
                             icon: Icon(
                               color: hintColor,
-                              _obsecurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                              _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
                             ),
                           ),
                           errorMaxLines: 2,
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your password';
+                            return AppLocalizations.of(context).translate('password_required');
                           }
                           return null;
                         },
@@ -282,7 +289,7 @@ class _LoginState extends State<Login> {
                       GestureDetector(
                         onTap: _resetPassword,
                         child: Text(
-                          'Forget Password ?',
+                          AppLocalizations.of(context).translate('forgot_password'),
                           style: TextStyle(
                             fontFamily: 'DM Sans',
                             fontSize: 12.sp,
@@ -293,7 +300,7 @@ class _LoginState extends State<Login> {
                       ),
                       SizedBox(height: 100.h),
                       PrimaryButton(
-                        text: 'Sign In',
+                        text: AppLocalizations.of(context).translate('sign_in'),
                         isLoading: _isLoading,
                         onPressed: _validateAndLogin,
                       ),
@@ -302,7 +309,7 @@ class _LoginState extends State<Login> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Don't have an account?",
+                            AppLocalizations.of(context).translate('no_account'),
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontFamily: 'DM Sans',
@@ -317,7 +324,7 @@ class _LoginState extends State<Login> {
                               );
                             },
                             child: Text(
-                              ' Sign up',
+                              ' ${AppLocalizations.of(context).translate('sign_up')}',
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontFamily: 'DM Sans',

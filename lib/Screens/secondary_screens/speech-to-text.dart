@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eazytalk/widgets/common/secondary_header.dart';
 import 'package:eazytalk/widgets/speech_to_text/text_area.dart';
 import 'package:eazytalk/widgets/speech_to_text/microphone_section.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class Speech extends StatefulWidget {
   const Speech({super.key});
@@ -122,7 +123,7 @@ class _SpeechState extends State<Speech> {
             language: _selectedLanguage, // Use selected language
           );
         } else {
-          _showSnackBar('Speech recognition not available');
+          _showSnackBar(AppLocalizations.of(context).translate('speech_not_available'));
         }
       } else {
         _stopListening();
@@ -140,7 +141,7 @@ class _SpeechState extends State<Speech> {
   void _copyText() {
     if (_textController.text.isNotEmpty) {
       Clipboard.setData(ClipboardData(text: _textController.text));
-      _showSnackBar('Text copied to clipboard!');
+      _showSnackBar(AppLocalizations.of(context).translate('copy_to_clipboard'));
     }
   }
 
@@ -172,6 +173,8 @@ class _SpeechState extends State<Speech> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+    final localizations = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
@@ -182,7 +185,7 @@ class _SpeechState extends State<Speech> {
           child: Column(
             children: [
               // Header with language selector
-              _buildHeaderWithLanguageSelector(isDarkMode),
+              _buildHeaderWithLanguageSelector(isDarkMode, isRTL, localizations),
               
               Expanded(
                 child: SingleChildScrollView(
@@ -228,7 +231,7 @@ class _SpeechState extends State<Speech> {
   }
   
   // New method to build header with language selector
-  Widget _buildHeaderWithLanguageSelector(bool isDarkMode) {
+  Widget _buildHeaderWithLanguageSelector(bool isDarkMode, bool isRTL, AppLocalizations localizations) {
     final textColor = AppColors.getTextPrimaryColor(context);
     final borderColor = isDarkMode ? const Color(0xFF323232) : AppColors.dividerColor;
     
@@ -237,6 +240,7 @@ class _SpeechState extends State<Speech> {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 28.w),
           child: Row(
+            textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Back button
@@ -244,15 +248,21 @@ class _SpeechState extends State<Speech> {
                 onTap: () => Navigator.pop(context),
                 child: Container(
                   padding: EdgeInsets.symmetric(vertical: 27.h),
-                  child: Image.asset(
-                    'assets/icons/back-arrow.png',
-                    width: 22.w,
-                    height: 22.h,
-                    color: textColor,
-                    errorBuilder: (context, error, stackTrace) => Icon(
-                      Icons.arrow_back_ios,
+                  child: Transform(
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(isRTL ? 3.14159 : 0),
+                    alignment: Alignment.center,
+                    child: Image.asset(
+                      'assets/icons/back-arrow.png',
+                      width: 22.w,
+                      height: 22.h,
                       color: textColor,
-                      size: 20.sp,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        isRTL ? Icons.arrow_forward_ios : Icons.arrow_back_ios,
+                        color: textColor,
+                        size: 20.sp,
+                      ),
                     ),
                   ),
                 ),
@@ -260,7 +270,7 @@ class _SpeechState extends State<Speech> {
               
               // Title
               Text(
-                'Speech to Text',
+                localizations.translate('speech_to_text'),
                 style: TextStyle(
                   fontFamily: 'Sora',
                   fontSize: 20.sp,
@@ -279,10 +289,11 @@ class _SpeechState extends State<Speech> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 10.h),
           child: Row(
+            textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Language:',
+                localizations.translate('language') + ':',
                 style: TextStyle(
                   fontFamily: 'DM Sans',
                   fontSize: 14.sp,
@@ -298,6 +309,7 @@ class _SpeechState extends State<Speech> {
                   border: Border.all(color: borderColor),
                 ),
                 child: Row(
+                  textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
                   children: [
                     // English button
                     _buildLanguageButton(

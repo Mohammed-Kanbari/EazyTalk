@@ -1,3 +1,4 @@
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
@@ -132,7 +133,7 @@ class _WordVideoPlayerState extends State<WordVideoPlayer> {
           ),
           SizedBox(height: 12.h),
           Text(
-            'Video coming soon',
+            AppLocalizations.of(context).translate('video_coming_soon'),
             style: TextStyle(
               fontFamily: 'DM Sans',
               fontSize: 16.sp,

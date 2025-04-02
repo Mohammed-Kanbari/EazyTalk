@@ -250,7 +250,7 @@ class _ProfileState extends State<Profile> {
                 GestureDetector(
                   onTap: _toggleTheme,
                   child: Padding(
-                    padding: EdgeInsets.only(right: 28.w, top: 27.h),
+                    padding: EdgeInsets.only(right: 28.w, top: 27.h, left: 28.w),
                     child: Icon(
                       isDarkMode ? Icons.light_mode : Icons.dark_mode,
                       color: AppColors.getTextPrimaryColor(context),

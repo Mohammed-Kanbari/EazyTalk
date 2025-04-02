@@ -9,6 +9,7 @@ import 'package:eazytalk/widgets/chat/typing_indicator.dart';
 import 'package:eazytalk/widgets/chat/chat_input.dart';
 import 'package:eazytalk/widgets/common/secondary_header.dart';
 import 'package:eazytalk/core/theme/text_styles.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class Chatbot extends StatefulWidget {
   const Chatbot({super.key});
@@ -31,10 +32,13 @@ class _ChatbotState extends State<Chatbot> {
   @override
   void initState() {
     super.initState();
-    _initializeChat();
     _messageController.addListener(_updateSendButtonState);
     _checkInitialConnectivity();
     _listenToConnectivityChanges();
+    // Use a post-frame callback to ensure context is available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeChat();
+    });
   }
 
   Future<void> _checkInitialConnectivity() async {
@@ -53,6 +57,10 @@ class _ChatbotState extends State<Chatbot> {
   }
 
   Future<void> _initializeChat() async {
+    if (!mounted) return;
+    
+    final localizations = AppLocalizations.of(context);
+    
     // Initialize the Gemini model
     final initialized = await _geminiService.initializeModel();
 
@@ -60,7 +68,7 @@ class _ChatbotState extends State<Chatbot> {
     setState(() {
       _messages.add(
         Message(
-          text: "Hello! I am your AI assistant.\nFeel free to ask me anything.",
+          text: localizations.translate('ai_welcome_message'),
           isUser: false,
           timestamp: DateTime.now(),
         ),
@@ -70,7 +78,7 @@ class _ChatbotState extends State<Chatbot> {
       if (!initialized) {
         _messages.add(
           Message(
-            text: "Failed to initialize AI model. Please restart the app.",
+            text: localizations.translate('ai_init_failed'),
             isUser: false,
             timestamp: DateTime.now(),
           ),
@@ -100,13 +108,14 @@ class _ChatbotState extends State<Chatbot> {
 
   void _clearChat() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final localizations = AppLocalizations.of(context);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
         title: Text(
-          'Clear Chat',
+          localizations.translate('clear_chat'),
           style: TextStyle(
             fontFamily: 'Sora',
             fontSize: 18.sp,
@@ -115,7 +124,7 @@ class _ChatbotState extends State<Chatbot> {
           ),
         ),
         content: Text(
-          'Are you sure you want to clear the chat history?',
+          localizations.translate('confirm_clear_chat'),
           style: TextStyle(
             fontFamily: 'DM Sans',
             fontSize: 14.sp,
@@ -126,7 +135,7 @@ class _ChatbotState extends State<Chatbot> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              localizations.translate('cancel'),
               style: TextStyle(
                 color: AppColors.primary,
                 fontFamily: 'DM Sans',
@@ -141,8 +150,7 @@ class _ChatbotState extends State<Chatbot> {
                 _messages.clear();
                 _messages.add(
                   Message(
-                    text:
-                        "Hello! I am your AI assistant.\nFeel free to ask me anything.",
+                    text: localizations.translate('ai_welcome_message'),
                     isUser: false,
                     timestamp: DateTime.now(),
                   ),
@@ -151,7 +159,7 @@ class _ChatbotState extends State<Chatbot> {
               Navigator.pop(context);
             },
             child: Text(
-              'Clear',
+              localizations.translate('clear'),
               style: TextStyle(
                 color: Colors.red,
                 fontFamily: 'DM Sans',
@@ -214,6 +222,11 @@ class _ChatbotState extends State<Chatbot> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textPrimaryColor = AppColors.getTextPrimaryColor(context);
     final textSecondaryColor = AppColors.getTextSecondaryColor(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+    final localizations = AppLocalizations.of(context);
+
+    // Get the introduction text and split it into words
+    String introText = localizations.translate('ai_welcome_message');
 
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
@@ -225,7 +238,7 @@ class _ChatbotState extends State<Chatbot> {
             children: [
               // Header
               SecondaryHeader(
-                title: 'EazyChat AI',
+                title: localizations.translate('eazychat_ai'),
                 onBackPressed: () => Navigator.pop(context),
                 actionWidget: GestureDetector(
                   onTap: _clearChat,
@@ -242,6 +255,7 @@ class _ChatbotState extends State<Chatbot> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 30.h),
                 child: Row(
+                  textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
@@ -250,43 +264,37 @@ class _ChatbotState extends State<Chatbot> {
                         children: [
                           RichText(
                             text: TextSpan(
+                              style: TextStyle(
+                                fontFamily: 'DM Sans',
+                                fontSize: 16.sp,
+                                color: textPrimaryColor,
+                              ),
                               children: [
                                 TextSpan(
-                                  text: 'Your ',
-                                  style: TextStyle(
-                                    color: textPrimaryColor,
-                                    fontFamily: 'DM Sans',
-                                    fontSize: 16.sp,
-                                  ),
+                                  text: localizations.translate('your') + ' ',
                                 ),
                                 TextSpan(
-                                  text: 'smart assistant',
+                                  text: localizations.translate('smart_assistant'),
                                   style: TextStyle(
                                     color: AppColors.primary,
-                                    fontFamily: 'DM Sans',
-                                    fontSize: 16.sp,
                                   ),
                                 ),
                                 TextSpan(
-                                  text: ' for effortless communication.',
-                                  style: TextStyle(
-                                    color: textPrimaryColor,
-                                    fontFamily: 'DM Sans',
-                                    fontSize: 16.sp,
-                                  ),
+                                  text: ' ' + localizations.translate('for_effortless_communication'),
                                 ),
                               ],
                             ),
                           ),
                           SizedBox(height: 20.h),
                           Text(
-                            'How may I help you today?',
+                            localizations.translate('how_help'),
                             style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w600,
                               color: textPrimaryColor,
                             ),
+                            textAlign: isRTL ? TextAlign.right : TextAlign.left,
                           ),
                         ],
                       ),

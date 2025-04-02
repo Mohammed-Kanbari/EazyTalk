@@ -10,7 +10,6 @@ import 'package:eazytalk/widgets/signs/section_word_card.dart';
 import 'package:eazytalk/widgets/signs/section_search_bar.dart';
 import 'package:eazytalk/widgets/signs/filter_option_item.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
-import 'package:eazytalk/core/theme/text_styles.dart';
 import 'package:eazytalk/l10n/app_localizations.dart';
 
 class SectionDetailPage extends StatefulWidget {

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -15,7 +16,7 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  bool _obsecurePassword = true;
+  bool _obscurePassword = true;
   bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
@@ -49,9 +50,8 @@ class _SignupState extends State<Signup> {
           await user.sendEmailVerification();
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                    'A verification email has been sent. Please check your inbox.'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context).translate('verification_sent')),
               ),
             );
           }
@@ -62,9 +62,8 @@ class _SignupState extends State<Signup> {
             // If not verified (e.g., user closed dialog or app), delete the user
             await user.delete();
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text(
-                      'Signup canceled. Please verify your email to complete registration.')),
+              SnackBar(
+                  content: Text(AppLocalizations.of(context).translate('signup_canceled'))),
             );
             return;
           }
@@ -87,16 +86,16 @@ class _SignupState extends State<Signup> {
         String errorMessage;
         switch (e.code) {
           case 'email-already-in-use':
-            errorMessage = 'This email is already registered.';
+            errorMessage = AppLocalizations.of(context).translate('email_registered');
             break;
           case 'weak-password':
-            errorMessage = 'Password is too weak (minimum 6 characters).';
+            errorMessage = AppLocalizations.of(context).translate('password_too_weak');
             break;
           case 'invalid-email':
-            errorMessage = 'Invalid email format.';
+            errorMessage = AppLocalizations.of(context).translate('valid_email');
             break;
           default:
-            errorMessage = 'An error occurred: ${e.message}';
+            errorMessage = '${AppLocalizations.of(context).translate('error_update')}: ${e.message}';
         }
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -127,7 +126,7 @@ class _SignupState extends State<Signup> {
       builder: (context) => AlertDialog(
         backgroundColor: dialogBgColor,
         title: Text(
-          'Verify Your Email',
+          AppLocalizations.of(context).translate('verify_email'),
           style: TextStyle(
             fontFamily: 'Sora',
             fontSize: 18.sp,
@@ -136,7 +135,7 @@ class _SignupState extends State<Signup> {
           ),
         ),
         content: Text(
-          'Please click the link in the email we sent to complete signup.',
+          AppLocalizations.of(context).translate('click_link'),
           style: TextStyle(
             fontFamily: 'DM Sans',
             fontSize: 14.sp,
@@ -154,14 +153,13 @@ class _SignupState extends State<Signup> {
                 Navigator.pop(context); // Close dialog
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text(
-                          'Email not verified yet. Please check your inbox.')),
+                  SnackBar(
+                      content: Text(AppLocalizations.of(context).translate('email_not_verified'))),
                 );
               }
             },
             child: Text(
-              "I've Verified",
+              AppLocalizations.of(context).translate('verified'),
               style: TextStyle(
                 color: buttonColor,
                 fontFamily: 'DM Sans',
@@ -173,11 +171,11 @@ class _SignupState extends State<Signup> {
             onPressed: () async {
               await user.sendEmailVerification(); // Resend verification email
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Verification email resent.')),
+                SnackBar(content: Text(AppLocalizations.of(context).translate('verification_resent'))),
               );
             },
             child: Text(
-              'Resend Email',
+              AppLocalizations.of(context).translate('resend_email'),
               style: TextStyle(
                 color: buttonColor,
                 fontFamily: 'DM Sans',
@@ -190,7 +188,7 @@ class _SignupState extends State<Signup> {
               Navigator.pop(context); // Close dialog without verifying
             },
             child: Text(
-              'Cancel',
+              AppLocalizations.of(context).translate('cancel'),
               style: TextStyle(
                 color: Colors.red,
                 fontFamily: 'DM Sans',
@@ -262,7 +260,7 @@ class _SignupState extends State<Signup> {
                             end: Alignment.bottomCenter,
                           ).createShader(bounds),
                           child: Text(
-                            'EazyTalk',
+                            AppLocalizations.of(context).translate('app_name'),
                             style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 36.sp,
@@ -274,7 +272,7 @@ class _SignupState extends State<Signup> {
                       ),
                       SizedBox(height: 57.h),
                       Text(
-                        'Create Account',
+                        AppLocalizations.of(context).translate('create_account'),
                         style: TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 28.sp,
@@ -284,7 +282,7 @@ class _SignupState extends State<Signup> {
                       ),
                       SizedBox(height: 14.h),
                       Text(
-                        'Sign up to experience communication without barriers',
+                        AppLocalizations.of(context).translate('sign_up_desc'),
                         style: TextStyle(
                           fontFamily: 'DM Sans',
                           fontSize: 16.sp,
@@ -294,7 +292,7 @@ class _SignupState extends State<Signup> {
                       ),
                       SizedBox(height: 31.h),
                       Text(
-                        'Username :',
+                        AppLocalizations.of(context).translate('username'),
                         style: TextStyle(
                           fontFamily: 'DM Sans',
                           fontSize: 14.sp,
@@ -312,7 +310,7 @@ class _SignupState extends State<Signup> {
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 8),
-                          hintText: 'Enter your name',
+                          hintText: AppLocalizations.of(context).translate('enter_username'),
                           hintStyle: TextStyle(
                             fontSize: 14.sp,
                             fontFamily: 'DM Sans',
@@ -337,17 +335,17 @@ class _SignupState extends State<Signup> {
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your username';
+                            return AppLocalizations.of(context).translate('required_field');
                           }
                           if (value.trim().length < 3) {
-                            return 'Username must be at least 3 characters';
+                            return AppLocalizations.of(context).translate('username_short');
                           }
                           return null;
                         },
                       ),
                       SizedBox(height: 28.h),
                       Text(
-                        'Email :',
+                        AppLocalizations.of(context).translate('email'),
                         style: TextStyle(
                           fontFamily: 'DM Sans',
                           fontSize: 14.sp,
@@ -359,6 +357,7 @@ class _SignupState extends State<Signup> {
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
+                        textDirection: TextDirection.ltr, // Email is always LTR
                         style: TextStyle(
                             fontSize: 16.sp,
                             fontFamily: 'DM Sans',
@@ -366,7 +365,7 @@ class _SignupState extends State<Signup> {
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 8),
-                          hintText: 'Enter your email',
+                          hintText: AppLocalizations.of(context).translate('enter_email'),
                           hintStyle: TextStyle(
                             fontSize: 14.sp,
                             fontFamily: 'DM Sans',
@@ -391,17 +390,17 @@ class _SignupState extends State<Signup> {
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your email';
+                            return AppLocalizations.of(context).translate('email_required');
                           }
                           if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                            return 'Please enter a valid email';
+                            return AppLocalizations.of(context).translate('valid_email');
                           }
                           return null;
                         },
                       ),
                       SizedBox(height: 28.h),
                       Text(
-                        'Password :',
+                        AppLocalizations.of(context).translate('password'),
                         style: TextStyle(
                           fontFamily: 'DM Sans',
                           fontSize: 14.sp,
@@ -413,7 +412,7 @@ class _SignupState extends State<Signup> {
                       TextFormField(
                         controller: _passwordController,
                         autocorrect: false,
-                        obscureText: _obsecurePassword,
+                        obscureText: _obscurePassword,
                         style: TextStyle(
                             fontSize: 16.sp,
                             fontFamily: 'DM Sans',
@@ -421,7 +420,7 @@ class _SignupState extends State<Signup> {
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 8),
-                          hintText: 'Enter your password',
+                          hintText: AppLocalizations.of(context).translate('enter_password'),
                           hintStyle: TextStyle(
                             fontSize: 14.sp,
                             fontFamily: 'DM Sans',
@@ -445,12 +444,12 @@ class _SignupState extends State<Signup> {
                           suffixIcon: IconButton(
                             onPressed: () {
                               setState(() {
-                                _obsecurePassword = !_obsecurePassword;
+                                _obscurePassword = !_obscurePassword;
                               });
                             },
                             icon: Icon(
                               color: hintColor,
-                              _obsecurePassword
+                              _obscurePassword
                                   ? Icons.visibility_off_rounded
                                   : Icons.visibility_rounded,
                             ),
@@ -459,20 +458,20 @@ class _SignupState extends State<Signup> {
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your password';
+                            return AppLocalizations.of(context).translate('password_required');
                           }
                           if (!RegExp(r'[A-Z]').hasMatch(value)) {
-                            return 'Password must contain at least one capital letter';
+                            return AppLocalizations.of(context).translate('capital_letter');
                           }
                           if (!RegExp(r'[0-9]').hasMatch(value)) {
-                            return 'Password must contain at least one number';
+                            return AppLocalizations.of(context).translate('contains_number');
                           }
                           return null;
                         },
                       ),
                       SizedBox(height: 37.h),
                       PrimaryButton(
-                        text: 'Sign In',
+                        text: AppLocalizations.of(context).translate('sign_in'),
                         isLoading: _isLoading,
                         onPressed: _validateAndSignup,
                       ),
@@ -481,7 +480,7 @@ class _SignupState extends State<Signup> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Already have an account?",
+                            AppLocalizations.of(context).translate('already_account'),
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontFamily: 'DM Sans',
@@ -499,7 +498,7 @@ class _SignupState extends State<Signup> {
                               );
                             },
                             child: Text(
-                              ' Log in',
+                              ' ${AppLocalizations.of(context).translate('log_in')}',
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontFamily: 'DM Sans',

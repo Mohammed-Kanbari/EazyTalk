@@ -1,4 +1,5 @@
 // lib/widgets/profile/profile_header.dart
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:convert';
@@ -97,7 +98,7 @@ class ProfileHeader extends StatelessWidget {
                         ),
                         SizedBox(width: 8.h),
                         Text(
-                          'Edit Profile',
+                          AppLocalizations.of(context).translate('edit_profile'),
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           style: TextStyle(
