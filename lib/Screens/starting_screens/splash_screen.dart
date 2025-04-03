@@ -1,6 +1,7 @@
 // lib/Screens/starting_screens/splash_screen.dart
 import 'package:eazytalk/Screens/secondary_screens/navigation.dart';
 import 'package:eazytalk/Screens/starting_screens/welcome.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -85,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
               // App Name
               Text(
-                'EazyTalk',
+                AppLocalizations.of(context).translate('app_name'),
                 style: TextStyle(
                   fontFamily: 'Sora', 
                   fontSize: screenWidth * 0.1,
@@ -98,7 +99,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
               // Slogan
               Text(
-                'Speak Your Way, Sign Your Way!',
+                AppLocalizations.of(context).translate('splash_slogan'),
                 style: TextStyle(
                   fontFamily: 'DM Sans', 
                   fontSize: screenWidth * 0.045,

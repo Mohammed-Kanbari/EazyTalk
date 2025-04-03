@@ -1,4 +1,5 @@
 // lib/Screens/secondary_screens/profile_pages/edit_profile.dart
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:eazytalk/widgets/buttons/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,6 +11,7 @@ import 'package:eazytalk/services/user/user_profile_service.dart';
 import 'package:eazytalk/widgets/common/modal_header.dart';
 import 'package:eazytalk/widgets/profile/profile_image_picker.dart';
 import 'package:eazytalk/widgets/inputs/profile_form_field.dart';
+
 
 class EditProfile extends StatefulWidget {
   final String? currentName;
@@ -80,7 +82,7 @@ class _EditProfileState extends State<EditProfile> {
         });
       }
     } catch (e) {
-      _showSnackBar('Error fetching user data: $e', isError: true);
+      _showSnackBar(AppLocalizations.of(context).translate('error_update'), isError: true);
     } finally {
       setState(() {
         _isLoading = false;
@@ -116,7 +118,7 @@ class _EditProfileState extends State<EditProfile> {
       );
 
       if (success) {
-        _showSnackBar('Profile updated successfully');
+        _showSnackBar(AppLocalizations.of(context).translate('profile_updated'));
         
         // Return to previous screen with updated data
         if (mounted) {
@@ -138,10 +140,10 @@ class _EditProfileState extends State<EditProfile> {
           }
         }
       } else {
-        _showSnackBar('Failed to update profile', isError: true);
+        _showSnackBar(AppLocalizations.of(context).translate('error_update'), isError: true);
       }
     } catch (e) {
-      _showSnackBar('Error updating profile: $e', isError: true);
+      _showSnackBar(AppLocalizations.of(context).translate('error_update'), isError: true);
     } finally {
       if (mounted) {
         setState(() {
@@ -158,6 +160,8 @@ class _EditProfileState extends State<EditProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
@@ -172,7 +176,7 @@ class _EditProfileState extends State<EditProfile> {
                   children: [
                     // Header
                     ModalHeader(
-                      title: 'Edit Profile',
+                      title: l10n.translate('edit_profile'),
                       onClose: () => Navigator.pop(context),
                     ),
                     SizedBox(height: 50.h),
@@ -202,6 +206,8 @@ class _EditProfileState extends State<EditProfile> {
 
   // Build the form content
   Widget _buildFormContent() {
+    final l10n = AppLocalizations.of(context);
+    
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
@@ -222,23 +228,23 @@ class _EditProfileState extends State<EditProfile> {
 
                   // Name Input Field
                   ProfileFormField(
-                    label: 'Name :',
+                    label: l10n.translate('name'),
                     controller: _nameController,
                     keyboardType: TextInputType.name,
                     prefixIcon: Icons.person_outline,
-                    hintText: 'Enter your name',
+                    hintText: l10n.translate('enter_name'),
                   ),
 
                   SizedBox(height: 30.h),
 
                   // Email Input Field (Disabled)
                   ProfileFormField(
-                    label: 'Email :',
+                    label: l10n.translate('email'),
                     controller: _emailController,
                     enabled: false,
                     keyboardType: TextInputType.emailAddress,
                     prefixIcon: Icons.email_outlined,
-                    hintText: 'Your email address',
+                    hintText: l10n.translate('enter_email'),
                   ),
 
                   Spacer(),
@@ -257,8 +263,10 @@ class _EditProfileState extends State<EditProfile> {
 
   // Build the save button
   Widget _buildSaveButton() {
+    final l10n = AppLocalizations.of(context);
+    
     return PrimaryButton(
-      text: 'Save Changes',
+      text: l10n.translate('save_changes'),
       onPressed: _saveProfile,
       isLoading: _isLoading,
       margin: EdgeInsets.only(bottom: 20.h),

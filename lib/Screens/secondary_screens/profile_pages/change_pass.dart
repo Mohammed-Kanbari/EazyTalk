@@ -8,6 +8,7 @@ import 'package:eazytalk/services/auth/password_update_service.dart';
 import 'package:eazytalk/widgets/auth/password_input_field.dart';
 import 'package:eazytalk/widgets/auth/password_requirement_row.dart';
 import 'package:eazytalk/widgets/common/secondary_header.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class ChangePass extends StatefulWidget {
   const ChangePass({super.key});
@@ -71,7 +72,7 @@ class _ChangePassState extends State<ChangePass> {
     // First validate all fields
     if (!_isPasswordValid || !_doPasswordsMatch) {
       PasswordUpdateService.showResultSnackBar(
-          context, false, 'Please fix the password issues before continuing');
+          context, false, AppLocalizations.of(context).translate('password_too_weak'));
       return;
     }
 
@@ -102,6 +103,7 @@ class _ChangePassState extends State<ChangePass> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
+    final l10n = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
@@ -118,7 +120,7 @@ class _ChangePassState extends State<ChangePass> {
                   children: [
                     // Header
                     ModalHeader(
-                      title: 'Reset Password',
+                      title: l10n.translate('reset_password'),
                       onClose: () => Navigator.pop(context),
                     ),
                     SizedBox(height: 30.h),
@@ -140,8 +142,8 @@ class _ChangePassState extends State<ChangePass> {
                         // Current Password Field
                         PasswordInputField(
                           controller: _currentPasswordController,
-                          label: 'Current Password :',
-                          hintText: 'Enter your current password',
+                          label: l10n.translate('current_password'),
+                          hintText: l10n.translate('enter_current'),
                           onVisibilityChanged: (_) {},
                           isDarkMode: isDarkMode,
                         ),
@@ -151,8 +153,8 @@ class _ChangePassState extends State<ChangePass> {
                         // New Password Field
                         PasswordInputField(
                           controller: _passwordController,
-                          label: 'New Password :',
-                          hintText: 'Enter your new password',
+                          label: l10n.translate('new_password'),
+                          hintText: l10n.translate('enter_new'),
                           showValidationIcon: true,
                           isValid: _isPasswordValid,
                           onVisibilityChanged: (_) {},
@@ -168,8 +170,8 @@ class _ChangePassState extends State<ChangePass> {
                         // Confirm Password Field
                         PasswordInputField(
                           controller: _confirmPasswordController,
-                          label: 'Confirm Password :',
-                          hintText: 'Confirm your new password',
+                          label: l10n.translate('confirm_password'),
+                          hintText: l10n.translate('confirm_new'),
                           showValidationIcon: true,
                           isValid: _doPasswordsMatch,
                           onVisibilityChanged: (_) {},
@@ -182,7 +184,7 @@ class _ChangePassState extends State<ChangePass> {
                             padding: EdgeInsets.only(top: 8.h, left: 4.w),
                             child: PasswordRequirementRow(
                               isMet: _doPasswordsMatch,
-                              text: 'Passwords match',
+                              text: l10n.translate('passwords_match'),
                             ),
                           ),
 
@@ -209,6 +211,7 @@ class _ChangePassState extends State<ChangePass> {
   // Title section with icon
   Widget _buildTitleSection() {
     final textColor = AppColors.getTextPrimaryColor(context);
+    final l10n = AppLocalizations.of(context);
     
     return Row(
       children: [
@@ -219,7 +222,7 @@ class _ChangePassState extends State<ChangePass> {
         ),
         SizedBox(width: 8.w),
         Text(
-          'Enter New Password',
+          l10n.translate('enter_new_pass'),
           style: TextStyle(
             fontFamily: 'DM Sans',
             fontSize: 18.sp,
@@ -245,6 +248,8 @@ class _ChangePassState extends State<ChangePass> {
         ? Colors.grey[300]
         : Colors.grey[700];
     
+    final l10n = AppLocalizations.of(context);
+    
     return Container(
       padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
@@ -263,7 +268,7 @@ class _ChangePassState extends State<ChangePass> {
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
-              'Your new password must be different from previously used passwords and include at least 6 characters, one capital letter, and one number.',
+              l10n.translate('password_note'),
               style: TextStyle(
                 fontFamily: 'DM Sans',
                 fontSize: 14.sp,
@@ -279,6 +284,8 @@ class _ChangePassState extends State<ChangePass> {
 
   // Password requirements list
   Widget _buildPasswordRequirements() {
+    final l10n = AppLocalizations.of(context);
+    
     return Padding(
       padding: EdgeInsets.only(top: 12.h, left: 4.w),
       child: Column(
@@ -286,17 +293,17 @@ class _ChangePassState extends State<ChangePass> {
         children: [
           PasswordRequirementRow(
             isMet: _hasMinLength,
-            text: 'At least 6 characters',
+            text: l10n.translate('at_least_6'),
           ),
           SizedBox(height: 4.h),
           PasswordRequirementRow(
             isMet: _hasCapitalLetter,
-            text: 'Contains at least one capital letter',
+            text: l10n.translate('capital_letter'),
           ),
           SizedBox(height: 4.h),
           PasswordRequirementRow(
             isMet: _hasNumber,
-            text: 'Contains at least one number',
+            text: l10n.translate('one_number'),
           ),
         ],
       ),
@@ -305,13 +312,14 @@ class _ChangePassState extends State<ChangePass> {
 
   // Reset button
   Widget _buildResetButton() {
+    final l10n = AppLocalizations.of(context);
     final bool canReset = !_isLoading &&
         _isPasswordValid &&
         _doPasswordsMatch &&
         _currentPasswordController.text.isNotEmpty;
 
     return PrimaryButton(
-      text: 'Reset',
+      text: l10n.translate('reset'),
       onPressed: canReset ? _updatePassword : null,
       isLoading: _isLoading,
     );

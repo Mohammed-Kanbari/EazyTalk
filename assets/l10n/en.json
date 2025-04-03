@@ -3,7 +3,8 @@
   "profile": "Profile",
   "change_password": "Change Password",
   "more_on_deaf": "More on Deaf",
-  "deaf_excursions": "Deaf-friendly Excursions",
+  "deaf_excursions": "Deaf-friendly\nExcursions",
+  "deaf_excursions_profile": "Deaf-friendly Excursions",
   "help_us": "Help Us Improve",
   "terms_services": "Terms and Services",
   "language": "Language",
@@ -253,13 +254,15 @@
   "uae_support": "UAE Government Support for the Deaf Community",
   "support_description": "The UAE government offers a range of services to the deaf community, including legal protections, inclusive education, and vocational training. It provides specialized healthcare, assistive technologies, and social services to ensure accessibility and integration. Public awareness and advocacy work to promote equality and reduce stigma for the deaf.",
   
-  "deaf_excursions_subtitle": "Discover fun havens where fun knows no bounds.",
+  "discover": "Discover ",
+  "delightful": "delightful ", 
+  "hideaways": "hideaways where fun knows no boundaries.",
   "half_day_tour": "Half-day Dubai tour",
-  "half_day_description": "You'll see some of Dubai's most famous landmarks, take beautiful photos and experience the city's stunning beauty.",
+  "half_day_description": "You'll see some of Dubai's most famous landmarks, take beautiful pictures and experience the great beauty of the city.",
   "tanoura_show": "Tanoura Show",
-  "tanoura_description": "Enjoy classic Arabian dreams on a desert safari trip with a delicious BBQ dinner, cultural entertainment shows and a number of desert adventures to partake in.",
+  "tanoura_description": "Live up the classic Arabian dream on the desert safari with a delectable barbeque dinner, cultural performances to keep you entertained and a number of desert adventure to participate.",
   "ferrari_world": "Ferrari World",
-  "ferrari_description": "Ferrari World Abu Dhabi - home to the world's fastest roller coaster, highest loop ride, highest structure ever built on the planet and over 40 record-breaking attractions. This is the ultimate destination for non-stop fun, high adrenaline and heart-racing excitement!",
+  "ferrari_description": "Ferrari World Abu Dhabi - home to the world's fastest rollercoaster, the highest loop ride, the tallest space-frame structure ever built on the planet and over 40 record-breaking attractions. This is the ultimate destination for non-stop, hyper-adrenaline, heart-racing fun!",
   "explore_more": "Explore More",
   
   "help_us_improve": "Help Us Improve",
@@ -410,5 +413,17 @@
   "recent": "Recent",
   "oldest": "Oldest",
   "mic_tap_hint": "Tap the mic and start talking — we'll do the typing!",
-  "error_occurred": "An error occurred. Please try again."
+  "error_occurred": "An error occurred. Please try again.",
+  
+  "zayed_org": "Zayed Higher Organization for People of Determination",
+  "zayed_org_desc": "Provides comprehensive educational programs tailored for deaf students with focus on bilingual education using Emirati Sign Language and Arabic.",
+  "sharjah_city": "Sharjah City for Humanitarian Services",
+  "sharjah_city_desc": "Offers specialized courses for deaf students of all ages, including vocational training and integration programs with sign language support.",
+  "al_amal": "Al Amal School for the Deaf",
+  "al_amal_desc": "One of the oldest specialized schools for deaf students in the UAE, offering academic curriculum delivered in sign language from kindergarten through high school.",
+  "emirates_assoc": "Emirates Association of the Deaf",
+  "emirates_assoc_desc": "Provides sign language courses, interpreter training, and regular workshops to support education and employment for the deaf community.",
+  "abu_dhabi": "Abu Dhabi",
+  "sharjah": "Sharjah",
+  "multiple_branches": "Multiple branches across UAE"
 }

@@ -5,6 +5,7 @@ import 'package:eazytalk/models/excursion_model.dart';
 import 'package:eazytalk/services/url/url_launcher_service.dart';
 import 'package:eazytalk/widgets/common/modal_header.dart';
 import 'package:eazytalk/widgets/excursions/destination_card.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class DeafFriendlyExcursions extends StatefulWidget {
   const DeafFriendlyExcursions({super.key});
@@ -15,28 +16,52 @@ class DeafFriendlyExcursions extends StatefulWidget {
 
 class _DeafFriendlyExcursionsState extends State<DeafFriendlyExcursions> {
   // List of excursion destinations
-  final List<ExcursionModel> _destinations = [
-    ExcursionModel(
-      title: 'Half-day City Tour of Dubai',
-      description: 'You\'ll see some of Dubai\'s most famous landmarks, take beautiful pictures and experience the great beauty of the city.',
-      image: 'assets/images/dubai-4k-most-downloaded-wallpaper-preview.jpg',
-      url: 'https://www.youtube.com/watch?v=s4eUxCTqNm8',
-    ),
+  late List<ExcursionModel> _destinations;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with empty list, will be populated in didChangeDependencies
+    _destinations = [];
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initializeDestinations();
+      _initialized = true;
+    }
+  }
+
+  // Initialize destinations with localized strings
+  void _initializeDestinations() {
+    final l10n = AppLocalizations.of(context);
     
-    ExcursionModel(
-      title: 'Tanoura Show',
-      description: 'Live up the classic Arabian dream on the desert safari with a delectable barbeque dinner, cultural performances to keep you entertained and a number of desert adventure to participate.',
-      image: 'assets/images/03.jpg',
-      url: 'https://www.youtube.com/watch?v=pXMvv9WyL88',
-    ),
-    
-    ExcursionModel(
-      title: 'Ferrari World',
-      description: 'Ferrari World Abu Dhabi - home to the world\'s fastest rollercoaster, the highest loop ride, the tallest space-frame structure ever built on the planet and over 40 record-breaking attractions. This is the ultimate destination for non-stop, hyper-adrenaline, heart-racing fun!.',
-      image: 'assets/images/Image-4-Ferrari-World-Abu-Dhabi.jpg',
-      url: 'https://www.youtube.com/watch?v=VJsHnvgQ4dI',
-    ),
-  ];
+    _destinations = [
+      ExcursionModel(
+        title: l10n.translate('half_day_tour'),
+        description: l10n.translate('half_day_description'),
+        image: 'assets/images/dubai-4k-most-downloaded-wallpaper-preview.jpg',
+        url: 'https://www.youtube.com/watch?v=s4eUxCTqNm8',
+      ),
+      
+      ExcursionModel(
+        title: l10n.translate('tanoura_show'),
+        description: l10n.translate('tanoura_description'),
+        image: 'assets/images/03.jpg',
+        url: 'https://www.youtube.com/watch?v=pXMvv9WyL88',
+      ),
+      
+      ExcursionModel(
+        title: l10n.translate('ferrari_world'),
+        description: l10n.translate('ferrari_description'),
+        image: 'assets/images/Image-4-Ferrari-World-Abu-Dhabi.jpg',
+        url: 'https://www.youtube.com/watch?v=VJsHnvgQ4dI',
+      ),
+    ];
+  }
 
   // Handle opening YouTube URL
   void _handleExplorePressed(String url) {
@@ -51,6 +76,12 @@ class _DeafFriendlyExcursionsState extends State<DeafFriendlyExcursions> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
+    final l10n = AppLocalizations.of(context);
+    
+    // Update destinations when language changes
+    if (_initialized) {
+      _initializeDestinations();
+    }
     
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
@@ -62,7 +93,7 @@ class _DeafFriendlyExcursionsState extends State<DeafFriendlyExcursions> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 28.w),
               child: ModalHeader(
-                title: 'Deaf-friendly\nExcursions',
+                title: l10n.translate('deaf_excursions'),
                 onClose: () => Navigator.pop(context),
               ),
             ),
@@ -93,6 +124,7 @@ class _DeafFriendlyExcursionsState extends State<DeafFriendlyExcursions> {
   // Build subtitle widget
   Widget _buildSubtitle(bool isDarkMode) {
     final textColor = AppColors.getTextPrimaryColor(context);
+    final l10n = AppLocalizations.of(context);
     
     return Padding(
       padding: EdgeInsets.only(top: 30.h, bottom: 30.h),
@@ -104,15 +136,15 @@ class _DeafFriendlyExcursionsState extends State<DeafFriendlyExcursions> {
             color: textColor,
           ),
           children: [
-            const TextSpan(text: 'Discover '),
+            TextSpan(text: l10n.translate('discover')),
             TextSpan(
-              text: 'delightful',
+              text: l10n.translate('delightful'),
               style: TextStyle(
                 color: AppColors.primary,
               ),
             ),
-            const TextSpan(
-                text: ' hideaways where fun knows no boundaries.'),
+            TextSpan(
+                text: l10n.translate('hideaways')),
           ],
         ),
       ),
@@ -124,6 +156,7 @@ class _DeafFriendlyExcursionsState extends State<DeafFriendlyExcursions> {
     final textColor = AppColors.getTextPrimaryColor(context);
     final descriptionColor = isDarkMode ? Colors.grey[300] : Colors.black87;
     final cardBgColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+    final l10n = AppLocalizations.of(context);
     
     return Container(
       margin: EdgeInsets.only(bottom: 20.h),
@@ -195,7 +228,7 @@ class _DeafFriendlyExcursionsState extends State<DeafFriendlyExcursions> {
                   child: GestureDetector(
                     onTap: () => _handleExplorePressed(destination.url),
                     child: Text(
-                      'Explore more',
+                      l10n.translate('explore_more'),
                       style: TextStyle(
                         fontFamily: 'Sora',
                         fontSize: 14.sp,

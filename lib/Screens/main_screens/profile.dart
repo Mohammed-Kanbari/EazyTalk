@@ -355,7 +355,7 @@ class _ProfileState extends State<Profile> {
         ),
         ProfileMenuItem(
           icon: Icons.location_on,
-          text: AppLocalizations.of(context).translate('deaf_excursions'),
+          text: AppLocalizations.of(context).translate('deaf_excursions_profile'),
           iconColor: AppColors.primary,
           onTap: () => _navigateTo(const DeafFriendlyExcursions()),
         ),

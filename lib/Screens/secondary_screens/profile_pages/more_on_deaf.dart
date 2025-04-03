@@ -7,6 +7,7 @@ import 'package:eazytalk/widgets/stats/stat_card.dart';
 import 'package:eazytalk/widgets/stats/circular_progress.dart';
 import 'package:eazytalk/widgets/info/info_card.dart';
 import 'package:eazytalk/widgets/education/educational_resource_card.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class MoreOnDeaf extends StatefulWidget {
   const MoreOnDeaf({Key? key}) : super(key: key);
@@ -23,6 +24,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
+    final l10n = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
@@ -33,7 +35,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 28.w),
               child: ModalHeader(
-                title: 'More On Deaf',
+                title: l10n.translate('more_on_deaf'),
                 onClose: () => Navigator.pop(context),
               ),
             ),
@@ -52,6 +54,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
   // Build the main scrollable content
   Widget _buildMainContent(bool isDarkMode) {
     final textColor = AppColors.getTextPrimaryColor(context);
+    final l10n = AppLocalizations.of(context);
     
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -62,7 +65,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
           children: [
             // Main Title
             Text(
-              'Deaf in United Arab Emirates',
+              l10n.translate('deaf_uae'),
               style: TextStyle(
                 fontFamily: 'Sora',
                 fontSize: 28.sp,
@@ -91,6 +94,8 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
 
   // Build the stats grid
   Widget _buildStatsGrid(bool isDarkMode) {
+    final l10n = AppLocalizations.of(context);
+    
     // Custom colors for the stat cards in dark mode
     final bgColorPrimary = isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFF1F8FF);
     final bgColorSecondary = isDarkMode ? const Color(0xFF2C4F7A) : const Color(0xFF4A86E8);
@@ -108,7 +113,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
                 iconData: Icons.people,
                 iconColor: const Color(0xFF4A86E8),
                 title: '19.4k',
-                subtitle: 'Population',
+                subtitle: l10n.translate('population'),
                 backgroundColor: bgColorPrimary,
                 titleColor: AppColors.getTextPrimaryColor(context),
                 subtitleColor: isDarkMode ? Colors.grey[400]! : Colors.black87,
@@ -121,7 +126,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
                 iconData: Icons.attach_money,
                 iconColor: Colors.white,
                 title: '\$8.5M',
-                subtitle: 'Annual Support',
+                subtitle: l10n.translate('annual_support'),
                 backgroundColor: bgColorSecondary,
                 titleColor: textColorSecondary,
                 subtitleColor: subtitleColorSecondary,
@@ -138,7 +143,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
               child: StatCard(
                 icon: CircularProgressWidget(percentage: 0.89),
                 title: '89%',
-                subtitle: 'Deaf Empowerment',
+                subtitle: l10n.translate('deaf_empowerment'),
                 backgroundColor: bgColorPrimary,
                 titleColor: AppColors.getTextPrimaryColor(context),
                 subtitleColor: isDarkMode ? Colors.grey[400]! : Colors.black87,
@@ -151,7 +156,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
                 iconData: Icons.business,
                 iconColor: const Color(0xFF4A86E8),
                 title: '36',
-                subtitle: 'association for deaf people',
+                subtitle: l10n.translate('associations'),
                 backgroundColor: bgColorPrimary,
                 titleColor: AppColors.getTextPrimaryColor(context),
                 subtitleColor: isDarkMode ? Colors.grey[400]! : Colors.black87,
@@ -169,6 +174,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
     final cardBorderColor = isDarkMode ? const Color(0xFF323232) : Colors.grey[200]!;
     final textColor = AppColors.getTextPrimaryColor(context);
     final contentColor = isDarkMode ? Colors.grey[300] : Colors.black87;
+    final l10n = AppLocalizations.of(context);
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +201,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Emirati Sign Language (ESL)',
+                  l10n.translate('esl_title'),
                   style: TextStyle(
                     fontFamily: 'Sora',
                     fontSize: 18.sp,
@@ -205,7 +211,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
                 ),
                 SizedBox(height: 10.h),
                 Text(
-                  'Emirati Sign Language (ESL) is the main communication method for the deaf community in the UAE, with unique signs and cultural significance. The UAE government promotes its use in education, public services, and workplaces to increase inclusivity and awareness.',
+                  l10n.translate('esl_content'),
                   style: TextStyle(
                     fontFamily: 'DM Sans',
                     fontSize: 14.sp,
@@ -259,7 +265,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'What Are Their Needs?',
+                  l10n.translate('needs_title'),
                   style: TextStyle(
                     fontFamily: 'Sora',
                     fontSize: 18.sp,
@@ -269,7 +275,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
                 ),
                 SizedBox(height: 10.h),
                 Text(
-                  'The deaf community faces challenges in employment, healthcare, and social inclusion, requiring specialized services, job opportunities, and accessible technologies. There is a need for more awareness programs, and assistive devices to support their integration into society.',
+                  l10n.translate('needs_content'),
                   style: TextStyle(
                     fontFamily: 'DM Sans',
                     fontSize: 14.sp,
@@ -304,7 +310,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'UAE Government Support for the Deaf Community',
+                  l10n.translate('support_title'),
                   style: TextStyle(
                     fontFamily: 'Sora',
                     fontSize: 18.sp,
@@ -314,7 +320,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
                 ),
                 SizedBox(height: 10.h),
                 Text(
-                  'The UAE government offers a range of services to the deaf community, including legal protections, inclusive education, and vocational training. It provides specialized healthcare, assistive technologies, and social services to ensure accessibility and integration. Public awareness and advocacy work to promote equality and reduce stigma for the deaf.',
+                  l10n.translate('support_content'),
                   style: TextStyle(
                     fontFamily: 'DM Sans',
                     fontSize: 14.sp,
@@ -352,6 +358,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
   // Build educational resources section
   Widget _buildEducationalResourcesSection(bool isDarkMode) {
     final textColor = AppColors.getTextPrimaryColor(context);
+    final l10n = AppLocalizations.of(context);
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,7 +366,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
         // Section title
         SizedBox(height: 15.h),
         Text(
-          'Educational Resources',
+          l10n.translate('educational_resources'),
           style: TextStyle(
             fontFamily: 'Sora',
             fontSize: 20.sp,
@@ -372,37 +379,37 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
         // Educational resource cards
         _buildEducationalResourceCard(
           isDarkMode,
-          "Zayed Higher Organization for People of Determination",
-          "Specialized Education Center",
-          "Provides comprehensive educational programs tailored for deaf students with focus on bilingual education using Emirati Sign Language and Arabic.",
-          "Abu Dhabi",
+          l10n.translate('zayed_org'),
+          l10n.translate('specialized_education'),
+          l10n.translate('zayed_org_desc'),
+          l10n.translate('abu_dhabi'),
           "https://zho.gov.ae",
         ),
 
         _buildEducationalResourceCard(
           isDarkMode,
-          "Sharjah City for Humanitarian Services",
-          "Inclusive Education Provider",
-          "Offers specialized courses for deaf students of all ages, including vocational training and integration programs with sign language support.",
-          "Sharjah",
+          l10n.translate('sharjah_city'),
+          l10n.translate('inclusive_education'),
+          l10n.translate('sharjah_city_desc'),
+          l10n.translate('sharjah'),
           "https://www.schs.ae",
         ),
 
         _buildEducationalResourceCard(
           isDarkMode,
-          "Al Amal School for the Deaf",
-          "K-12 Education",
-          "One of the oldest specialized schools for deaf students in the UAE, offering academic curriculum delivered in sign language from kindergarten through high school.",
-          "Sharjah",
+          l10n.translate('al_amal'),
+          l10n.translate('k12_education'),
+          l10n.translate('al_amal_desc'),
+          l10n.translate('sharjah'),
           "https://www.schs.ae",
         ),
 
         _buildEducationalResourceCard(
           isDarkMode,
-          "Emirates Association of the Deaf",
-          "Training & Development",
-          "Provides sign language courses, interpreter training, and regular workshops to support education and employment for the deaf community.",
-          "Multiple branches across UAE",
+          l10n.translate('emirates_assoc'),
+          l10n.translate('training_development'),
+          l10n.translate('emirates_assoc_desc'),
+          l10n.translate('multiple_branches'),
           null,
         ),
       ],
@@ -425,6 +432,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
     final textColor = AppColors.getTextPrimaryColor(context);
     final contentColor = isDarkMode ? Colors.grey[300] : Colors.black87;
     final locationColor = isDarkMode ? Colors.grey[500] : Colors.grey[600];
+    final l10n = AppLocalizations.of(context);
     
     return Container(
       margin: EdgeInsets.only(bottom: 15.h),
@@ -534,7 +542,7 @@ class _MoreOnDeafState extends State<MoreOnDeaf> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            "Visit Website",
+                            l10n.translate('visit_website'),
                             style: TextStyle(
                               fontFamily: 'DM Sans',
                               fontSize: 12.sp,
