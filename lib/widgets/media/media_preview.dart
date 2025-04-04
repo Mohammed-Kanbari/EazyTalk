@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:io';
 import 'package:eazytalk/core/theme/app_colors.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class MediaPreview extends StatelessWidget {
   final File? mediaFile;
@@ -53,14 +54,14 @@ class MediaPreview extends StatelessWidget {
             color: borderColor,
           ),
         ),
-        child: _buildPreviewContent(textColor, hintColor, iconColor),
+        child: _buildPreviewContent(context, textColor, hintColor, iconColor),
       ),
     );
   }
   
-  Widget _buildPreviewContent(Color textColor, Color? hintColor, Color iconColor) {
+  Widget _buildPreviewContent(BuildContext context, Color textColor, Color? hintColor, Color iconColor) {
     if (mediaFile == null) {
-      return _buildPlaceholder(textColor, hintColor, iconColor);
+      return _buildPlaceholder(context, textColor, hintColor, iconColor);
     } else {
       return ClipRRect(
         borderRadius: BorderRadius.circular(16.r),
@@ -76,7 +77,9 @@ class MediaPreview extends StatelessWidget {
     }
   }
   
-  Widget _buildPlaceholder(Color textColor, Color? hintColor, Color iconColor) {
+  Widget _buildPlaceholder(BuildContext context, Color textColor, Color? hintColor, Color iconColor) {
+    final l10n = AppLocalizations.of(context);
+    
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -87,7 +90,7 @@ class MediaPreview extends StatelessWidget {
         ),
         SizedBox(height: 12.h),
         Text(
-          'Tap to add a photo or video',
+          l10n.translate('tap_add'),
           style: TextStyle(
             fontFamily: 'DM Sans',
             fontSize: 14.sp,
@@ -96,7 +99,7 @@ class MediaPreview extends StatelessWidget {
         ),
         SizedBox(height: 8.h),
         Text(
-          'Show the sign clearly in good lighting',
+          l10n.translate('show_clear'),
           style: TextStyle(
             fontFamily: 'DM Sans',
             fontSize: 12.sp,

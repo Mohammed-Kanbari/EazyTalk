@@ -323,7 +323,7 @@
   "take_photo": "Take photo",
   "gallery_photo": "Photo from gallery",
   "gallery_video": "Video from gallery",
-  "tap_add": "Tap to add photo or video",
+  "tap_add": "Tap to add a photo or video",
   "show_clear": "Show the sign clearly in good lighting",
   "change": "Change",
   "remove": "Remove",
@@ -425,5 +425,14 @@
   "emirates_assoc_desc": "Provides sign language courses, interpreter training, and regular workshops to support education and employment for the deaf community.",
   "abu_dhabi": "Abu Dhabi",
   "sharjah": "Sharjah",
-  "multiple_branches": "Multiple branches across UAE"
+  "multiple_branches": "Multiple branches across UAE",
+  
+  "help_us_title": "Help Us Improve",
+  "help_us_submit": "Submit Sign",
+  "help_us_change": "Change",
+  "help_us_remove": "Remove",
+  "help_us_uploading": "Uploading...",
+  "help_us_upload_progress": "Uploading... %s%",
+  "help_us_please_select": "Please select a photo or video first",
+  "help_us_error_upload": "Error uploading sign: %s"
 }

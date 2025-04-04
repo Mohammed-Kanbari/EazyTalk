@@ -10,6 +10,7 @@ import 'package:eazytalk/widgets/common/modal_header.dart';
 import 'package:eazytalk/widgets/inputs/form_field_container.dart';
 import 'package:eazytalk/widgets/media/media_preview.dart';
 import 'package:eazytalk/widgets/buttons/primary_button.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class HelpUsPage extends StatefulWidget {
   const HelpUsPage({Key? key}) : super(key: key);
@@ -96,7 +97,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
   // Handle media upload
   Future<void> _uploadData() async {
     if (_mediaFile == null) {
-      _showSnackBar('Please select a photo or video first');
+      _showSnackBar(AppLocalizations.of(context).translate('help_us_please_select'));
       return;
     }
 
@@ -127,7 +128,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
         _showSnackBar(result['message']);
       }
     } catch (e) {
-      _showSnackBar('Error uploading sign: $e');
+      _showSnackBar(AppLocalizations.of(context).translate('help_us_error_upload', [e.toString()]));
     } finally {
       if (mounted && _isUploading) {
         setState(() {
@@ -158,6 +159,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
     final secondaryTextColor = isDarkMode ? Colors.grey[300] : Colors.black87;
+    final l10n = AppLocalizations.of(context);
     
     showDialog(
       context: context,
@@ -185,7 +187,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
             ),
             SizedBox(height: 20.h),
             Text(
-              'Thank You!',
+              l10n.translate('thank_you'),
               style: TextStyle(
                 fontFamily: 'Sora',
                 fontSize: 20.sp,
@@ -195,7 +197,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
             ),
             SizedBox(height: 16.h),
             Text(
-              'Your sign has been submitted for review. Your contribution helps make communication more accessible for everyone.',
+              l10n.translate('submission_thanks'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'DM Sans',
@@ -205,7 +207,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
             ),
             SizedBox(height: 20.h),
             PrimaryButton(
-              text: 'Continue',
+              text: l10n.translate('continue'),
               onPressed: () => Navigator.pop(context),
               width: double.infinity,
             ),
@@ -232,6 +234,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
@@ -247,7 +250,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 28.w),
                     child: ModalHeader(
-                      title: 'Help Us Improve',
+                      title: l10n.translate('help_us_title'),
                       onClose: () => Navigator.pop(context),
                     ),
                   ),
@@ -275,6 +278,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
   Widget _buildFormContent() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
+    final l10n = AppLocalizations.of(context);
     
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 28.w),
@@ -285,8 +289,8 @@ class _HelpUsPageState extends State<HelpUsPage> {
           children: [
             // Introduction section
             InfoCard(
-              title: 'Contribute to EazyTalk',
-              content: 'Help us expand our sign language database by submitting signs you know. Your contributions make EazyTalk better for everyone!',
+              title: l10n.translate('contribute'),
+              content: l10n.translate('contribute_content'),
               icon: Icons.lightbulb_outline,
             ),
 
@@ -294,7 +298,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
 
             // Media upload section
             Text(
-              'Upload Sign',
+              l10n.translate('upload_sign'),
               style: TextStyle(
                 fontFamily: 'Sora',
                 fontSize: 18.sp,
@@ -322,7 +326,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
 
             // Sign details section
             Text(
-              'Sign Details',
+              l10n.translate('sign_details'),
               style: TextStyle(
                 fontFamily: 'Sora',
                 fontSize: 18.sp,
@@ -334,7 +338,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
 
             // Sign name field
             FormFieldContainer(
-              label: 'Sign Name:',
+              label: l10n.translate('sign_name'),
               child: _buildSignNameField(isDarkMode),
             ),
 
@@ -342,7 +346,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
 
             // Category dropdown
             FormFieldContainer(
-              label: 'Category:',
+              label: l10n.translate('category'),
               child: _buildCategoryDropdown(isDarkMode),
             ),
 
@@ -350,7 +354,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
 
             // Description field
             FormFieldContainer(
-              label: 'Description (Optional):',
+              label: l10n.translate('description_optional'),
               child: _buildDescriptionField(isDarkMode),
             ),
 
@@ -358,7 +362,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
 
             // Submit button
             PrimaryButton(
-              text: 'Submit Sign',
+              text: l10n.translate('submit_sign'),
               onPressed: _isUploading ? null : _uploadData,
               width: double.infinity,
             ),
@@ -367,7 +371,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
 
             // Additional information
             InfoCard(
-              content: 'Your submission will be reviewed by our team before being added to the app.',
+              content: l10n.translate('review_note'),
               icon: Icons.info_outline,
             ),
             
@@ -381,6 +385,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
   // Build media action buttons (change/remove)
   Widget _buildMediaActionButtons() {
     final textColor = AppColors.getTextPrimaryColor(context);
+    final l10n = AppLocalizations.of(context);
     
     return Padding(
       padding: EdgeInsets.only(top: 8.h),
@@ -395,7 +400,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
               color: AppColors.primary,
             ),
             label: Text(
-              'Change',
+              l10n.translate('help_us_change'),
               style: TextStyle(
                 fontFamily: 'DM Sans',
                 fontSize: 12.sp,
@@ -427,7 +432,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
               color: Colors.red,
             ),
             label: Text(
-              'Remove',
+              l10n.translate('help_us_remove'),
               style: TextStyle(
                 fontFamily: 'DM Sans',
                 fontSize: 12.sp,
@@ -451,6 +456,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
     final textColor = AppColors.getTextPrimaryColor(context);
     final backgroundColor = isDarkMode ? const Color(0xFF2A2A2A) : AppColors.backgroundGrey;
     final hintColor = isDarkMode ? Colors.grey[600] : Colors.black38;
+    final l10n = AppLocalizations.of(context);
     
     return TextFormField(
       controller: _signNameController,
@@ -460,7 +466,7 @@ class _HelpUsPageState extends State<HelpUsPage> {
         color: textColor,
       ),
       decoration: InputDecoration(
-        hintText: 'Enter the meaning of this sign',
+        hintText: l10n.translate('enter_sign'),
         hintStyle: TextStyle(
           fontFamily: 'DM Sans',
           fontSize: 14.sp,
@@ -479,151 +485,154 @@ class _HelpUsPageState extends State<HelpUsPage> {
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Please enter the sign name';
+          return l10n.translate('required_field');
         }
         return null;
       },
     );
   }
 
-// Build category dropdown
-Widget _buildCategoryDropdown(bool isDarkMode) {
-  final textColor = AppColors.getTextPrimaryColor(context);
-  final backgroundColor = isDarkMode ? const Color(0xFF2A2A2A) : AppColors.backgroundGrey;
-  final hintColor = isDarkMode ? Colors.grey[600] : Colors.black38;
-  final dropdownIconColor = isDarkMode ? Colors.grey[400] : Colors.black54;
-  
-  return DropdownButtonFormField<String>(
-    value: _selectedCategory,
-    dropdownColor: AppColors.getSurfaceColor(context),
-    decoration: InputDecoration(
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: 16.w,
-        vertical: 14.h,
+  // Build category dropdown
+  Widget _buildCategoryDropdown(bool isDarkMode) {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final backgroundColor = isDarkMode ? const Color(0xFF2A2A2A) : AppColors.backgroundGrey;
+    final hintColor = isDarkMode ? Colors.grey[600] : Colors.black38;
+    final dropdownIconColor = isDarkMode ? Colors.grey[400] : Colors.black54;
+    final l10n = AppLocalizations.of(context);
+    
+    return DropdownButtonFormField<String>(
+      value: _selectedCategory,
+      dropdownColor: AppColors.getSurfaceColor(context),
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 16.w,
+          vertical: 14.h,
+        ),
+        filled: true,
+        fillColor: backgroundColor,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: AppColors.primary, width: 1),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: Colors.red, width: 1),
+        ),
+        hintText: l10n.translate('select_category'),
+        hintStyle: TextStyle(
+          fontFamily: 'DM Sans',
+          fontSize: 14.sp,
+          color: hintColor,
+        ),
       ),
-      filled: true,
-      fillColor: backgroundColor,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.r),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.r),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.r),
-        borderSide: BorderSide(color: AppColors.primary, width: 1),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.r),
-        borderSide: BorderSide(color: Colors.red, width: 1),
-      ),
-      hintText: 'Select a category',
-      hintStyle: TextStyle(
+      style: TextStyle(
         fontFamily: 'DM Sans',
         fontSize: 14.sp,
-        color: hintColor,
+        color: textColor,
       ),
-    ),
-    style: TextStyle(
-      fontFamily: 'DM Sans',
-      fontSize: 14.sp,
-      color: textColor,
-    ),
-    items: _categories.map((category) {
-      return DropdownMenuItem<String>(
-        value: category,
-        child: Text(
-          category,
-          style: TextStyle(
-            fontFamily: 'DM Sans',
-            fontSize: 14.sp,
-            color: textColor,
+      items: _categories.map((category) {
+        return DropdownMenuItem<String>(
+          value: category,
+          child: Text(
+            category,
+            style: TextStyle(
+              fontFamily: 'DM Sans',
+              fontSize: 14.sp,
+              color: textColor,
+            ),
           ),
+        );
+      }).toList(),
+      onChanged: (value) {
+        setState(() {
+          _selectedCategory = value;
+        });
+      },
+      validator: (value) {
+        if (value == null) {
+          return l10n.translate('required_field');
+        }
+        return null;
+      },
+      icon: Icon(
+        Icons.arrow_drop_down,
+        color: dropdownIconColor,
+      ),
+    );
+  }
+
+  // Build description field
+  Widget _buildDescriptionField(bool isDarkMode) {
+    final textColor = AppColors.getTextPrimaryColor(context);
+    final backgroundColor = isDarkMode ? const Color(0xFF2A2A2A) : AppColors.backgroundGrey;
+    final hintColor = isDarkMode ? Colors.grey[600] : Colors.black38;
+    final l10n = AppLocalizations.of(context);
+    
+    return TextFormField(
+      controller: _descriptionController,
+      maxLines: 3,
+      style: TextStyle(
+        fontFamily: 'DM Sans',
+        fontSize: 14.sp,
+        color: textColor,
+      ),
+      decoration: InputDecoration(
+        hintText: l10n.translate('add_info'),
+        hintStyle: TextStyle(
+          fontFamily: 'DM Sans',
+          fontSize: 14.sp,
+          color: hintColor,
         ),
-      );
-    }).toList(),
-    onChanged: (value) {
-      setState(() {
-        _selectedCategory = value;
-      });
-    },
-    validator: (value) {
-      if (value == null) {
-        return 'Please select a category';
-      }
-      return null;
-    },
-    icon: Icon(
-      Icons.arrow_drop_down,
-      color: dropdownIconColor,
-    ),
-  );
-}
+        filled: true,
+        fillColor: backgroundColor,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 16.w,
+          vertical: 14.h,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
 
- // Build description field
- Widget _buildDescriptionField(bool isDarkMode) {
-   final textColor = AppColors.getTextPrimaryColor(context);
-   final backgroundColor = isDarkMode ? const Color(0xFF2A2A2A) : AppColors.backgroundGrey;
-   final hintColor = isDarkMode ? Colors.grey[600] : Colors.black38;
-   
-   return TextFormField(
-     controller: _descriptionController,
-     maxLines: 3,
-     style: TextStyle(
-       fontFamily: 'DM Sans',
-       fontSize: 14.sp,
-       color: textColor,
-     ),
-     decoration: InputDecoration(
-       hintText: 'Add any additional information about this sign',
-       hintStyle: TextStyle(
-         fontFamily: 'DM Sans',
-         fontSize: 14.sp,
-         color: hintColor,
-       ),
-       filled: true,
-       fillColor: backgroundColor,
-       contentPadding: EdgeInsets.symmetric(
-         horizontal: 16.w,
-         vertical: 14.h,
-       ),
-       border: OutlineInputBorder(
-         borderRadius: BorderRadius.circular(12.r),
-         borderSide: BorderSide.none,
-       ),
-     ),
-   );
- }
-
- // Build loading overlay
- Widget _buildLoadingOverlay() {
-   return Container(
-     color: Colors.black.withOpacity(0.5),
-     child: Center(
-       child: Column(
-         mainAxisSize: MainAxisSize.min,
-         children: [
-           CircularProgressIndicator(
-             value: _uploadProgress,
-             valueColor: AlwaysStoppedAnimation<Color>(
-               AppColors.primary,
-             ),
-           ),
-           SizedBox(height: 16.h),
-           Text(
-             'Uploading... ${(_uploadProgress * 100).toStringAsFixed(0)}%',
-             style: TextStyle(
-               fontFamily: 'DM Sans',
-               fontSize: 16.sp,
-               color: Colors.white,
-               fontWeight: FontWeight.w500,
-             ),
-           ),
-         ],
-       ),
-     ),
-   );
- }
+  // Build loading overlay
+  Widget _buildLoadingOverlay() {
+    final l10n = AppLocalizations.of(context);
+    return Container(
+      color: Colors.black.withOpacity(0.5),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(
+              value: _uploadProgress,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              l10n.translate('help_us_upload_progress', [(_uploadProgress * 100).toStringAsFixed(0)]),
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontSize: 16.sp,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
