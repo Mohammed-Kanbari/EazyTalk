@@ -1,3 +1,4 @@
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
@@ -119,7 +120,7 @@ class ConversationItem extends StatelessWidget {
                       Expanded(
                         child: Text(
                           lastMessage.isEmpty
-                              ? 'Start a conversation'
+                              ? AppLocalizations.of(context).translate('start_conversation')
                               : lastMessage,
                           style: TextStyle(
                             fontFamily: 'DM Sans',

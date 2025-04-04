@@ -1,3 +1,4 @@
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
@@ -11,6 +12,7 @@ class TermsAndServicesPage extends StatelessWidget {
     final textColor = AppColors.getTextPrimaryColor(context);
     final subtitleColor = isDarkMode ? Colors.grey[400] : Colors.grey;
     final contentColor = isDarkMode ? Colors.grey[300] : Colors.black87;
+    final localizations = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
@@ -25,7 +27,7 @@ class TermsAndServicesPage extends StatelessWidget {
                 children: [
                   Container(width: 28.w, height: 28.h), // Placeholder for alignment
                   Text(
-                    'Terms and Services',
+                    localizations.translate('terms_services'),
                     style: TextStyle(
                       fontFamily: 'Sora',
                       fontSize: 20.sp,
@@ -53,7 +55,7 @@ class TermsAndServicesPage extends StatelessWidget {
                     children: [
                       // Last Updated Date
                       Text(
-                        'Last Updated: March 19, 2025',
+                        localizations.translate('last_updated'),
                         style: TextStyle(
                           fontFamily: 'DM Sans',
                           fontSize: 14.sp,
@@ -63,61 +65,61 @@ class TermsAndServicesPage extends StatelessWidget {
                       ),
                       SizedBox(height: 20.h),
                       
-                      // Introduction
-                      _buildSectionTitle(context, '1. Acceptance of Terms'),
+                      // Acceptance of Terms
+                      _buildSectionTitle(context, localizations.translate('acceptance_terms')),
                       _buildParagraph(
                         context,
-                        'By using the Eazy Talk application, you agree to comply with and be bound by these terms and conditions. If you do not agree with any part of these terms, you are advised to discontinue using the application.'
+                        localizations.translate('acceptance_desc')
                       ),
                       
-                      // User Accounts
-                      _buildSectionTitle(context, '2. Service Overview'),
+                      // Service Overview
+                      _buildSectionTitle(context, localizations.translate('service_overview')),
                       _buildParagraph(
                         context,
-                        'Eazy Talk is a platform designed to assist users in translating Arabic sign language to text and vice versa. It also offers features to contribute data and provide feedback to enhance the platform. All functionalities are intended for personal, non-commercial use only.'
+                        localizations.translate('service_desc')
                       ),
                       
-                      // Privacy Policy
-                      _buildSectionTitle(context, '3. User Responsibilities'),
-                      _buildListItem(context, 'Use the application solely for its intended purpose.'),
-                      _buildListItem(context, 'Avoid uploading inappropriate, offensive, or harmful content.'),
-                      _buildListItem(context, 'Provide accurate information when contributing data or providing feedback.'),
+                      // User Responsibilities
+                      _buildSectionTitle(context, localizations.translate('user_responsibilities')),
+                      _buildListItem(context, localizations.translate('use_only')),
+                      _buildListItem(context, localizations.translate('avoid_upload')),
+                      _buildListItem(context, localizations.translate('provide_accurate')),
                       
-                      // User Content
-                      _buildSectionTitle(context, '4. Data Contribution'),
+                      // Data Contribution
+                      _buildSectionTitle(context, localizations.translate('data_contribution')),
                       _buildParagraph(
                         context,
-                        "Users contributing data (e.g., videos, photos, or textual labels) grant AI Signs a non-exclusive, royalty-free license to use the content for improving the application's performance and expanding its database. AI Signs will not use this data for any purpose outside its scope."
+                        localizations.translate('data_desc')
                       ),
                      
                       
-                      // Prohibited Activities
-                      _buildSectionTitle(context, '5. Privacy Policy'),
+                      // Privacy Policy
+                      _buildSectionTitle(context, localizations.translate('privacy_policy')),
                       _buildParagraph(
                         context,
-                        'Eazy Talk respects your privacy and handles your data responsibly. Collected data will only be used to enhance application functionality and will not be shared with third parties without your consent. For more details, refer to our Privacy Policy.'
+                       localizations.translate('privacy_desc')
                       ),
                       
                       // Limitation of Liability
-                      _buildSectionTitle(context, '6. Limitation of Liability'),
+                      _buildSectionTitle(context, localizations.translate('limitation_liability')),
                       _buildParagraph(
                         context,
-                        "Eazy Talk is provided on an 'as-is' basis. While we strive to ensure accurate translations and smooth functionality, we do not guarantee the application's performance at all times. AI Signs will not be liable for any damages or losses resulting from the use or inability to use the application."
+                        localizations.translate('liability_desc')
                       ),
                       
-                      // Termination
-                      _buildSectionTitle(context, '7. Updates and Changes'),
+                      // Updates and Changes
+                      _buildSectionTitle(context, localizations.translate('updates_changes')),
                       _buildParagraph(
                         context,
-                        "Eazy Talk reserves the right to modify these terms and the application's features at any time. Users will be notified of significant changes through the application or other communication channels."
+                        localizations.translate('updates_desc')
                       ),
                       
                       
                       // Contact Information
-                      _buildSectionTitle(context, '8. Contact Information'),
+                      _buildSectionTitle(context, localizations.translate('contact_info')),
                       _buildParagraph(
                         context,
-                        'If you have any questions, concerns, or feedback regarding these terms or the application, please reach out to us at: \nEmail: Ammaralhawamdeh@gmail.com \nPhone: 0567132854'
+                        localizations.translate('contact_desc')
                       ),
                       
                       SizedBox(height: 20.h),

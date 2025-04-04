@@ -37,18 +37,21 @@ class _HelpUsPageState extends State<HelpUsPage> {
   double _uploadProgress = 0.0;
 
   // Available categories for signs
-  final List<String> _categories = [
-    'Alphabet',
-    'Numbers',
-    'Common Phrases',
-    'Greetings',
-    'Family',
-    'Colors',
-    'Time',
-    'Food',
-    'Weather',
-    'Other'
-  ];
+  List<String> get _categories {
+    final l10n = AppLocalizations.of(context);
+    return [
+      l10n.translate('alphabet'),
+      l10n.translate('numbers'),
+      l10n.translate('common_phrases'),
+      l10n.translate('greetings'),
+      l10n.translate('family'),
+      l10n.translate('colors'),
+      l10n.translate('time'),
+      l10n.translate('food'),
+      l10n.translate('weather'),
+      l10n.translate('other'),
+    ];
+  }
 
   // Services
   final MediaPickerService _mediaPickerService = MediaPickerService();

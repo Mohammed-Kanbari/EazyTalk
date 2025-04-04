@@ -57,8 +57,6 @@
 
   "cannot_find_recipient": "cannot_find_recipient",
   
-
-  
   "sign_language": "Sign Language Translator",
   "tool_button": "Start translation",
   "record_video": "Record a video to translate sign language instantly.",
@@ -319,17 +317,17 @@
   "powerful_tools": "Use powerful tools for effortless and seamless face-to-face communication.",
   "register": "Register",
   
-  "add_sign": "Add sign",
-  "take_photo": "Take photo",
-  "gallery_photo": "Photo from gallery",
-  "gallery_video": "Video from gallery",
+  "add_sign": "Add a sign",
+  "take_photo": "Take Photo",
+  "gallery_photo": "Gallery Photo",
+  "gallery_video": "Gallery Video",
+  "record_video_help_us": "Record video",
   "tap_add": "Tap to add a photo or video",
   "show_clear": "Show the sign clearly in good lighting",
   "change": "Change",
   "remove": "Remove",
   
   "sure_logout": "Are you sure you want to logout?",
-  
   
   "video_coming_soon": "Video coming soon",
   "sign_in_button": "Sign In",
@@ -434,5 +432,21 @@
   "help_us_uploading": "Uploading...",
   "help_us_upload_progress": "Uploading... %s%",
   "help_us_please_select": "Please select a photo or video first",
-  "help_us_error_upload": "Error uploading sign: %s"
+  "help_us_error_upload": "Error uploading sign: %s",
+
+  
+  "alphabet": "Alphabet",
+  "numbers": "Numbers",
+  "common_phrases": "Common Phrases",
+  "greetings": "Greetings",
+  "family": "Family",
+  "colors": "Colors",
+  "time": "Time",
+  "food": "Food",
+  "weather": "Weather",
+  "other": "Other",
+
+
+  "start_conversation": "Start a conversation"
+  
 }

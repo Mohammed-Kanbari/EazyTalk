@@ -1,3 +1,4 @@
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -26,7 +27,7 @@ class MediaPickerService {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Add a Sign',
+                AppLocalizations.of(context).translate('add_sign'),
                 style: TextStyle(
                   fontFamily: 'Sora',
                   fontSize: 18.sp,
@@ -41,7 +42,7 @@ class MediaPickerService {
                 children: [
                   MediaPickerOption(
                     icon: Icons.camera_alt,
-                    title: 'Take Photo',
+                    title: AppLocalizations.of(context).translate('take_photo'),
                     onTap: () {
                       Navigator.pop(context);
                       _pickImage(
@@ -52,7 +53,7 @@ class MediaPickerService {
                   ),
                   MediaPickerOption(
                     icon: Icons.videocam,
-                    title: 'Record Video',
+                    title: AppLocalizations.of(context).translate('record_video_help_us'),
                     onTap: () {
                       Navigator.pop(context);
                       _pickVideo(
@@ -72,7 +73,7 @@ class MediaPickerService {
                 children: [
                   MediaPickerOption(
                     icon: Icons.photo_library,
-                    title: 'Gallery Photo',
+                    title: AppLocalizations.of(context).translate('gallery_photo'),
                     onTap: () {
                       Navigator.pop(context);
                       _pickImage(
@@ -83,7 +84,7 @@ class MediaPickerService {
                   ),
                   MediaPickerOption(
                     icon: Icons.video_library,
-                    title: 'Gallery Video',
+                    title: AppLocalizations.of(context).translate('gallery_video'),
                     onTap: () {
                       Navigator.pop(context);
                       _pickVideo(
