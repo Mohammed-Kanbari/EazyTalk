@@ -447,6 +447,22 @@
   "other": "Other",
 
 
-  "start_conversation": "Start a conversation"
+  "start_conversation": "Start a conversation",
+
+  "text_to_sign": "Text to \nSign Language",
+  "convert_to_sign": "Convert",
+  "sign_language_representation": "Sign Language Representation",
+  "sign_language_animation": "Sign Language Animation",
+  "converting_to_sign": "Converting to sign language...",
+  "enter_text_first": "Please enter some text to convert",
+  "powered_by_wecapable": "Powered by WeCapable Sign Language API",
+  "powered_by_signall": "Powered by SignAll Avatar Technology",
+  "use_avatar": "Use Avatar",
+  "use_images": "Use Images",
+  "replay": "Replay",
+  "speed": "Speed",
+  "hint_text_to_sign": "Enter text to convert to sign language",
   
+  "smart_tools_desc": "Unlock the power of effective communication tools designed specifically for sign language users and learners.",
+  "text_to_sign_desc": "Convert written text to sign language gestures for easy learning"  
 }

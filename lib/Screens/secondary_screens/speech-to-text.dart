@@ -196,11 +196,13 @@ class _SpeechState extends State<Speech> {
                       children: [
                         SizedBox(height: 30.h),
                         TranscriptionTextArea(
+                          height: 275.h,
                           controller: _textController,
                           onChanged: (value) => _transcribedText = value,
                           onCopy: _copyText,
                           onClear: _clearText,
                           isDarkMode: isDarkMode,
+                          hintText: localizations.translate('transcribed_text'),
                         ),
                         SizedBox(height: 36.h),
                         Divider(

@@ -11,6 +11,8 @@ class TranscriptionTextArea extends StatelessWidget {
   final VoidCallback onCopy;
   final VoidCallback onClear;
   final bool isDarkMode;
+  final String hintText; // Dynamic hint text parameter
+  final double height; // Added dynamic height parameter
   
   const TranscriptionTextArea({
     Key? key,
@@ -19,6 +21,8 @@ class TranscriptionTextArea extends StatelessWidget {
     required this.onCopy,
     required this.onClear,
     required this.isDarkMode,
+    required this.hintText, // Marked as required
+    required this.height, // Marked as required
   }) : super(key: key);
 
   @override
@@ -41,7 +45,7 @@ class TranscriptionTextArea extends StatelessWidget {
     
     return Container(
       width: double.infinity,
-      height: 275.h,
+      height: height, // Use dynamic height
       padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 30.h),
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -64,7 +68,7 @@ class TranscriptionTextArea extends StatelessWidget {
                 decoration: InputDecoration(
                   fillColor: const Color.fromARGB(0, 255, 255, 255),
                   border: InputBorder.none,
-                  hintText: localizations.translate('transcribed_text'),
+                  hintText: hintText, // Use dynamic hint text
                   hintStyle: TextStyle(
                     fontSize: 14.sp,
                     fontFamily: 'DM Sans',

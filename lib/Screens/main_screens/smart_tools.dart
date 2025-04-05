@@ -8,6 +8,7 @@ import 'package:eazytalk/widgets/tools/instruction_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eazytalk/l10n/app_localizations.dart';
+import 'package:eazytalk/Screens/secondary_screens/text_to_sign.dart';
 
 class SmartToolsScreen extends StatefulWidget {
   const SmartToolsScreen({super.key});
@@ -19,7 +20,7 @@ class SmartToolsScreen extends StatefulWidget {
 class _SmartToolsScreenState extends State<SmartToolsScreen> {
   final ConnectivityService _connectivityService = ConnectivityService();
   bool _isOffline = false;
-  
+
   // Instructions for using tools (will be localized in build)
   late List<String> _instructions;
 
@@ -70,7 +71,7 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Initialize instructions list with translations
     _instructions = [
       AppLocalizations.of(context).translate('ensure_online'),
@@ -79,7 +80,7 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
       AppLocalizations.of(context).translate('follow_instructions'),
       AppLocalizations.of(context).translate('view_results'),
     ];
-    
+
     return Scaffold(
       backgroundColor: AppColors.getBackgroundColor(context),
       body: SafeArea(
@@ -118,46 +119,76 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
                     children: [
                       _buildIntroText(),
                       SizedBox(height: 30.h),
-                      
+
                       // Sign Language Translator Card
                       FeatureCard(
-                        title: AppLocalizations.of(context).translate('sign_language'),
-                        description: AppLocalizations.of(context).translate('record_video'),
+                        title: AppLocalizations.of(context)
+                            .translate('sign_language'),
+                        description: AppLocalizations.of(context)
+                            .translate('record_video'),
                         iconPath: 'assets/images/sign.png',
-                        buttonText: AppLocalizations.of(context).translate('tool_button'),
+                        buttonText: AppLocalizations.of(context)
+                            .translate('tool_button'),
                         onPressed: () {
                           // Navigate to Sign Language Page
                         },
                       ),
                       SizedBox(height: 40.h),
-                      
+
                       // Speech to Text Card
                       FeatureCard(
-                        title: AppLocalizations.of(context).translate('speech_to_text'),
-                        description: AppLocalizations.of(context).translate('speech_desc'),
+                        title: AppLocalizations.of(context)
+                            .translate('speech_to_text'),
+                        description: AppLocalizations.of(context)
+                            .translate('speech_desc'),
                         iconPath: 'assets/images/speech.png',
-                        buttonText: AppLocalizations.of(context).translate('tool_button'),
+                        buttonText: AppLocalizations.of(context)
+                            .translate('tool_button'),
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const Speech()));
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const Speech()));
                         },
                       ),
+
+                      SizedBox(height: 40.h),
+
+                      // Text to Sign Card (New Feature)
+                      FeatureCard(
+                        title: AppLocalizations.of(context)
+                            .translate('text_to_sign'),
+                        description: AppLocalizations.of(context)
+                            .translate('text_to_sign_desc'),
+                        iconPath:
+                            'assets/images/text_to_sign.png', // You'll need to add this asset
+                        buttonText: AppLocalizations.of(context)
+                            .translate('tool_button'),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const TextToSignScreen()));
+                        },
+                      ),
+
                       SizedBox(height: 60.h),
-                      
+
                       Text(
                         AppLocalizations.of(context).translate('how_use_tools'),
                         style: AppTextStyles.getSectionTitle(context),
                       ),
                       SizedBox(height: 20.h),
-                      
+
                       // Instructions Card
                       InstructionCard(
                         instructions: _instructions,
                         numberBackgroundColor: AppColors.primary,
-                        cardBackgroundColor: isDarkMode 
-                            ? const Color(0xFF2A2A2A) 
+                        cardBackgroundColor: isDarkMode
+                            ? const Color(0xFF2A2A2A)
                             : AppColors.backgroundGrey,
                       ),
-                      
+
                       SizedBox(height: 20.h),
                     ],
                   ),
@@ -173,10 +204,11 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
   Widget _buildIntroText() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = AppColors.getTextPrimaryColor(context);
-    
-    String introText = AppLocalizations.of(context).translate('smart_tools_desc');
+
+    String introText =
+        AppLocalizations.of(context).translate('smart_tools_desc');
     List<String> words = introText.split(' ');
-    
+
     // Ensure we have enough words for the special styling
     if (words.length < 3) {
       return Text(
@@ -188,7 +220,7 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
         ),
       );
     }
-    
+
     return RichText(
       text: TextSpan(
         style: TextStyle(

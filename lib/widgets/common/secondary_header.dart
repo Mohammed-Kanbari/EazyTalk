@@ -49,6 +49,7 @@ class SecondaryHeader extends StatelessWidget {
               : SizedBox(width: 22.w, height: 22.h),
           Text(
             title,
+            textAlign: TextAlign.center,
             style: AppTextStyles.secondaryHeaderTitle.copyWith(color: textColor),
           ),
           actionWidget ?? SizedBox(width: 22.w, height: 22.h),

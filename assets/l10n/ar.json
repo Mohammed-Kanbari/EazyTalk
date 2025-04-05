@@ -397,6 +397,23 @@
     "contact_info": "8. معلومات الاتصال",
     "contact_desc": "إذا كانت لديك أي أسئلة أو مخاوف أو ملاحظات بخصوص هذه الشروط أو التطبيق، يرجى الاتصال بنا على: \nالبريد الإلكتروني: Ammaralhawamdeh@gmail.com \nالهاتف: 0567132854",
 
-    "start_conversation": "ابدأ محادثة"
+    "start_conversation": "ابدأ محادثة",
 
+    "text_to_sign": "تحويل النص إلى \nلغة الإشارة",
+    "convert_to_sign": "حوّل",
+    "sign_language_representation": "تمثيل لغة الإشارة",
+    "sign_language_animation": "رسوم متحركة بلغة الإشارة",
+    "converting_to_sign": "جاري التحويل إلى لغة الإشارة...",
+    "enter_text_first": "الرجاء إدخال بعض النص للتحويل",
+    "powered_by_wecapable": "مدعوم بواسطة WeCapable لواجهة برمجة لغة الإشارة",
+    "powered_by_signall": "مدعوم بواسطة تقنية SignAll للشخصيات المتحركة",
+    "use_avatar": "استخدم الشخصية المتحركة",
+    "use_images": "استخدم الصور",
+    "replay": "إعادة",
+    "speed": "السرعة",
+    "hint_text_to_sign": "اكتب النص الذي تريد تحويله إلى لغة الإشارة",
+
+    
+    "smart_tools_desc": "استفد من قوة أدوات التواصل الفعالة المصممة خصيصًا لمستخدمي ومتعلمي لغة الإشارة.",
+    "text_to_sign_desc": "تحويل النص المكتوب إلى إيماءات لغة الإشارة لسهولة التعلم"
   }
