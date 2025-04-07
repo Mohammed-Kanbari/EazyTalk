@@ -6,8 +6,10 @@ import 'package:eazytalk/core/theme/app_colors.dart';
 class CallControls extends StatelessWidget {
   final bool isMicOn;
   final bool isVideoOn;
+  final bool isSpeechToTextOn;  // New parameter for speech-to-text
   final VoidCallback onToggleMic;
   final VoidCallback onToggleVideo;
+  final VoidCallback onToggleSpeechToText;  // New callback for speech-to-text
   final VoidCallback onSwitchCamera;
   final VoidCallback onEndCall;
   final bool isLoading;
@@ -17,8 +19,10 @@ class CallControls extends StatelessWidget {
     Key? key,
     required this.isMicOn,
     required this.isVideoOn,
+    this.isSpeechToTextOn = false,
     required this.onToggleMic,
     required this.onToggleVideo,
+    required this.onToggleSpeechToText,
     required this.onSwitchCamera,
     required this.onEndCall,
     this.isLoading = false,
@@ -28,7 +32,7 @@ class CallControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 24.w),
+      padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.black54 : Colors.white54,
         borderRadius: BorderRadius.circular(30.r),
@@ -46,7 +50,7 @@ class CallControls extends StatelessWidget {
             isEnabled: isMicOn,
           ),
           
-          SizedBox(width: 16.w),
+          SizedBox(width: 12.w),
           
           // Video toggle button
           _buildControlButton(
@@ -58,7 +62,19 @@ class CallControls extends StatelessWidget {
             isEnabled: isVideoOn,
           ),
           
-          SizedBox(width: 16.w),
+          SizedBox(width: 12.w),
+          
+          // Speech-to-text toggle button
+          _buildControlButton(
+            icon: isSpeechToTextOn ? Icons.closed_caption : Icons.closed_caption_off,
+            onPressed: onToggleSpeechToText,
+            backgroundColor: isSpeechToTextOn
+                ? AppColors.primary.withOpacity(0.8)
+                : Colors.transparent,
+            isEnabled: isSpeechToTextOn,
+          ),
+          
+          SizedBox(width: 12.w),
           
           // Switch camera button
           _buildControlButton(
@@ -67,7 +83,7 @@ class CallControls extends StatelessWidget {
             backgroundColor: Colors.transparent,
           ),
           
-          SizedBox(width: 16.w),
+          SizedBox(width: 12.w),
           
           // End call button
           _buildControlButton(
@@ -94,8 +110,8 @@ class CallControls extends StatelessWidget {
         (isDarkMode ? Colors.white : Colors.black);
     
     return Container(
-      width: 50.h,
-      height: 50.h,
+      width: 46.h,
+      height: 46.h,
       decoration: BoxDecoration(
         color: backgroundColor,
         shape: BoxShape.circle,
@@ -111,7 +127,7 @@ class CallControls extends StatelessWidget {
             icon: Icon(
               icon,
               color: effectiveIconColor,
-              size: 24.sp,
+              size: 22.sp,
             ),
             onPressed: showLoadingOverlay ? null : onPressed,
             padding: EdgeInsets.zero,

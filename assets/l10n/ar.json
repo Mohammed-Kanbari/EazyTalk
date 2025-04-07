@@ -415,5 +415,19 @@
 
     
     "smart_tools_desc": "استفد من قوة أدوات التواصل الفعالة المصممة خصيصًا لمستخدمي ومتعلمي لغة الإشارة.",
-    "text_to_sign_desc": "تحويل النص المكتوب إلى إيماءات لغة الإشارة لسهولة التعلم"
+    "text_to_sign_desc": "تحويل النص المكتوب إلى إيماءات لغة الإشارة لسهولة التعلم",
+
+    "speech_to_text_toggle": "تحويل الكلام إلى نص",
+  "captions_on": "التعليقات مفعلة",
+  "captions_off": "التعليقات معطلة",
+  "connecting": "جاري الاتصال...",
+  "waiting_user_join": "في انتظار انضمام المستخدم الآخر...",
+  "incoming_video_call": "مكالمة فيديو واردة",
+  "incoming_audio_call": "مكالمة صوتية واردة",
+  "is_calling_you": "يتصل بك...",
+  "speech_recognition_failed": "فشل في بدء التعرف على الكلام",
+  "language_en": "الإنجليزية",
+  "language_ar": "العربية",
+  "select_language": "اختر اللغة",
+  "captions_language": "لغة التعليقات"
   }

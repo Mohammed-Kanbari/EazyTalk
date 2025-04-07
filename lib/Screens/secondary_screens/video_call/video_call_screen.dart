@@ -1,13 +1,17 @@
-// lib/Screens/secondary_screens/video_call/video_call_screen.dart
+import 'dart:async';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:eazytalk/Services/video_call/call_service.dart';
 import 'package:eazytalk/Services/video_call/video_call_service.dart';
+import 'package:eazytalk/Services/video_call/video_call_speech_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eazytalk/core/constants/agora_constants.dart';
 import 'package:eazytalk/models/call_model.dart';
 import 'package:eazytalk/widgets/video_call/call_controls.dart';
 import 'package:eazytalk/widgets/video_call/caller_info.dart';
+import 'package:eazytalk/widgets/video_call/transcript_overlay.dart';
+import 'package:eazytalk/widgets/video_call/language_selector.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 
 class VideoCallScreen extends StatefulWidget {
   final CallModel call;
@@ -26,23 +30,82 @@ class VideoCallScreen extends StatefulWidget {
 class _VideoCallScreenState extends State<VideoCallScreen> {
   final VideoCallService _videoCallService = VideoCallService();
   final CallService _callService = CallService();
+  final VideoCallSpeechService _speechService = VideoCallSpeechService();
 
   // State variables
   bool _isMicOn = true;
   bool _isVideoOn = true;
+  bool _isSpeechToTextOn = false;
   bool _isLoading = false;
   bool _isConnecting = true;
   bool _isCallEnded = false;
 
   // Remote user ID
   int? _remoteUid;
+  
+  // Speech-to-text state
+  String _localTranscript = '';
+  String _remoteTranscript = '';
+  String _preferredLanguage = 'en-US'; // Default language
+
+  
+  // Stream subscriptions
+  late StreamSubscription<CallModel?> _callStreamSubscription;
+  StreamSubscription<String>? _transcriptSubscription;
 
   @override
   void initState() {
     super.initState();
     _isVideoOn = widget.call.isVideoEnabled;
+    _isSpeechToTextOn = widget.call.isSpeechToTextEnabled;
+    
+    // Listen to changes in the call document
+    _callStreamSubscription = _callService
+        .callStream(widget.call.id)
+        .listen(_handleCallUpdates);
+    
+    // Initialize the video call
     _initializeCall();
+    
+    // Initialize speech service if speech-to-text is enabled
+    if (_isSpeechToTextOn) {
+      _initializeSpeechToText();
+    }
   }
+  
+  // Handle updates to the call document in Firestore
+  void _handleCallUpdates(CallModel? updatedCall) {
+    if (updatedCall == null || !mounted) return;
+    
+    // Check if speech-to-text setting has changed
+    if (updatedCall.isSpeechToTextEnabled != _isSpeechToTextOn) {
+      setState(() {
+        _isSpeechToTextOn = updatedCall.isSpeechToTextEnabled;
+      });
+      
+      // Initialize or stop speech service based on new setting
+      if (_isSpeechToTextOn) {
+        _initializeSpeechToText();
+      } else {
+        _stopSpeechToText();
+      }
+    }
+
+    if (updatedCall.preferredLanguage != _preferredLanguage) {
+      setState(() {
+        _preferredLanguage = updatedCall.preferredLanguage;
+      });
+      
+      // Restart speech recognition with new language if active
+      if (_isSpeechToTextOn) {
+        _stopSpeechToText();
+        _initializeSpeechToText();
+      }
+    }
+  }
+
+
+  
 
   Future<void> _initializeCall() async {
     setState(() {
@@ -100,6 +163,45 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       });
     }
   }
+  
+  // Initialize the speech-to-text service
+  Future<void> _initializeSpeechToText() async {
+    try {
+      final initialized = await _speechService.initialize();
+      
+      if (initialized) {
+        // Start listening
+        await _speechService.startListening(
+          language: widget.call.preferredLanguage,
+        );
+        
+        // Listen to transcript updates
+        _transcriptSubscription = _speechService.transcriptStream.listen((transcript) {
+          if (mounted) {
+            setState(() {
+              _localTranscript = transcript;
+            });
+          }
+        });
+      } else {
+        _showError('Failed to initialize speech recognition');
+      }
+    } catch (e) {
+      print('Error initializing speech-to-text: $e');
+    }
+  }
+  
+  // Stop the speech-to-text service
+  void _stopSpeechToText() {
+    _speechService.stopListening();
+    _transcriptSubscription?.cancel();
+    _transcriptSubscription = null;
+    
+    setState(() {
+      _localTranscript = '';
+      _remoteTranscript = '';
+    });
+  }
 
   // Toggle microphone
   Future<void> _toggleMic() async {
@@ -118,6 +220,39 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
     await _videoCallService.toggleVideo(_isVideoOn);
   }
+  
+  // Toggle speech-to-text
+  Future<void> _toggleSpeechToText() async {
+    final newState = !_isSpeechToTextOn;
+    
+    // Update state optimistically for better UX
+    setState(() {
+      _isSpeechToTextOn = newState;
+    });
+    
+    // Update in Firestore
+    final success = await _callService.toggleSpeechToText(
+      widget.call.id,
+      newState,
+    );
+    
+    if (!success) {
+      // Revert if failed
+      setState(() {
+        _isSpeechToTextOn = !newState;
+      });
+      _showError('Failed to toggle speech-to-text');
+      return;
+    }
+    
+    if (newState) {
+      // Start speech-to-text
+      await _initializeSpeechToText();
+    } else {
+      // Stop speech-to-text
+      _stopSpeechToText();
+    }
+  }
 
   // Switch camera
   Future<void> _switchCamera() async {
@@ -134,6 +269,11 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     });
 
     try {
+      // Stop speech-to-text if active
+      if (_isSpeechToTextOn) {
+        _stopSpeechToText();
+      }
+      
       // Update call status in Firestore
       await _callService.endCall(widget.call.id);
 
@@ -165,6 +305,15 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
   @override
   void dispose() {
+    // Clean up all resources
+    _callStreamSubscription.cancel();
+    
+    if (_isSpeechToTextOn) {
+      _stopSpeechToText();
+    }
+    
+    _speechService.dispose();
+    
     // Make sure to end the call if the screen is closed
     if (!_isCallEnded) {
       _callService.endCall(widget.call.id);
@@ -177,6 +326,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final localizations = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -196,7 +346,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
           ),
 
           // Remote video view or connecting message
-          _buildMainContent(isDarkMode),
+          _buildMainContent(isDarkMode, localizations),
 
           // Local video view
           if (!_isConnecting && _isVideoOn)
@@ -214,6 +364,39 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                 child: _buildLocalVideoView(),
               ),
             ),
+          
+          // Speech-to-text transcript for remote user
+          if (_isSpeechToTextOn && _remoteTranscript.isNotEmpty)
+            Positioned(
+              top: 230.h,
+              left: 16.w,
+              right: 16.w,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Text(
+                  _remoteTranscript,
+                  style: TextStyle(
+                    fontFamily: 'DM Sans',
+                    fontSize: 14.sp,
+                    color: Colors.white,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            
+          // Speech-to-text toggle and transcript for local user
+          TranscriptOverlay(
+            transcript: _localTranscript,
+            isActive: _isSpeechToTextOn,
+            onToggle: (enabled) => _toggleSpeechToText(),
+            isLocalUser: true,
+          ),
 
           // Call controls at the bottom
           Positioned(
@@ -224,8 +407,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
               child: CallControls(
                 isMicOn: _isMicOn,
                 isVideoOn: _isVideoOn,
+                isSpeechToTextOn: _isSpeechToTextOn,
                 onToggleMic: _toggleMic,
                 onToggleVideo: _toggleVideo,
+                onToggleSpeechToText: _toggleSpeechToText,
                 onSwitchCamera: _switchCamera,
                 onEndCall: _endCall,
                 isLoading: _isLoading,
@@ -238,7 +423,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     );
   }
 
-  Widget _buildMainContent(bool isDarkMode) {
+  Widget _buildMainContent(bool isDarkMode, AppLocalizations localizations) {
     if (_isConnecting) {
       // Show connecting UI with caller info
       return Center(
@@ -252,7 +437,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
               profileImageBase64: widget.isIncoming
                   ? widget.call.callerProfileImageBase64
                   : widget.call.receiverProfileImageBase64,
-              statusText: 'Connecting...',
+              statusText: localizations.translate('connecting'),
               isDarkMode: isDarkMode,
             ),
             SizedBox(height: 24.h),
@@ -271,7 +456,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       // Fallback - should not happen but just in case
       return Center(
         child: Text(
-          'Waiting for other user to join...',
+          localizations.translate('waiting_user_join'),
           style: TextStyle(
             color: Colors.white,
             fontFamily: 'DM Sans',

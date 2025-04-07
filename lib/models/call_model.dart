@@ -16,6 +16,8 @@ class CallModel {
   final bool isAccepted;
   final bool isRejected;
   final List<String> participants;  // Added participants array
+  final bool isSpeechToTextEnabled; // New field for speech-to-text
+  final String preferredLanguage; // Preferred language for speech-to-text
   
   CallModel({
     required this.id,
@@ -32,6 +34,8 @@ class CallModel {
     this.isAccepted = false,
     this.isRejected = false,
     List<String>? participants,
+    this.isSpeechToTextEnabled = false,
+    this.preferredLanguage = 'en-US',
   }) : participants = participants ?? [callerId, receiverId];
   
   // Factory constructor to create from Firestore document
@@ -64,6 +68,8 @@ class CallModel {
       isActive: data['isActive'] ?? true,
       isAccepted: data['isAccepted'] ?? false,
       isRejected: data['isRejected'] ?? false,
+      isSpeechToTextEnabled: data['isSpeechToTextEnabled'] ?? false,
+      preferredLanguage: data['preferredLanguage'] ?? 'en-US',
       participants: participants,
     );
   }
@@ -84,6 +90,8 @@ class CallModel {
       'isAccepted': isAccepted,
       'isRejected': isRejected,
       'participants': participants,
+      'isSpeechToTextEnabled': isSpeechToTextEnabled,
+      'preferredLanguage': preferredLanguage,
     };
   }
   
@@ -103,6 +111,8 @@ class CallModel {
     bool? isAccepted,
     bool? isRejected,
     List<String>? participants,
+    bool? isSpeechToTextEnabled,
+    String? preferredLanguage,
   }) {
     return CallModel(
       id: id ?? this.id,
@@ -119,6 +129,8 @@ class CallModel {
       isAccepted: isAccepted ?? this.isAccepted,
       isRejected: isRejected ?? this.isRejected,
       participants: participants ?? this.participants,
+      isSpeechToTextEnabled: isSpeechToTextEnabled ?? this.isSpeechToTextEnabled,
+      preferredLanguage: preferredLanguage ?? this.preferredLanguage,
     );
   }
 }

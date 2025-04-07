@@ -464,5 +464,16 @@
   "hint_text_to_sign": "Enter text to convert to sign language",
   
   "smart_tools_desc": "Unlock the power of effective communication tools designed specifically for sign language users and learners.",
-  "text_to_sign_desc": "Convert written text to sign language gestures for easy learning"  
+  "text_to_sign_desc": "Convert written text to sign language gestures for easy learning" ,
+  
+  "speech_to_text_toggle": "Speech-to-Text",
+  "captions_on": "Captions ON",
+  "captions_off": "Captions OFF",
+  "waiting_user_join": "Waiting for other user to join...",
+  "is_calling_you": "is calling you...",
+  "speech_recognition_failed": "Failed to start speech recognition",
+  "language_en": "English",
+  "language_ar": "Arabic",
+  "select_language": "Select language",
+  "captions_language": "Captions language"
 }

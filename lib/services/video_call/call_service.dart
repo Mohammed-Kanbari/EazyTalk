@@ -1,5 +1,6 @@
 // lib/services/video_call/call_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -58,6 +59,8 @@ class CallService {
     required String receiverName,
     String? receiverProfileImageBase64,
     bool isVideoEnabled = true,
+    bool isSpeechToTextEnabled = false,
+    String preferredLanguage = 'en-US',
   }) async {
     if (currentUserId.isEmpty) return null;
     
@@ -85,6 +88,8 @@ class CallService {
         isActive: true,
         isAccepted: false,
         isRejected: false,
+        isSpeechToTextEnabled: isSpeechToTextEnabled,
+        preferredLanguage: preferredLanguage,
       );
       
       // Add to Firestore
@@ -153,6 +158,44 @@ class CallService {
       return false;
     }
   }
+
+   // Toggle speech-to-text for a call
+  Future<bool> toggleSpeechToText(String callId, bool enabled) async {
+    try {
+      await _firestore.collection('calls').doc(callId).update({
+        'isSpeechToTextEnabled': enabled,
+      });
+      
+      // Update cached call if it exists
+      if (_currentCall?.id == callId) {
+        _currentCall = _currentCall!.copyWith(isSpeechToTextEnabled: enabled);
+      }
+      
+      return true;
+    } catch (e) {
+      print('Error toggling speech-to-text: $e');
+      return false;
+    }
+  }
+
+  // Update preferred language for speech-to-text
+  Future<bool> updatePreferredLanguage(String callId, String language) async {
+    try {
+      await _firestore.collection('calls').doc(callId).update({
+        'preferredLanguage': language,
+      });
+      
+      // Update cached call if it exists
+      if (_currentCall?.id == callId) {
+        _currentCall = _currentCall!.copyWith(preferredLanguage: language);
+      }
+      
+      return true;
+    } catch (e) {
+      print('Error updating preferred language: $e');
+      return false;
+    }
+  }
   
   // Check if a call has been accepted
   Future<bool> isCallAccepted(String callId) async {
@@ -174,29 +217,44 @@ class CallService {
     Function() onAccept, 
     Function() onReject
   ) {
+    final localizations = AppLocalizations.of(context);
+    
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text('Incoming ${call.isVideoEnabled ? 'Video' : 'Audio'} Call'),
-        content: Text('${call.callerName} is calling you...'),
+        title: Text(call.isVideoEnabled ? 
+          localizations.translate('incoming_video_call') : 
+          localizations.translate('incoming_audio_call')),
+        content: Text('${call.callerName} ${localizations.translate('is_calling_you')}'),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               onReject();
             },
-            child: const Text('Decline', style: TextStyle(color: Colors.red)),
+            child: Text(
+              localizations.translate('decline'),
+              style: TextStyle(color: Colors.red),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               onAccept();
             },
-            child: const Text('Accept', style: TextStyle(color: Colors.green)),
+            child: Text(
+              localizations.translate('accept'),
+              style: TextStyle(color: Colors.green),
+            ),
           ),
         ],
       ),
     );
+  }
+  
+  // Clear cache streams
+  void clearCache() {
+    _currentCall = null;
   }
 }
