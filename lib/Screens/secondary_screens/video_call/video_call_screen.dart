@@ -71,6 +71,46 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     if (_isSpeechToTextOn) {
       _initializeSpeechToText();
     }
+
+    // In VideoCallScreen's initState
+// Listen to transcript updates and share them
+_transcriptSubscription = _speechService.transcriptStream.listen((transcript) {
+  if (mounted) {
+    setState(() {
+      _localTranscript = transcript;
+    });
+    
+    // Share transcript with remote user
+    if (transcript.isNotEmpty && _isMicOn) {
+      _callService.updateTranscript(
+        widget.call.id,
+        _callService.currentUserId,
+        transcript
+      );
+    }
+  }
+});
+
+// Listen for remote transcript updates
+_callStreamSubscription = _callService
+  .callStream(widget.call.id)
+  .listen((updatedCall) {
+    if (updatedCall == null || !mounted) return;
+    
+    // Get remote user's transcript
+    final remoteUserId = updatedCall.participants
+        .firstWhere((id) => id != _callService.currentUserId, orElse: () => '');
+    
+    if (remoteUserId.isNotEmpty) {
+      final remoteTranscript = updatedCall.transcripts?[remoteUserId] ?? '';
+      
+      setState(() {
+        _remoteTranscript = remoteTranscript;
+      });
+    }
+    
+    // Other call updates handling...
+  });
   }
   
   // Handle updates to the call document in Firestore
@@ -104,6 +144,22 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     }
   }
 
+// In VideoCallScreen
+Future<void> _changeLanguage(String language) async {
+  // Update state immediately for UI responsiveness
+  setState(() {
+    _preferredLanguage = language;
+  });
+  
+  // Update in Firestore
+  await _callService.updateCallLanguage(widget.call.id, language);
+  
+  // Restart speech recognition with new language
+  if (_isSpeechToTextOn && _isMicOn) {
+    await _speechService.stopListening();
+    await _speechService.startListening(language: language);
+  }
+}
 
   
 
@@ -203,14 +259,25 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     });
   }
 
-  // Toggle microphone
-  Future<void> _toggleMic() async {
-    setState(() {
-      _isMicOn = !_isMicOn;
-    });
+ // In VideoCallScreen
+Future<void> _toggleMic() async {
+  setState(() {
+    _isMicOn = !_isMicOn;
+  });
 
-    await _videoCallService.toggleMicrophone(_isMicOn);
+  await _videoCallService.toggleMicrophone(_isMicOn);
+  
+  // Add this section - Link with speech service
+  if (_isSpeechToTextOn) {
+    if (_isMicOn) {
+      // Resume speech recognition if mic is turned on
+      await _speechService.startListening(language: _preferredLanguage);
+    } else {
+      // Pause speech recognition if mic is turned off
+      await _speechService.stopListening();
+    }
   }
+}
 
   // Toggle video
   Future<void> _toggleVideo() async {

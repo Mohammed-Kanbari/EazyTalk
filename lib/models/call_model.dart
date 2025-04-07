@@ -18,6 +18,8 @@ class CallModel {
   final List<String> participants;  // Added participants array
   final bool isSpeechToTextEnabled; // New field for speech-to-text
   final String preferredLanguage; // Preferred language for speech-to-text
+  final Map<String, String>? transcripts; // Maps user IDs to their transcripts
+
   
   CallModel({
     required this.id,
@@ -36,6 +38,7 @@ class CallModel {
     List<String>? participants,
     this.isSpeechToTextEnabled = false,
     this.preferredLanguage = 'en-US',
+    this.transcripts
   }) : participants = participants ?? [callerId, receiverId];
   
   // Factory constructor to create from Firestore document
@@ -50,6 +53,7 @@ class CallModel {
       final receiverId = data['receiverId'] ?? '';
       if (callerId.isNotEmpty) participants.add(callerId);
       if (receiverId.isNotEmpty) participants.add(receiverId);
+      
     }
     
     return CallModel(
@@ -71,6 +75,9 @@ class CallModel {
       isSpeechToTextEnabled: data['isSpeechToTextEnabled'] ?? false,
       preferredLanguage: data['preferredLanguage'] ?? 'en-US',
       participants: participants,
+      transcripts: data['transcripts'] != null 
+        ? Map<String, String>.from(data['transcripts'])
+        : null,
     );
   }
   
@@ -92,6 +99,7 @@ class CallModel {
       'participants': participants,
       'isSpeechToTextEnabled': isSpeechToTextEnabled,
       'preferredLanguage': preferredLanguage,
+      'transcripts': transcripts,
     };
   }
   
@@ -113,6 +121,7 @@ class CallModel {
     List<String>? participants,
     bool? isSpeechToTextEnabled,
     String? preferredLanguage,
+    Map<String, String>? transcripts, 
   }) {
     return CallModel(
       id: id ?? this.id,
@@ -131,6 +140,7 @@ class CallModel {
       participants: participants ?? this.participants,
       isSpeechToTextEnabled: isSpeechToTextEnabled ?? this.isSpeechToTextEnabled,
       preferredLanguage: preferredLanguage ?? this.preferredLanguage,
+      transcripts: transcripts ?? this.transcripts,
     );
   }
 }

@@ -40,6 +40,32 @@ class CallService {
           return calls;
         });
   }
+
+Future<bool> updateTranscript(String callId, String userId, String transcript) async {
+  try {
+    await _firestore.collection('calls').doc(callId).update({
+      'transcripts.$userId': transcript,
+    });
+    return true;
+  } catch (e) {
+    print('Error updating transcript: $e');
+    return false;
+  }
+}
+
+// Add this method to your CallService class (in lib/services/video_call/call_service.dart)
+
+Future<bool> updateCallLanguage(String callId, String language) async {
+  try {
+    await _firestore.collection('calls').doc(callId).update({
+      'preferredLanguage': language,
+    });
+    return true;
+  } catch (e) {
+    print('Error updating call language: $e');
+    return false;
+  }
+}
   
   // Stream for a specific call by ID
   Stream<CallModel?> callStream(String callId) {
@@ -177,6 +203,8 @@ class CallService {
       return false;
     }
   }
+
+  
 
   // Update preferred language for speech-to-text
   Future<bool> updatePreferredLanguage(String callId, String language) async {
