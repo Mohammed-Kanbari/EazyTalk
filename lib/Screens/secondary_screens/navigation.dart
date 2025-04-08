@@ -8,9 +8,9 @@ import 'package:eazytalk/Widgets/voice_navigation/voice_command_button.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
 import 'package:eazytalk/l10n/app_localizations.dart';
 import 'package:eazytalk/services/voice_navigation/voice_navigation_service.dart';
+import 'package:eazytalk/widgets/voice_navigation/voice_command_guide.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:eazytalk/services/voice_navigation/voice_command_helper.dart';
 import 'package:eazytalk/services/video_call/call_listener_service.dart';
 
 class Navigation extends StatefulWidget {
@@ -71,8 +71,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    VoiceCommandHelper.showGuideIfNeeded(context);
-
     // Initialize the voice navigation service
     _voiceNavigationService = VoiceNavigationService(
       navigatorKey: _navigatorKey,
@@ -115,14 +113,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   void _showVoiceCommandHelp() {
-    VoiceCommandHelper.navigateToVoiceCommandGuide(context);
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => const VoiceCommandGuide()));
   }
 
   @override
   void dispose() {
     // Stop listening for incoming calls
     _callListenerService.stopListening();
-    
+
     // Dispose all animation controllers
     for (final controller in _animationControllers) {
       controller.dispose();
@@ -130,9 +129,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  List<BottomNavigationBarItem> _buildNavigationItems(BuildContext context, bool isDarkMode) {
+  List<BottomNavigationBarItem> _buildNavigationItems(
+      BuildContext context, bool isDarkMode) {
     final localizations = AppLocalizations.of(context);
-    
+
     return _navigationItems
         .asMap()
         .entries
@@ -177,12 +177,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       floatingActionButton: VoiceCommandButton(
           onLongPress: _showVoiceCommandHelp,
           navigationService: _voiceNavigationService),
-      floatingActionButtonLocation: isRTL 
-          ? (_selectedIndex == 0 
-              ? FloatingActionButtonLocation.startFloat 
+      floatingActionButtonLocation: isRTL
+          ? (_selectedIndex == 0
+              ? FloatingActionButtonLocation.startFloat
               : FloatingActionButtonLocation.endFloat)
-          : (_selectedIndex == 0 
-              ? FloatingActionButtonLocation.startFloat 
+          : (_selectedIndex == 0
+              ? FloatingActionButtonLocation.startFloat
               : FloatingActionButtonLocation.endFloat),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
