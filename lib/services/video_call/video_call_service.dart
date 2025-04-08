@@ -173,11 +173,14 @@ class VideoCallService {
     if (!_isInitialized) return;
 
     try {
-      if (enabled) {
-        await _engine?.enableAudio();
-      } else {
-        await _engine?.disableAudio();
-      }
+      // Instead of enabling/disabling audio entirely, we should only control
+      // the microphone track publishing
+      await _engine?.muteLocalAudioStream(!enabled);
+      
+      // This ensures we're only affecting outgoing audio, not incoming audio
+      // We don't want to use these methods as they affect both directions:
+      // await _engine?.enableAudio();
+      // await _engine?.disableAudio();
     } catch (e) {
       print('Error toggling microphone: $e');
     }

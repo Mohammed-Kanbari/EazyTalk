@@ -34,50 +34,50 @@ class VideoCallSpeechService {
   }
 
   // Start speech recognition
-  Future<bool> startListening({String language = 'en-US'}) async {
-    if (_isListening) return true;
-    
-    if (!_isInitialized) {
-      await initialize();
-    }
-    
-    if (!_isInitialized) {
-      return false;
-    }
-    
-    try {
-      // Define the status handler function that can be reused
-      void handleStatus(String status) {
-        if (status == 'done' && _isListening) {
-          // Save the current text
-          final accumulatedText = _transcribedText;
-          
-          // Restart listening after a brief delay to prevent immediate stopping
-          Future.delayed(const Duration(milliseconds: 300), () {
-            if (_isListening) {
-              _startListeningInternal(
-                accumulatedText: accumulatedText,
-                language: language,
-                statusHandler: handleStatus,
-              );
-            }
-          });
-        }
-      }
-      
-      // Start the initial listening session
-      await _startListeningInternal(
-        language: language,
-        statusHandler: handleStatus,
-      );
-      
-      _isListening = true;
-      return true;
-    } catch (e) {
-      print('Error starting speech recognition: $e');
-      return false;
-    }
+Future<bool> startListening({String language = 'en-US'}) async {
+  if (_isListening) return true;
+  
+  if (!_isInitialized) {
+    await initialize();
   }
+  
+  if (!_isInitialized) {
+    return false;
+  }
+  
+  try {
+    // Define the status handler function that can be reused
+    void handleStatus(String status) {
+      if (status == 'done' && _isListening) {
+        // Save the current text
+        final accumulatedText = _transcribedText;
+        
+        // Restart listening after a brief delay to prevent immediate stopping
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (_isListening) {
+            _startListeningInternal(
+              accumulatedText: accumulatedText,
+              language: language,
+              statusHandler: handleStatus,
+            );
+          }
+        });
+      }
+    }
+    
+    // Start the initial listening session
+    await _startListeningInternal(
+      language: language,
+      statusHandler: handleStatus,
+    );
+    
+    _isListening = true;
+    return true;
+  } catch (e) {
+    print('Error starting speech recognition: $e');
+    return false;
+  }
+}
   
   // Internal method to handle the actual listening logic
   Future<void> _startListeningInternal({

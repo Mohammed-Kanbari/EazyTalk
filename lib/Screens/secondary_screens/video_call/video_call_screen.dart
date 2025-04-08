@@ -226,10 +226,12 @@ Future<void> _changeLanguage(String language) async {
       final initialized = await _speechService.initialize();
       
       if (initialized) {
-        // Start listening
-        await _speechService.startListening(
-          language: widget.call.preferredLanguage,
-        );
+        // Start listening only if mic is on
+        if (_isMicOn) {
+          await _speechService.startListening(
+            language: _preferredLanguage,
+          );
+        }
         
         // Listen to transcript updates
         _transcriptSubscription = _speechService.transcriptStream.listen((transcript) {
@@ -237,6 +239,15 @@ Future<void> _changeLanguage(String language) async {
             setState(() {
               _localTranscript = transcript;
             });
+            
+            // Share transcript with remote user
+            if (transcript.isNotEmpty) {
+              _callService.updateTranscript(
+                widget.call.id,
+                _callService.currentUserId,
+                transcript
+              );
+            }
           }
         });
       } else {
@@ -267,7 +278,7 @@ Future<void> _toggleMic() async {
 
   await _videoCallService.toggleMicrophone(_isMicOn);
   
-  // Add this section - Link with speech service
+  // Link with speech service
   if (_isSpeechToTextOn) {
     if (_isMicOn) {
       // Resume speech recognition if mic is turned on
