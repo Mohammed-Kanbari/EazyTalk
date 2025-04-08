@@ -35,7 +35,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   // Using const constructors for better performance
   static const List<Widget> _pages = [
-    Chatting(),
     LearnSignsPage(),
     SmartToolsScreen(),
     Profile(),
@@ -169,8 +168,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       backgroundColor: backgroundColor,
       body: SafeArea(
         // Using IndexedStack to preserve the state of pages
-        child: IndexedStack(
-          index: _selectedIndex,
+        child: _selectedIndex == 0
+      ? const Chatting() // This will rebuild Chatting() every time it's selected
+      : IndexedStack(
+          index: _selectedIndex - 1, // because Chatting is not included
           children: _pages,
         ),
       ),
