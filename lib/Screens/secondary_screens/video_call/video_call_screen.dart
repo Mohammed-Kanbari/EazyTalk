@@ -73,6 +73,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       _initializeSpeechToText();
     }
 
+    _preferredLanguage = widget.call.preferredLanguage;
+
     // In VideoCallScreen's initState
 // Listen to transcript updates and share them
 _transcriptSubscription = _speechService.transcriptStream.listen((transcript) {
@@ -175,13 +177,15 @@ Future<void> _changeLanguage(String language) async {
   await _callService.updateCallLanguage(widget.call.id, language);
   
   // Restart speech recognition with new language
-  if (_isSpeechToTextOn && _isMicOn) {
-    await _speechService.stopListening();
-    await _speechService.startListening(language: language);
+   if (_isSpeechToTextOn && _isMicOn) {
+      _restartSpeechToText();
+    }
   }
-}
-
   
+  void _restartSpeechToText() async {
+    await _speechService.stopListening();
+    await _speechService.startListening(language: _preferredLanguage);
+  } 
 
   Future<void> _initializeCall() async {
     setState(() {
@@ -495,11 +499,16 @@ Future<void> _toggleSpeechToText() async {
             isActive: _isSpeechToTextOn,
             onToggle: (enabled) => _toggleSpeechToText(),
             isLocalUser: true,
+             onLanguagePress: () => LanguageSelector.showAsDialog(
+              context,
+              currentLanguage: _preferredLanguage,
+              onLanguageSelected: _changeLanguage,
+            ),
           ),
 
           // Call controls at the bottom
           Positioned(
-            bottom: 40.h,
+            bottom: 70.h,
             left: 0,
             right: 0,
             child: Center(
