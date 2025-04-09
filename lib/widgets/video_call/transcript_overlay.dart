@@ -28,7 +28,7 @@ class TranscriptOverlay extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     
     return Positioned(
-      bottom: 100.h,  // Position above call controls
+      bottom: 120.h,  // Position above call controls
       left: 16.w,
       right: 16.w,
       child: Column(

@@ -508,7 +508,7 @@ Future<void> _toggleSpeechToText() async {
 
           // Call controls at the bottom
           Positioned(
-            bottom: 70.h,
+            bottom: 40.h,
             left: 0,
             right: 0,
             child: Center(
