@@ -57,7 +57,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   void initState() {
     super.initState();
     _isVideoOn = widget.call.isVideoEnabled;
-    _isSpeechToTextOn = widget.call.isSpeechToTextEnabled;
+
+     _isSpeechToTextOn = widget.call.speechToTextStatus?[_callService.currentUserId] ?? false;
     
     // Listen to changes in the call document
     _callStreamSubscription = _callService
@@ -75,6 +76,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     // In VideoCallScreen's initState
 // Listen to transcript updates and share them
 _transcriptSubscription = _speechService.transcriptStream.listen((transcript) {
+  //it is entering here when the other phone is clicking tospeeach text
+  //the problem is here 
+  //they speech text is connected
   if (mounted) {
     setState(() {
       _localTranscript = transcript;
@@ -114,35 +118,51 @@ _callStreamSubscription = _callService
   }
   
   // Handle updates to the call document in Firestore
-  void _handleCallUpdates(CallModel? updatedCall) {
-    if (updatedCall == null || !mounted) return;
+void _handleCallUpdates(CallModel? updatedCall) {
+  if (updatedCall == null || !mounted) return;
+  
+  // Get current user's speech-to-text status
+  final userSttEnabled = updatedCall.speechToTextStatus?[_callService.currentUserId] ?? false;
+  
+  // Check if the current user's speech-to-text setting has changed
+  if (userSttEnabled != _isSpeechToTextOn) {
+    setState(() {
+      _isSpeechToTextOn = userSttEnabled;
+    });
     
-    // Check if speech-to-text setting has changed
-    if (updatedCall.isSpeechToTextEnabled != _isSpeechToTextOn) {
-      setState(() {
-        _isSpeechToTextOn = updatedCall.isSpeechToTextEnabled;
-      });
-      
-      // Initialize or stop speech service based on new setting
-      if (_isSpeechToTextOn) {
-        _initializeSpeechToText();
-      } else {
-        _stopSpeechToText();
-      }
-    }
-
-    if (updatedCall.preferredLanguage != _preferredLanguage) {
-      setState(() {
-        _preferredLanguage = updatedCall.preferredLanguage;
-      });
-      
-      // Restart speech recognition with new language if active
-      if (_isSpeechToTextOn) {
-        _stopSpeechToText();
-        _initializeSpeechToText();
-      }
+    // Initialize or stop speech service based on new setting
+    if (_isSpeechToTextOn) {
+      _initializeSpeechToText();
+    } else {
+      _stopSpeechToText();
     }
   }
+  
+  // Handle language changes as before
+  if (updatedCall.preferredLanguage != _preferredLanguage) {
+    setState(() {
+      _preferredLanguage = updatedCall.preferredLanguage;
+    });
+    
+    // Restart speech recognition with new language if active
+    if (_isSpeechToTextOn) {
+      _stopSpeechToText();
+      _initializeSpeechToText();
+    }
+  }
+  
+  // Get remote user's transcript
+  final remoteUserId = updatedCall.participants
+      .firstWhere((id) => id != _callService.currentUserId, orElse: () => '');
+  
+  if (remoteUserId.isNotEmpty) {
+    final remoteTranscript = updatedCall.transcripts?[remoteUserId] ?? '';
+    
+    setState(() {
+      _remoteTranscript = remoteTranscript;
+    });
+  }
+}
 
 // In VideoCallScreen
 Future<void> _changeLanguage(String language) async {
@@ -300,37 +320,38 @@ Future<void> _toggleMic() async {
   }
   
   // Toggle speech-to-text
-  Future<void> _toggleSpeechToText() async {
-    final newState = !_isSpeechToTextOn;
-    
-    // Update state optimistically for better UX
+Future<void> _toggleSpeechToText() async {
+  final newState = !_isSpeechToTextOn;
+  
+  // Update state optimistically for better UX
+  setState(() {
+    _isSpeechToTextOn = newState;
+  });
+  
+  // Update in Firestore - pass the current user's ID
+  final success = await _callService.toggleSpeechToText(
+    widget.call.id,
+    newState,
+    _callService.currentUserId// Pass the current user's ID
+  );
+  
+  if (!success) {
+    // Revert if failed
     setState(() {
-      _isSpeechToTextOn = newState;
+      _isSpeechToTextOn = !newState;
     });
-    
-    // Update in Firestore
-    final success = await _callService.toggleSpeechToText(
-      widget.call.id,
-      newState,
-    );
-    
-    if (!success) {
-      // Revert if failed
-      setState(() {
-        _isSpeechToTextOn = !newState;
-      });
-      _showError('Failed to toggle speech-to-text');
-      return;
-    }
-    
-    if (newState) {
-      // Start speech-to-text
-      await _initializeSpeechToText();
-    } else {
-      // Stop speech-to-text
-      _stopSpeechToText();
-    }
+    _showError('Failed to toggle speech-to-text');
+    return;
   }
+  
+  if (newState) {
+    // Start speech-to-text
+    await _initializeSpeechToText();
+  } else {
+    // Stop speech-to-text
+    _stopSpeechToText();
+  }
+}
 
   // Switch camera
   Future<void> _switchCamera() async {

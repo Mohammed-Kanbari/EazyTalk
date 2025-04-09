@@ -19,6 +19,7 @@ class CallModel {
   final bool isSpeechToTextEnabled; // New field for speech-to-text
   final String preferredLanguage; // Preferred language for speech-to-text
   final Map<String, String>? transcripts; // Maps user IDs to their transcripts
+  final Map<String, bool>? speechToTextStatus;
 
   
   CallModel({
@@ -38,7 +39,8 @@ class CallModel {
     List<String>? participants,
     this.isSpeechToTextEnabled = false,
     this.preferredLanguage = 'en-US',
-    this.transcripts
+    this.transcripts,
+    this.speechToTextStatus,
   }) : participants = participants ?? [callerId, receiverId];
   
   // Factory constructor to create from Firestore document
@@ -53,6 +55,7 @@ class CallModel {
       final receiverId = data['receiverId'] ?? '';
       if (callerId.isNotEmpty) participants.add(callerId);
       if (receiverId.isNotEmpty) participants.add(receiverId);
+
       
     }
     
@@ -75,6 +78,9 @@ class CallModel {
       isSpeechToTextEnabled: data['isSpeechToTextEnabled'] ?? false,
       preferredLanguage: data['preferredLanguage'] ?? 'en-US',
       participants: participants,
+      speechToTextStatus: data['speechToTextStatus']!= null
+       ? Map<String, bool>.from(data['speechToTextStatus'])
+        : null,
       transcripts: data['transcripts'] != null 
         ? Map<String, String>.from(data['transcripts'])
         : null,
@@ -100,6 +106,7 @@ class CallModel {
       'isSpeechToTextEnabled': isSpeechToTextEnabled,
       'preferredLanguage': preferredLanguage,
       'transcripts': transcripts,
+      'speechToTextStatus': speechToTextStatus,
     };
   }
   
@@ -122,6 +129,7 @@ class CallModel {
     bool? isSpeechToTextEnabled,
     String? preferredLanguage,
     Map<String, String>? transcripts, 
+    Map<String, bool>? speechToTextStatus,
   }) {
     return CallModel(
       id: id ?? this.id,
@@ -141,6 +149,7 @@ class CallModel {
       isSpeechToTextEnabled: isSpeechToTextEnabled ?? this.isSpeechToTextEnabled,
       preferredLanguage: preferredLanguage ?? this.preferredLanguage,
       transcripts: transcripts ?? this.transcripts,
+      speechToTextStatus: speechToTextStatus?? this.speechToTextStatus,
     );
   }
 }

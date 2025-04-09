@@ -186,23 +186,27 @@ Future<bool> updateCallLanguage(String callId, String language) async {
   }
 
    // Toggle speech-to-text for a call
-  Future<bool> toggleSpeechToText(String callId, bool enabled) async {
-    try {
-      await _firestore.collection('calls').doc(callId).update({
-        'isSpeechToTextEnabled': enabled,
-      });
+Future<bool> toggleSpeechToText(String callId, bool enabled, String userId) async {
+  try {
+    await _firestore.collection('calls').doc(callId).update({
+      'speechToTextStatus.$userId': enabled,
+    });
+    
+    // Update cached call if it exists
+    if (_currentCall?.id == callId) {
+      // Create updated speech-to-text status map
+      Map<String, bool> updatedStatus = Map.from(_currentCall?.speechToTextStatus ?? {});
+      updatedStatus[userId] = enabled;
       
-      // Update cached call if it exists
-      if (_currentCall?.id == callId) {
-        _currentCall = _currentCall!.copyWith(isSpeechToTextEnabled: enabled);
-      }
-      
-      return true;
-    } catch (e) {
-      print('Error toggling speech-to-text: $e');
-      return false;
+      _currentCall = _currentCall!.copyWith(speechToTextStatus: updatedStatus);
     }
+    
+    return true;
+  } catch (e) {
+    print('Error toggling speech-to-text: $e');
+    return false;
   }
+}
 
   
 
