@@ -66,7 +66,7 @@
   "type_message": "رسالة",
 
   
-  "sign_language": "مترجم لغة الإشارة",
+  "sign_language": "مترجم لغة \nالإشارة",
   "tool_button": "ابدأ الترجمة",
   "record_video": "سجل فيديو لترجمة لغة الإشارة فوراً.",
   "master_signs": "أتقن الإشارات الأساسية للتواصل اليومي.",
@@ -429,5 +429,17 @@
   "language_en": "الإنجليزية",
   "language_ar": "العربية",
   "select_language": "اختر اللغة",
-  "captions_language": "لغة التعليقات"
+  "captions_language": "لغة التعليقات",
+
+
+  "start_recording": "بدء التسجيل",
+  "stop_recording": "إيقاف التسجيل",
+  "your_results_will_appear_here": "ستظهر نتائجك هنا",
+  "hold_sign_instructions": "احمل إشاراتك بوضوح أمام الكاميرا للحصول على أفضل النتائج",
+  "camera_permission_required": "إذن الكاميرا مطلوب",
+  "enable_camera_instructions": "يرجى تمكين الوصول إلى الكاميرا في إعدادات جهازك لاستخدام مترجم لغة الإشارة",
+  "try_again": "حاول مرة أخرى",
+  "recognition_mode": "وضع التعرف",
+  "phrase_mode": "وضع الجملة",
+  "alphabet_mode": "وضع الأبجدية"
   }

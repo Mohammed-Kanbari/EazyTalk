@@ -1,3 +1,4 @@
+import 'package:eazytalk/Screens/secondary_screens/sign_language_translator.dart';
 import 'package:eazytalk/Screens/secondary_screens/speech-to-text.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
 import 'package:eazytalk/core/theme/text_styles.dart';
@@ -130,7 +131,12 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
                         buttonText: AppLocalizations.of(context)
                             .translate('tool_button'),
                         onPressed: () {
-                          // Navigate to Sign Language Page
+                           Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SignLanguageTranslatorScreen()
+                            ),
+                          );
                         },
                       ),
                       SizedBox(height: 40.h),
@@ -229,14 +235,14 @@ class _SmartToolsScreenState extends State<SmartToolsScreen> {
           color: textColor,
         ),
         children: [
-          TextSpan(text: words.take(3).join(' ') + ' '),
+          TextSpan(text: words.take(4).join(' ') + ' '),
           TextSpan(
-            text: words.skip(3).take(2).join(' '),
+            text: words.skip(4).take(3).join(' '),
             style: TextStyle(
               color: AppColors.primary,
             ),
           ),
-          TextSpan(text: ' ' + words.skip(5).join(' ')),
+          TextSpan(text: ' ' + words.skip(7).join(' ')),
         ],
       ),
     );

@@ -57,7 +57,6 @@
 
   "cannot_find_recipient": "cannot_find_recipient",
   
-  "sign_language": "Sign Language Translator",
   "tool_button": "Start translation",
   "record_video": "Record a video to translate sign language instantly.",
   "master_signs": "Master essential signs for everyday communication.",
@@ -360,7 +359,6 @@
   "mic_off": "Microphone off",
   "camera_on": "Camera on",
   "camera_off": "Camera off",
-  "switch_camera": "Switch camera",
   "end_call": "End call",
   "missed_call_from": "Missed call from",
   "call_duration": "Call duration",
@@ -475,5 +473,18 @@
   "language_en": "English",
   "language_ar": "Arabic",
   "select_language": "Select language",
-  "captions_language": "Captions language"
+  "captions_language": "Captions language",
+
+  "sign_language": "Sign Language \nTranslator",
+  "start_recording": "Start Recording",
+  "stop_recording": "Stop Recording",
+  "your_results_will_appear_here": "Your results will appear here",
+  "hold_sign_instructions": "Hold your signs clearly in front of the camera for best results",
+  "camera_permission_required": "Camera permission is required",
+  "enable_camera_instructions": "Please enable camera access in your device settings to use the sign language translator",
+  "switch_camera": "Switch Camera",
+  "recognition_mode": "Recognition Mode",
+  "phrase_mode": "Phrase Mode",
+  "alphabet_mode": "Alphabet Mode"  
+
 }

@@ -206,14 +206,14 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> with SingleTicker
             SecondaryHeader(
               title: localizations.translate('call_history'),
               onBackPressed: () => Navigator.pop(context),
-              actionWidget: IconButton(
-                icon: Icon(
-                  Icons.delete_outline,
-                  color: AppColors.getTextPrimaryColor(context),
-                  size: 24.sp,
+              actionWidget: GestureDetector(
+                  onTap: _clearAllHistory,
+                  child: Icon(
+                    Icons.delete_outline,
+                    color: AppColors.getTextPrimaryColor(context),
+                    size: 24.sp,
+                  ),
                 ),
-                onPressed: _clearAllHistory,
-              ),
             ),
             
             // Tab bar
