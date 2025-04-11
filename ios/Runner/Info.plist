@@ -3,18 +3,15 @@
 <plist version="1.0">
 <dict>
 	<key>NSCameraUsageDescription</key>
-	<string>For video calls, we need access to your camera</string>
+	<string>For video calls and profile pictures, we need access to your camera</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>For video calls, we need access to your microphone</string>
+	<string>For video calls and speech recognition, we need access to your microphone</string>
 
-	<key>NSCameraUsageDescription</key>
-	<string>We need access to your camera to update your profile picture.</string>
-	<key> NSSSpeechRecognitionUsageDescription</key>
+	
+	<key>NSSpeechRecognitionUsageDescription</key>
 	<string> This app uses speech recognition for the speech-to-text feature</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your photo library to update your profile picture.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>We need microphone access to transcribe your speech.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
