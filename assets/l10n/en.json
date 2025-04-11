@@ -485,6 +485,45 @@
   "switch_camera": "Switch Camera",
   "recognition_mode": "Recognition Mode",
   "phrase_mode": "Phrase Mode",
-  "alphabet_mode": "Alphabet Mode"  
+  "alphabet_mode": "Alphabet Mode",
+
+
+
+  "setup_camera": "Setup Camera",
+  "camera_eye_level": "1- Make sure the camera is at eye level.",
+  "upper_body_in_view": "2- Keep your upper body in view of the camera, this will help the AI recognize your signs better.",
+
+  "performing_signs": "Performing Signs",
+  "ready_to_sign": "1- Ready to sign? Press the 'Start' button" ,
+  "perform_slowly": "2- Perform the signs slowly and clearly.",
+  "you_will_see": "3- You will see the results appear at the bottom of the screen every second.",
+  "sign_time": "4- You can sign for 10 seconds",
+
+  "reading_results": "Reading Results",
+  "Ai_think": "1- As you sign, the AI will show words it thinks you are sigining.",
+  "results_appear_bottom": "2- Results will appear at the bottom of the screen.",
+  "similar_signs": "3- If the AI shows similar signs, you can choose the one that matches your sign.",
+  "choose_sign": "4- Choose the sign that matches your sign.",
+  "word_not_recognized": "5- If the AI doesn't recognize your sign, you can try again",
+
+  "need_help": "Need Help with Signs?",
+  "check_learn": "1- Not sure what to sign? Check the 'Learn Signs' section for help.",
+  "dictionary_has_signs": "2- The 'Learn Signs' section has over 100 signs and all the alphabet letters for help.",
+
+  "just_tips": "Tips",
+  "tip_hand_only": "Focus on hand movements and expressions.",
+  "tip_well_lit": "Ensure your signing area is well-lit.",
+  "tip_one_person": "Only one person should be in the frame at a time.",
+
+  "tip_clear_gestures": "Make clear, deliberate gestures.",
+  "tip_face_camera": "Face the camera directly for better recognition.",
+  "when_done":"If you're done before the 10 seconds, press the 'Stop' button.",
+
+  "sign_with_upper_body": "Sign with your upper body in view for the best results.",
+  "ai_recognizes_many_words": "The AI can recognize many words and letters in a sentence.",
+  "try_again_if_not_right": "It's okay if the AI doesn't get it right the first time. Just try again!",
+  "thank_you_title": "Thank you for using our Sign Language AI Tool!",
+  "thank_you_message": "We hope this guide helps you. Practice makes perfect. Keep signing and have fun!",
+  "close": "Close"
 
 }

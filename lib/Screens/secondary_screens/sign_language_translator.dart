@@ -1,3 +1,4 @@
+import 'package:eazytalk/widgets/speech_to_text/instruction.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eazytalk/core/theme/app_colors.dart';
@@ -35,6 +36,7 @@ class _SignLanguageTranslatorScreenState extends State<SignLanguageTranslatorScr
   
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+// Handle app lifecycle changes to manage camera resources properly
     // Handle app lifecycle changes to manage camera resources properly
     final CameraController? cameraController = _recognitionService.cameraController;
     
@@ -116,21 +118,26 @@ class _SignLanguageTranslatorScreenState extends State<SignLanguageTranslatorScr
   Future<void> _stopRecognition() async {
     await _recognitionService.stopRecognition();
     
-    setState(() {
-      _isRecording = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isRecording = false;
+      });
+    }
   }
   
-  Future<void> _switchCamera() async {
-    if (!_isCameraInitialized) return;
-    
-    setState(() {
-      // Show loading indicator while switching
-      _isCameraInitialized = false;
-    });
-    
-    final success = await _recognitionService.switchCamera();
-    
+Future<void> _switchCamera() async {
+  if (!_isCameraInitialized) return;
+  
+  if (mounted) {
+  setState(() {
+    _isCameraInitialized = false;
+  });
+}
+  
+  final success = await _recognitionService.switchCamera();
+  
+  // Add a mounted check here
+  if (mounted) {
     setState(() {
       _isCameraInitialized = true;
     });
@@ -139,6 +146,7 @@ class _SignLanguageTranslatorScreenState extends State<SignLanguageTranslatorScr
       _showCameraFlipError();
     }
   }
+}
   
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -156,47 +164,74 @@ class _SignLanguageTranslatorScreenState extends State<SignLanguageTranslatorScr
   }
 
   // New method to show instructions dialog
-  void _showInstructionsDialog() {
-    final localizations = AppLocalizations.of(context);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          localizations.translate('how_to_use_sign_language_translator'),
-          style: TextStyle(
-            fontFamily: 'Sora',
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.getTextPrimaryColor(context),
-          ),
-        ),
-        content: Text(
-          '${localizations.translate('sign_language_instructions')}\n\n'
-          '1. Ensure your hands are well-lit and visible.\n'
-          '2. Perform signs slowly and clearly.\n'
-          '3. Results will appear at the bottom of the screen.',
-          style: TextStyle(
-            fontFamily: 'DM Sans',
-            fontSize: 14.sp,
-            color: AppColors.getTextPrimaryColor(context),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              localizations.translate('ok'),
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 14.sp,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+void _showInstructionsDialog() {
+  final localizations = AppLocalizations.of(context);
+  
+  // Create the steps with their instructions and tips
+  final List<InstructionStep> steps = [
+    InstructionStep(
+      title: localizations.translate('setup_camera'),
+      instructions: [
+        localizations.translate('camera_eye_level'),
+        localizations.translate('upper_body_in_view'),
+      ],
+      tips: [
+        localizations.translate('tip_hand_only'),
+        localizations.translate('tip_well_lit'),
+        localizations.translate('tip_one_person'),
+      ],
+    ),
+    InstructionStep(
+      title: localizations.translate('performing_signs'),
+      instructions: [
+        localizations.translate('ready_to_sign'),
+        localizations.translate('perform_slowly'),
+        localizations.translate('you_will_see'),
+        localizations.translate('sign_time'),
+      ],
+      tips: [
+        localizations.translate('tip_clear_gestures'),
+        localizations.translate('tip_face_camera'),
+        localizations.translate('when_done'),
+      ],
+    ),
+    InstructionStep(
+      title: localizations.translate('reading_results'),
+      instructions: [
+        localizations.translate('Ai_think'),
+        localizations.translate('results_appear_bottom'),
+        localizations.translate('similar_signs'),
+        localizations.translate('choose_sign'),
+        localizations.translate('word_not_recognized'),
+      ],
+    ),
+
+    InstructionStep(
+      title: localizations.translate('need_help'),
+      instructions: [
+        localizations.translate('check_learn'),
+        localizations.translate('dictionary_has_signs'),
+      ],
+    ),
+  ];
+  
+  // Create the remember points
+  final List<String> rememberPoints = [
+    localizations.translate('sign_with_upper_body'),
+    localizations.translate('ai_recognizes_many_words'),
+    localizations.translate('try_again_if_not_right'),
+  ];
+  
+  // Show the dialog
+  InstructionsDialog.show(
+    context: context,
+    title: localizations.translate('instructions'),
+    steps: steps,
+    rememberPoints: rememberPoints,
+    thankYouTitle: localizations.translate('thank_you_title'),
+    thankYouMessage: localizations.translate('thank_you_message'),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -282,16 +317,19 @@ class _SignLanguageTranslatorScreenState extends State<SignLanguageTranslatorScr
                 fit: StackFit.expand,
                 children: [
                   // Camera preview
-                  _isCameraInitialized
-                      ? AspectRatio(
-                    aspectRatio: _recognitionService.cameraController!.value.aspectRatio,
-                    child: CameraPreview(_recognitionService.cameraController!),
-                  )
-                : Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
+                  if (_isCameraInitialized &&
+                      _recognitionService.cameraController != null &&
+                      _recognitionService.cameraController!.value.isInitialized)
+                    AspectRatio(
+                      aspectRatio: _recognitionService.cameraController!.value.aspectRatio,
+                      child: CameraPreview(_recognitionService.cameraController!),
+                    )
+                  else
+                    Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
                     ),
-                  ),
                   
                   // Recording indicator
                   if (_isRecording)
