@@ -42,279 +42,211 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
   // Remote user ID
   int? _remoteUid;
-  
+
   // Speech-to-text state
   String _localTranscript = '';
   String _remoteTranscript = '';
-  String _preferredLanguage = 'en-US'; // Default language
+  String _preferredLanguage = 'en-US';
 
-  
   // Stream subscriptions
   late StreamSubscription<CallModel?> _callStreamSubscription;
   StreamSubscription<String>? _transcriptSubscription;
+
+  // NEW: Retry counter for STT initialization
+  int _sttRetryCount = 0;
+  static const int maxSttRetries = 3;
 
   @override
   void initState() {
     super.initState();
     _isVideoOn = widget.call.isVideoEnabled;
+    _isSpeechToTextOn = widget.call.speechToTextStatus?[_callService.currentUserId] ?? false;
+    _preferredLanguage = widget.call.preferredLanguage;
 
-     _isSpeechToTextOn = widget.call.speechToTextStatus?[_callService.currentUserId] ?? false;
-    
-    // Listen to changes in the call document
+    // Initialize Agora and join channel
+    _initializeCall();
+
+    // Set up call stream
     _callStreamSubscription = _callService
         .callStream(widget.call.id)
         .listen(_handleCallUpdates);
-    
-    // Initialize the video call
-    _initializeCall();
-    
-    // Initialize speech service if speech-to-text is enabled
-    if (_isSpeechToTextOn) {
-      _initializeSpeechToText();
-    }
-
-    _preferredLanguage = widget.call.preferredLanguage;
-
-    // In VideoCallScreen's initState
-// Listen to transcript updates and share them
-_transcriptSubscription = _speechService.transcriptStream.listen((transcript) {
-  //it is entering here when the other phone is clicking tospeeach text
-  //the problem is here 
-  //they speech text is connected
-  if (mounted) {
-    setState(() {
-      _localTranscript = transcript;
-    });
-    
-    // Share transcript with remote user
-    if (transcript.isNotEmpty && _isMicOn) {
-      _callService.updateTranscript(
-        widget.call.id,
-        _callService.currentUserId,
-        transcript
-      );
-    }
   }
-});
 
-// Listen for remote transcript updates
-_callStreamSubscription = _callService
-  .callStream(widget.call.id)
-  .listen((updatedCall) {
-    if (updatedCall == null || !mounted) return;
-    
-    // Get remote user's transcript
-    final remoteUserId = updatedCall.participants
-        .firstWhere((id) => id != _callService.currentUserId, orElse: () => '');
-    
-    if (remoteUserId.isNotEmpty) {
-      final remoteTranscript = updatedCall.transcripts?[remoteUserId] ?? '';
-      
-      setState(() {
-        _remoteTranscript = remoteTranscript;
-      });
-    }
-    
-    // Other call updates handling...
+Future<void> _initializeCall() async {
+  setState(() {
+    _isLoading = true;
+    _isConnecting = true;
   });
-  }
-  
-  // Handle updates to the call document in Firestore
-void _handleCallUpdates(CallModel? updatedCall) {
-  if (updatedCall == null || !mounted) return;
-  
-  // Get current user's speech-to-text status
-  final userSttEnabled = updatedCall.speechToTextStatus?[_callService.currentUserId] ?? false;
-  
-  // Check if the current user's speech-to-text setting has changed
-  if (userSttEnabled != _isSpeechToTextOn) {
-    setState(() {
-      _isSpeechToTextOn = userSttEnabled;
-    });
-    
-    // Initialize or stop speech service based on new setting
-    if (_isSpeechToTextOn) {
-      _initializeSpeechToText();
-    } else {
-      _stopSpeechToText();
+
+  try {
+    // Initialize the Agora engine first
+    final initialized = await _videoCallService.initialize();
+
+    if (!initialized || _videoCallService.engine == null) {
+      _showError('Failed to initialize video call');
+      return;
     }
-  }
-  
-  // Handle language changes as before
-  if (updatedCall.preferredLanguage != _preferredLanguage) {
-    setState(() {
-      _preferredLanguage = updatedCall.preferredLanguage;
-    });
-    
-    // Restart speech recognition with new language if active
-    if (_isSpeechToTextOn) {
-      _stopSpeechToText();
-      _initializeSpeechToText();
+
+    // NEW: Disable OpenSL ES using _videoCallService.engine
+    await _videoCallService.engine!.setParameters('{"che.audio.opensl.mode": 0}');
+    // NEW: Use shared audio mode
+    await _videoCallService.engine!.setParameters('{"che.audio.mode": 0}');
+
+    // Join the channel
+    await _videoCallService.joinChannel(
+      channelName: widget.call.channelName,
+      token: AgoraConstants.tempToken,
+      enabledVideo: _isVideoOn,
+      onUserJoined: (connection, uid, elapsed) {
+        setState(() {
+          _remoteUid = uid;
+          _isConnecting = false;
+        });
+        // Initialize STT after channel join for non-Huawei devices
+        if (_isSpeechToTextOn) {
+          _initializeSpeechToText();
+        }
+      },
+      onUserOffline: (connection, uid, reason) {
+        setState(() {
+          _remoteUid = null;
+          if (reason == UserOfflineReasonType.userOfflineQuit) {
+            _endCall();
+          } else {
+            _isConnecting = true;
+          }
+        });
+      },
+    );
+
+    // Update call status for incoming call
+    if (widget.isIncoming) {
+      await _callService.acceptCall(widget.call.id);
     }
-  }
-  
-  // Get remote user's transcript
-  final remoteUserId = updatedCall.participants
-      .firstWhere((id) => id != _callService.currentUserId, orElse: () => '');
-  
-  if (remoteUserId.isNotEmpty) {
-    final remoteTranscript = updatedCall.transcripts?[remoteUserId] ?? '';
-    
+
     setState(() {
-      _remoteTranscript = remoteTranscript;
+      _isLoading = false;
+    });
+  } catch (e) {
+    print('Error initializing call: $e');
+    _showError('Error setting up the call');
+    setState(() {
+      _isLoading = false;
     });
   }
 }
 
-// In VideoCallScreen
-Future<void> _changeLanguage(String language) async {
-  // Update state immediately for UI responsiveness
-  setState(() {
-    _preferredLanguage = language;
-  });
-  
-  // Update in Firestore
-  await _callService.updateCallLanguage(widget.call.id, language);
-  
-  // Restart speech recognition with new language
-   if (_isSpeechToTextOn && _isMicOn) {
-      _restartSpeechToText();
-    }
-  }
-  
-  void _restartSpeechToText() async {
-    await _speechService.stopListening();
-    await _speechService.startListening(language: _preferredLanguage);
-  } 
+Future<void> _initializeSpeechToText() async {
+  print('VideoCallScreen: Starting STT initialization...');
+  _sttRetryCount = 0;
 
-  Future<void> _initializeCall() async {
-    setState(() {
-      _isLoading = true;
-      _isConnecting = true;
-    });
+  try {
+    print('VideoCallScreen: Disabling Agora audio...');
+    await _videoCallService.engine?.disableAudio();
+    await _videoCallService.engine?.muteLocalAudioStream(true); // NEW: Extra mic release
+    await Future.delayed(Duration(milliseconds: 2000));
 
-    try {
-      // Initialize the Agora engine
-      final initialized = await _videoCallService.initialize();
+    final initialized = await _speechService.initialize();
+    print('VideoCallScreen: STT initialize result: $initialized');
 
-      if (!initialized) {
-        _showError('Failed to initialize video call');
-        return;
+    if (initialized) {
+      if (_isMicOn) {
+        print('VideoCallScreen: Starting STT listening...');
+        await _speechService.startListening(
+          language: _preferredLanguage,
+          sampleRate: 16000,
+        );
       }
 
-      // Join the channel
-      await _videoCallService.joinChannel(
-        channelName: widget.call.channelName,
-        token: AgoraConstants.tempToken,
-        enabledVideo: _isVideoOn,
-        onUserJoined: (connection, uid, elapsed) {
-          // Handle remote user joined
-          setState(() {
-            _remoteUid = uid;
-            _isConnecting = false;
-          });
-        },
-        onUserOffline: (connection, uid, reason) {
-          // Handle remote user left
-          setState(() {
-            _remoteUid = null;
-            if (reason == UserOfflineReasonType.userOfflineQuit) {
-              _endCall();
-            } else {
-              _isConnecting = true;
-            }
-          });
-        },
-      );
-
-      // Update call status if this is an incoming call that was just accepted
-      if (widget.isIncoming) {
-        await _callService.acceptCall(widget.call.id);
-      }
-
-      setState(() {
-        _isLoading = false;
-      });
-    } catch (e) {
-      print('Error initializing call: $e');
-      _showError('Error setting up the call');
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-  
-  // Initialize the speech-to-text service
-  Future<void> _initializeSpeechToText() async {
-    try {
-      final initialized = await _speechService.initialize();
-      
-      if (initialized) {
-        // Start listening only if mic is on
-        if (_isMicOn) {
-          await _speechService.startListening(
-            language: _preferredLanguage,
-          );
-        }
-        
-        // Listen to transcript updates
-        _transcriptSubscription = _speechService.transcriptStream.listen((transcript) {
+      _transcriptSubscription?.cancel();
+      _transcriptSubscription = _speechService.transcriptStream.listen(
+        (transcript) {
+          print('VideoCallScreen: Received transcript: $transcript');
           if (mounted) {
             setState(() {
               _localTranscript = transcript;
             });
-            
-            // Share transcript with remote user
-            if (transcript.isNotEmpty) {
+            if (transcript.isNotEmpty && _isMicOn) {
               _callService.updateTranscript(
                 widget.call.id,
                 _callService.currentUserId,
-                transcript
+                transcript,
               );
             }
           }
-        });
+        },
+        onError: (error) {
+          print('VideoCallScreen: Transcript stream error: $error');
+        },
+        onDone: () {
+          print('VideoCallScreen: Transcript stream closed');
+        },
+      );
+    } else {
+      if (_sttRetryCount < maxSttRetries) {
+        _sttRetryCount++;
+        print('VideoCallScreen: Retrying STT initialization ($_sttRetryCount/$maxSttRetries)...');
+        await Future.delayed(Duration(milliseconds: 1000));
+        await _initializeSpeechToText();
       } else {
+        print('VideoCallScreen: STT failed after $maxSttRetries retries');
         _showError('Failed to initialize speech recognition');
+        await _videoCallService.engine?.enableAudio();
+        await _videoCallService.engine?.muteLocalAudioStream(false);
       }
-    } catch (e) {
-      print('Error initializing speech-to-text: $e');
+    }
+  } catch (e) {
+    print('VideoCallScreen: STT initialization exception: $e');
+    if (_sttRetryCount < maxSttRetries) {
+      _sttRetryCount++;
+      print('VideoCallScreen: Retrying STT initialization ($_sttRetryCount/$maxSttRetries)...');
+      await Future.delayed(Duration(milliseconds: 1000));
+      await _initializeSpeechToText();
+    } else {
+      print('VideoCallScreen: STT failed after $maxSttRetries retries with error: $e');
+      _showError('Error setting up speech recognition');
+      await _videoCallService.engine?.enableAudio();
+      await _videoCallService.engine?.muteLocalAudioStream(false);
     }
   }
-  
-  // Stop the speech-to-text service
-  void _stopSpeechToText() {
-    _speechService.stopListening();
-    _transcriptSubscription?.cancel();
-    _transcriptSubscription = null;
-    
-    setState(() {
-      _localTranscript = '';
-      _remoteTranscript = '';
-    });
-  }
+}
 
- // In VideoCallScreen
+void _stopSpeechToText() {
+  print('VideoCallScreen: Stopping STT...');
+  _speechService.stopListening();
+  _transcriptSubscription?.cancel();
+  _transcriptSubscription = null;
+  print('VideoCallScreen: Re-enabling Agora audio...');
+  _videoCallService.engine?.enableAudio();
+  _videoCallService.engine?.muteLocalAudioStream(false);
+  setState(() {
+    _localTranscript = '';
+    _remoteTranscript = '';
+  });
+}
+
 Future<void> _toggleMic() async {
   setState(() {
     _isMicOn = !_isMicOn;
   });
 
+  print('VideoCallScreen: Toggling mic to: $_isMicOn');
   await _videoCallService.toggleMicrophone(_isMicOn);
-  
-  // Link with speech service
+
   if (_isSpeechToTextOn) {
     if (_isMicOn) {
-      // Resume speech recognition if mic is turned on
-      await _speechService.startListening(language: _preferredLanguage);
+      print('VideoCallScreen: Resuming STT listening');
+      await _speechService.startListening(
+        language: _preferredLanguage,
+        sampleRate: 16000,
+      );
     } else {
-      // Pause speech recognition if mic is turned off
+      print('VideoCallScreen: Pausing STT listening');
       await _speechService.stopListening();
     }
   }
 }
 
-  // Toggle video
   Future<void> _toggleVideo() async {
     setState(() {
       _isVideoOn = !_isVideoOn;
@@ -322,47 +254,39 @@ Future<void> _toggleMic() async {
 
     await _videoCallService.toggleVideo(_isVideoOn);
   }
-  
-  // Toggle speech-to-text
-Future<void> _toggleSpeechToText() async {
-  final newState = !_isSpeechToTextOn;
-  
-  // Update state optimistically for better UX
-  setState(() {
-    _isSpeechToTextOn = newState;
-  });
-  
-  // Update in Firestore - pass the current user's ID
-  final success = await _callService.toggleSpeechToText(
-    widget.call.id,
-    newState,
-    _callService.currentUserId// Pass the current user's ID
-  );
-  
-  if (!success) {
-    // Revert if failed
-    setState(() {
-      _isSpeechToTextOn = !newState;
-    });
-    _showError('Failed to toggle speech-to-text');
-    return;
-  }
-  
-  if (newState) {
-    // Start speech-to-text
-    await _initializeSpeechToText();
-  } else {
-    // Stop speech-to-text
-    _stopSpeechToText();
-  }
-}
 
-  // Switch camera
+  Future<void> _toggleSpeechToText() async {
+    final newState = !_isSpeechToTextOn;
+
+    setState(() {
+      _isSpeechToTextOn = newState;
+    });
+
+    final success = await _callService.toggleSpeechToText(
+      widget.call.id,
+      newState,
+      _callService.currentUserId,
+    );
+
+    if (!success) {
+      setState(() {
+        _isSpeechToTextOn = !newState;
+      });
+      _showError('Failed to toggle speech-to-text');
+      return;
+    }
+
+    if (newState) {
+      await _initializeSpeechToText();
+    } else {
+      _stopSpeechToText();
+    }
+  }
+
   Future<void> _switchCamera() async {
     await _videoCallService.switchCamera();
   }
 
-  // End the call
   Future<void> _endCall() async {
     if (_isCallEnded) return;
 
@@ -372,29 +296,79 @@ Future<void> _toggleSpeechToText() async {
     });
 
     try {
-      // Stop speech-to-text if active
       if (_isSpeechToTextOn) {
         _stopSpeechToText();
       }
-      
-      // Update call status in Firestore
-      await _callService.endCall(widget.call.id);
 
-      // Leave the channel
+      await _callService.endCall(widget.call.id);
       await _videoCallService.leaveChannel();
 
-      // Close the screen
       if (mounted) {
         Navigator.of(context).pop();
       }
     } catch (e) {
       print('Error ending call: $e');
       _showError('Error ending call');
-
       setState(() {
         _isLoading = false;
       });
     }
+  }
+
+  void _handleCallUpdates(CallModel? updatedCall) {
+    if (updatedCall == null || !mounted) return;
+
+    final userSttEnabled = updatedCall.speechToTextStatus?[_callService.currentUserId] ?? false;
+
+    if (userSttEnabled != _isSpeechToTextOn) {
+      setState(() {
+        _isSpeechToTextOn = userSttEnabled;
+      });
+
+      if (_isSpeechToTextOn) {
+        _initializeSpeechToText();
+      } else {
+        _stopSpeechToText();
+      }
+    }
+
+    if (updatedCall.preferredLanguage != _preferredLanguage) {
+      setState(() {
+        _preferredLanguage = updatedCall.preferredLanguage;
+      });
+
+      if (_isSpeechToTextOn) {
+        _stopSpeechToText();
+        _initializeSpeechToText();
+      }
+    }
+
+    final remoteUserId = updatedCall.participants
+        .firstWhere((id) => id != _callService.currentUserId, orElse: () => '');
+
+    if (remoteUserId.isNotEmpty) {
+      final remoteTranscript = updatedCall.transcripts?[remoteUserId] ?? '';
+      setState(() {
+        _remoteTranscript = remoteTranscript;
+      });
+    }
+  }
+
+  Future<void> _changeLanguage(String language) async {
+    setState(() {
+      _preferredLanguage = language;
+    });
+
+    await _callService.updateCallLanguage(widget.call.id, language);
+
+    if (_isSpeechToTextOn && _isMicOn) {
+      _restartSpeechToText();
+    }
+  }
+
+  Future<void> _restartSpeechToText() async {
+    await _speechService.stopListening();
+    await _speechService.startListening(language: _preferredLanguage);
   }
 
   void _showError(String message) {
@@ -408,16 +382,14 @@ Future<void> _toggleSpeechToText() async {
 
   @override
   void dispose() {
-    // Clean up all resources
     _callStreamSubscription.cancel();
-    
+
     if (_isSpeechToTextOn) {
       _stopSpeechToText();
     }
-    
+
     _speechService.dispose();
-    
-    // Make sure to end the call if the screen is closed
+
     if (!_isCallEnded) {
       _callService.endCall(widget.call.id);
       _videoCallService.leaveChannel();
@@ -435,7 +407,6 @@ Future<void> _toggleSpeechToText() async {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Background
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -447,11 +418,7 @@ Future<void> _toggleSpeechToText() async {
               ),
             ),
           ),
-
-          // Remote video view or connecting message
           _buildMainContent(isDarkMode, localizations),
-
-          // Local video view
           if (!_isConnecting && _isVideoOn)
             Positioned(
               top: 40.h,
@@ -467,8 +434,6 @@ Future<void> _toggleSpeechToText() async {
                 child: _buildLocalVideoView(),
               ),
             ),
-          
-          // Speech-to-text transcript for remote user
           if (_isSpeechToTextOn && _remoteTranscript.isNotEmpty)
             Positioned(
               top: 230.h,
@@ -492,21 +457,17 @@ Future<void> _toggleSpeechToText() async {
                 ),
               ),
             ),
-            
-          // Speech-to-text toggle and transcript for local user
           TranscriptOverlay(
             transcript: _localTranscript,
             isActive: _isSpeechToTextOn,
             onToggle: (enabled) => _toggleSpeechToText(),
             isLocalUser: true,
-             onLanguagePress: () => LanguageSelector.showAsDialog(
+            onLanguagePress: () => LanguageSelector.showAsDialog(
               context,
               currentLanguage: _preferredLanguage,
               onLanguageSelected: _changeLanguage,
             ),
           ),
-
-          // Call controls at the bottom
           Positioned(
             bottom: 40.h,
             left: 0,
@@ -533,7 +494,6 @@ Future<void> _toggleSpeechToText() async {
 
   Widget _buildMainContent(bool isDarkMode, AppLocalizations localizations) {
     if (_isConnecting) {
-      // Show connecting UI with caller info
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -556,12 +516,10 @@ Future<void> _toggleSpeechToText() async {
         ),
       );
     } else if (_remoteUid != null) {
-      // Show remote video when connected
       return Center(
         child: _buildRemoteVideoView(),
       );
     } else {
-      // Fallback - should not happen but just in case
       return Center(
         child: Text(
           localizations.translate('waiting_user_join'),
@@ -575,7 +533,6 @@ Future<void> _toggleSpeechToText() async {
     }
   }
 
-  // Build the remote user's video view
   Widget _buildRemoteVideoView() {
     if (_remoteUid == null) return Container();
 
@@ -592,7 +549,6 @@ Future<void> _toggleSpeechToText() async {
     );
   }
 
-  // Build the local user's video view
   Widget _buildLocalVideoView() {
     return AgoraVideoView(
       controller: VideoViewController(

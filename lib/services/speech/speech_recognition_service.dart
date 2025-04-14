@@ -5,59 +5,69 @@ class SpeechRecognitionService {
   final stt.SpeechToText _speech = stt.SpeechToText();
   bool _isInitialized = false;
 
-  // Initialize the speech recognition service
   Future<bool> initialize() async {
     if (!_isInitialized) {
-      _isInitialized = await _speech.initialize();
+      print('SpeechRecognitionService: Initializing...'); // NEW: Debug
+      _isInitialized = await _speech.initialize(
+        onStatus: (status) => print('SpeechRecognitionService: Status: $status'),
+        onError: (error) => print('SpeechRecognitionService: Error: $error'),
+      );
+      print('SpeechRecognitionService: Initialized: $_isInitialized');
     }
     return _isInitialized;
   }
 
- // Start listening with continuous recognition
   Future<void> startListening({
     required Function(String) onResult,
     required Function(double) onSoundLevelChange,
     required Function(String) onStatus,
     String accumulatedText = '',
-    Duration pauseTimeout = const Duration(seconds: 15), // Increased pause timeout to 15 seconds
-    String language = 'en-US', // Added language parameter with English as default
+    Duration pauseTimeout = const Duration(seconds: 5), // NEW: Shorter for calls
+    String language = 'en-US',
+    int sampleRate = 16000, // NEW: Explicit sample rate
   }) async {
     if (!_isInitialized) {
       await initialize();
     }
-    
+
     if (_speech.isNotListening) {
+      print('SpeechRecognitionService: Starting listening (language: $language, sampleRate: $sampleRate)'); // NEW: Debug
       await _speech.listen(
         onResult: (result) {
           if (result.recognizedWords.isNotEmpty) {
             final text = accumulatedText + ' ' + result.recognizedWords;
+            print('SpeechRecognitionService: Result: $text'); // NEW: Debug
             onResult(text);
           }
         },
         listenFor: const Duration(minutes: 30),
-        pauseFor: pauseTimeout, // Use the provided pause timeout
+        pauseFor: pauseTimeout,
         partialResults: true,
-        onSoundLevelChange: onSoundLevelChange,
+        onSoundLevelChange: (level) {
+          print('SpeechRecognitionService: Sound level: $level'); // NEW: Debug
+          onSoundLevelChange(level);
+        },
         cancelOnError: false,
-        listenMode: stt.ListenMode.dictation, // Use dictation mode for continuous speech
-        localeId: language, // Use the specified language
+        listenMode: stt.ListenMode.confirmation, // NEW: Try confirmation mode
+        localeId: language,
+        sampleRate: sampleRate, // NEW: Set sample rate
       );
-      
-      _speech.statusListener = onStatus;
+
+      _speech.statusListener = (status) {
+        print('SpeechRecognitionService: Status listener: $status'); // NEW: Debug
+        onStatus(status);
+      };
+    } else {
+      print('SpeechRecognitionService: Already listening');
     }
   }
 
-  // Stop listening
   Future<void> stopListening() async {
+    print('SpeechRecognitionService: Stopping listening');
     await _speech.stop();
   }
 
-  // Check if speech recognition is available
   bool get isAvailable => _isInitialized;
-
-  // Check if currently listening
   bool get isListening => _speech.isListening;
-
-  // Check if not currently listening
   bool get isNotListening => _speech.isNotListening;
 }
