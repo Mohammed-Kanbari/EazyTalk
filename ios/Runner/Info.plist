@@ -6,7 +6,13 @@
 	<string>For video calls and profile pictures, we need access to your camera</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>For video calls and speech recognition, we need access to your microphone</string>
-
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app needs to access your local network for peer-to-peer connectivity</string>
+	<key>UIBackgroundModes</key>
+	<array>
+   		<string>audio</string>
+    	<string>voip</string>
+	</array>
 	
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string> This app uses speech recognition for the speech-to-text feature</string>
